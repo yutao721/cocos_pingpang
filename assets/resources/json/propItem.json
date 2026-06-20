@@ -1,0 +1,146 @@
+[
+  {
+    "id": 1,
+    "item_name": "粮草",
+    "item_type": 0,
+    "updated_at": "4/8/2025 11:41:10",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 2,
+    "item_name": "蜀锦",
+    "item_type": 0,
+    "updated_at": "4/8/2025 11:41:10",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 3,
+    "item_name": "马匹",
+    "item_type": 0,
+    "updated_at": "4/8/2025 11:41:10",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 4,
+    "item_name": "兵器",
+    "item_type": 0,
+    "updated_at": "4/8/2025 11:41:10",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 5,
+    "item_name": "营帐",
+    "item_type": 0,
+    "updated_at": "4/8/2025 11:41:10",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 6,
+    "item_name": "桃",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:00:54",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 7,
+    "item_name": "铁索",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:00:55",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 8,
+    "item_name": "青龙偃月刀",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:00:58",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 9,
+    "item_name": "刘禅",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:01:00",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 10,
+    "item_name": "古锭刀",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:01:02",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 11,
+    "item_name": "玉玺",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:01:04",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 12,
+    "item_name": "假牙",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:01:06",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 13,
+    "item_name": "营火",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:01:08",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 14,
+    "item_name": "军令",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:01:10",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 15,
+    "item_name": "柠檬",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:01:12",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 16,
+    "item_name": "八卦阵",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:01:17",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 17,
+    "item_name": "青釭剑",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:01:20",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  },
+  {
+    "id": 18,
+    "item_name": "麒麟弓",
+    "item_type": 1,
+    "updated_at": "15/9/2025 16:01:22",
+    "created_at": "4/8/2025 11:41:10",
+    "deleted_at": null
+  }
+]

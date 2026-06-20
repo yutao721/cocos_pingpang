@@ -1,0 +1,17 @@
+
+const basePrefabPath = 'prefab/';
+export const UI_PATH = {
+  LOADING: basePrefabPath + 'page/LoadingPage', // 加载
+  HOME: basePrefabPath + 'page/HomePage', // 主页
+  GAME: basePrefabPath + 'page/GamePage', // 游戏
+  CAMP: basePrefabPath + 'page/CampPage', // 大营
+  REWARD: basePrefabPath + 'page/RewardPage', // 奖励
+
+  LOGIN: basePrefabPath + 'popup/LoginPopup', // 登录
+  RESULT: basePrefabPath + 'popup/ResultPopup', // 游戏结算
+  RULE: basePrefabPath + 'popup/RulePopup', // 规则
+  RANK: basePrefabPath + 'popup/RankPopup', // 排行榜
+  PROPGET: basePrefabPath + 'popup/PropGetPopup', // 道具分享获取
+
+  TIP: basePrefabPath + 'common/Tip' // 提示
+} as const;
