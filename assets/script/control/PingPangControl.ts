@@ -10,6 +10,8 @@ import {
     GameDuration,
     GroundY,
     MaxShoeFlowerOnStage,
+    PaddleHeight,
+    PaddleInitY,
     PaddleMoveSpeed,
     PaddleWidth,
     Phase1BallSpeedMul,
@@ -64,6 +66,10 @@ export class PingPangControl {
     /** 上一次秒级时间更新的整秒值，用于 timeUpdate 事件节流 */
     private lastSecond: number = -1;
 
+    // 调试统计
+    private _debugNormalCount:  number = 0;
+    private _debugLimitedCount: number = 0;
+
     // 屏幕水平边界（设计分辨率 750，留球半径边距）
     private readonly WALL_LEFT  = -375 + BallRadius;
     private readonly WALL_RIGHT =  375 - BallRadius;
@@ -81,6 +87,8 @@ export class PingPangControl {
         this.model.init();
         this.spawnTimer = this._randomSpawnInterval();
         this.lastSecond = -1;
+        this._debugNormalCount  = 0;
+        this._debugLimitedCount = 0;
         // 初始 vx 随机方向，避免球每次都垂直掉落
         const initSpeed = BallInitSpeed;
         const initVX    = (Math.random() < 0.5 ? 1 : -1) * initSpeed * 0.6;
@@ -132,14 +140,6 @@ export class PingPangControl {
     public getDifficultyPhase(): eDifficultyPhase { return this.model.difficultyPhase; }
     public getShoeFlowers(): ReadonlyArray<IShoeFlower> { return this.model.shoeFlowers; }
 
-    /**
-     * 同步球拍实际 Y 坐标（由 View 在 start() 里调用一次）
-     * 用于球落地判定，避免与编辑器节点位置不一致
-     */
-    public setPaddleY(y: number): void {
-        this.model.setPaddleY(y);
-    }
-
     // ----------------------------------------------------------------
     // 私有：球运动（手动模拟，方案B）
     // 详细公式见 BALL_PHYSICS.md
@@ -181,27 +181,28 @@ export class PingPangControl {
             vy = -Math.abs(vy);
         }
 
-        // 到达球拍高度时判断命中/落地
-        // paddleY 由 View 层通过 setPaddleY 传入，此处用 Model 存储的值
-        const paddleY = this.model.paddleY;
-        if (vy < 0 && y - BallRadius <= paddleY + this.model.paddleHalfHeight) {
-            if (!EnablePaddleCheck) {
-                // 调试模式：跳过落地判定，直接在底部反弹
+        if (!EnablePaddleCheck) {
+            // 调试模式：球到屏幕底部直接反弹，全程运动不触发落地
+            if (vy < 0 && y - BallRadius <= GroundY) {
                 vy = Math.abs(vy);
-                y  = paddleY + this.model.paddleHalfHeight + BallRadius;
-            } else {
+                y  = GroundY + BallRadius;
+            }
+        } else {
+            // 正式模式：到达球拍顶面高度时判断命中/落地
+            const PADDLE_TOP = PaddleInitY + PaddleHeight / 2;
+            if (vy < 0 && y - BallRadius <= PADDLE_TOP) {
                 const halfW = PaddleWidth / 2;
                 if (Math.abs(x - this.model.paddleX) <= halfW) {
                     // 命中球拍，重新计算反弹速度
                     const { newVX, newVY } = this._calcPaddleBounce(x);
                     vx = newVX;
                     vy = newVY;
-                    y  = paddleY + this.model.paddleHalfHeight + BallRadius; // 修正位置避免穿透
+                    y  = PADDLE_TOP + BallRadius;
                     this.model.setBall(x, y, vx, vy);
                     this._onBallHitPaddle();
                     return;
                 } else {
-                    // 未命中球拍，落地
+                    // 未命中球拍，落地游戏结束
                     this.model.setBall(x, y, vx, vy);
                     this._onBallFall();
                     return;
@@ -361,6 +362,14 @@ export class PingPangControl {
 
         const flower = this.model.spawnShoeFlower(type, x, y, speedY);
         UiBase.emitUiEvent(PingPangEvent.shoeFlowerSpawn, flower);
+
+        // 调试统计
+        if (type === eShoeFlowerType.limited) {
+            this._debugLimitedCount++;
+        } else {
+            this._debugNormalCount++;
+        }
+        console.log(`[ShoeFlower] 生成: ${type === eShoeFlowerType.limited ? '限量款' : '普通款'}  普通=${this._debugNormalCount}  限量=${this._debugLimitedCount}  合计=${this._debugNormalCount + this._debugLimitedCount}`);
     }
 
     // ----------------------------------------------------------------

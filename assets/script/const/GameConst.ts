@@ -100,7 +100,7 @@ export enum ePropType {
  * true  → 正式逻辑：球落到球拍高度未接住则游戏结束
  * false → 调试模式：球碰底部边界直接反弹，永不落地，方便测试鞋花生成/掉落
  */
-export const EnablePaddleCheck = true;
+export const EnablePaddleCheck = false;
 
 // ============================================================
 // 颠球游戏（PingPang）新玩法配置
@@ -143,7 +143,7 @@ export const ComboBuffStepBonus   = 10;
 export const BaseHitScore         = 1;
 
 // 每局游戏时间（秒），0 表示无限时
-export const GameDuration         = 60;
+export const GameDuration         = 0;
 
 // 鞋花在屏幕上同时最多存在的数量
 export const MaxShoeFlowerOnStage = 3;
@@ -174,7 +174,7 @@ export const PaddleWidth          = 160;
 export const PaddleHeight         = 24;
 
 // 球拍默认 Y 坐标（距屏幕底部的位置）
-export const PaddleInitY          = -80;
+export const PaddleInitY          = -580;
 
 // 球半径（像素），用于碰撞检测
 export const BallRadius           = 20;

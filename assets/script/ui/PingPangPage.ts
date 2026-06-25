@@ -122,10 +122,6 @@ export class PingPangPage extends UiBase {
     }
 
     protected start(): void {
-        // 把球拍节点的实际 Y 坐标同步给 Control，用于落地判定
-        if (this.paddleNode) {
-            pingPangControl.setPaddleY(this.paddleNode.position.y);
-        }
         pingPangControl.startGame();
     }
 
@@ -261,9 +257,8 @@ export class PingPangPage extends UiBase {
         // 根据类型切换 SpriteFrame（在编辑器拖入资源后生效）
         const sprite = node.getComponent(Sprite);
         if (sprite) {
-            sprite.spriteFrame = flower.type === 2
-                ? this.limitedShoeFlowerSF
-                : this.normalShoeFlowerSF;
+            const sf = flower.type === 2 ? this.limitedShoeFlowerSF : this.normalShoeFlowerSF;
+            sprite.spriteFrame = sf;
         }
 
         this.shoeFlowerNodes.set(flower.uid, node);

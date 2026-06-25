@@ -146,7 +146,7 @@ export class PingPangModel {
         this._hitCount      = 0;
         this._shoeFlowerHitCount = 0;
         this._paddleX       = 0;
-        this._paddleY       = PaddleInitY;
+        // _paddleY 不在此重置，由 View 层在 start() 里同步节点真实坐标
         this._ballX         = 0;
         this._ballY         = BallInitY;
         this._ballVX        = 0;
