@@ -90,3 +90,138 @@ export enum ePropType {
     // 重置
     reset = 3
 }
+
+// ============================================================
+// 开发调试开关
+// ============================================================
+
+/**
+ * 是否开启接球校验
+ * true  → 正式逻辑：球落到球拍高度未接住则游戏结束
+ * false → 调试模式：球碰底部边界直接反弹，永不落地，方便测试鞋花生成/掉落
+ */
+export const EnablePaddleCheck = true;
+
+// ============================================================
+// 颠球游戏（PingPang）新玩法配置
+// ============================================================
+
+// 鞋花类型
+export enum eShoeFlowerType {
+    normal  = 1, // 普通鞋花  +5分
+    limited = 2, // 限量款鞋花 +10分
+}
+
+// 鞋花得分配置
+export const ShoeFlowerScoreConfig: Record<eShoeFlowerType, number> = {
+    [eShoeFlowerType.normal]:  5,
+    [eShoeFlowerType.limited]: 10,
+};
+
+// 连颠 Buff 阶段配置（达到 count 次连颠时额外加 bonus 分）
+export interface IComboBuffConfig {
+    count: number; // 触发所需连颠次数（累计，非增量）
+    bonus: number; // 触发时额外得分
+    desc:  string; // 描述，用于 UI 提示
+}
+
+export const ComboBuffConfig: IComboBuffConfig[] = [
+    { count:  5, bonus: 10, desc: '连颠5次！+10' },
+    { count: 10, bonus: 20, desc: '连颠10次！+20' },
+    { count: 15, bonus: 30, desc: '连颠15次！+30' },
+    { count: 20, bonus: 40, desc: '连颠20次！+40' },
+    { count: 25, bonus: 50, desc: '连颠25次！+50' },
+    { count: 30, bonus: 60, desc: '连颠30次！+60' },
+];
+
+// 连颠步长（每隔多少次触发一次，超出上表后按此步长递增）
+export const ComboBuffStep        = 5;
+// 超出表格最大次数后，每步额外加分的基础值（最后一档 bonus + (超出段数 * ComboBuffStepBonus)）
+export const ComboBuffStepBonus   = 10;
+
+// 基础颠球得分（每颠一次 +1）
+export const BaseHitScore         = 1;
+
+// 每局游戏时间（秒），0 表示无限时
+export const GameDuration         = 60;
+
+// 鞋花在屏幕上同时最多存在的数量
+export const MaxShoeFlowerOnStage = 3;
+
+// 鞋花生成间隔范围（秒）[min, max]
+export const ShoeFlowerSpawnInterval: [number, number] = [2.0, 5.0];
+
+// 鞋花下落速度范围（像素/秒）[min, max]
+export const ShoeFlowerFallSpeed: [number, number] = [200, 450];
+
+// 球初始速度（像素/秒）
+export const BallInitSpeed        = 400;
+
+// 球反弹时垂直速度占总速度的比例（0~1），值越大弹起越高
+// 详见 BALL_PHYSICS.md 四、4.2
+export const BallVYRatio          = 0.75;
+
+// 球初始生成位置 Y 坐标
+export const BallInitY            = 200;
+
+// 球拍移动速度（像素/秒），长按后的最大移动速度
+export const PaddleMoveSpeed      = 600;
+
+// 球拍宽度（像素），用于碰撞检测
+export const PaddleWidth          = 160;
+
+// 球拍高度（像素），用于碰撞检测
+export const PaddleHeight         = 24;
+
+// 球拍默认 Y 坐标（距屏幕底部的位置）
+export const PaddleInitY          = -80;
+
+// 球半径（像素），用于碰撞检测
+export const BallRadius           = 20;
+
+// 每日最高上榜分数（超过才上报排行榜）
+export const DailyRankMinScore    = 0;
+
+// 游戏结束判定：球落地（低于此 Y 坐标，设计分辨率 750x1334 底部）
+export const GroundY              = -667;
+
+// ============================================================
+// 难度提升配置
+// ============================================================
+
+/**
+ * 难度阶段枚举
+ * normal   → 初始状态
+ * phase1   → 球速提升阶段（达到分数阈值后触发）
+ * phase2   → 鞋花加速阶段（球速提升后再持续一段时间触发）
+ */
+export enum eDifficultyPhase {
+    normal = 0,
+    phase1 = 1, // 球速提升
+    phase2 = 2, // 鞋花加速
+}
+
+// ---------- Phase 1：球速提升 ----------
+
+// 触发球速提升所需分数（建议测试期间根据游戏时长调整）
+export const Phase1ScoreThreshold    = 100;
+
+// 球速提升倍率（当前速度 × 此系数）
+export const Phase1BallSpeedMul      = 1.4;
+
+// Phase 1 触发时的 UI 提示文案
+export const Phase1HintText          = '⚡ 球速加快了！';
+
+// ---------- Phase 2：鞋花加速 ----------
+
+// 触发鞋花加速所需：进入 Phase1 后持续的游戏时长（秒）
+export const Phase2DurationThreshold = 20;
+
+// 鞋花下落速度倍率（Phase2 时在 ShoeFlowerFallSpeed 基础上 × 此系数）
+export const Phase2ShoeFlowerSpeedMul = 1.5;
+
+// Phase2 鞋花生成间隔缩短倍率（间隔 × 此系数，值越小生成越频繁）
+export const Phase2SpawnIntervalMul   = 0.6;
+
+// Phase 2 触发时的 UI 提示文案
+export const Phase2HintText           = '🌪 鞋花掉落加速了！';
