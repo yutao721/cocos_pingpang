@@ -100,7 +100,14 @@ export enum ePropType {
  * true  → 正式逻辑：球落到球拍高度未接住则游戏结束
  * false → 调试模式：球碰底部边界直接反弹，永不落地，方便测试鞋花生成/掉落
  */
-export const EnablePaddleCheck = false;
+export const EnablePaddleCheck = true;
+
+/**
+ * 调试：球拍自动跟随球（自动接球）
+ * true  → 球拍每帧自动移动到球正下方，方便测试得分/连颠/难度逻辑
+ * false → 正常玩家手动控制
+ */
+export const AutoPaddle = true;
 
 // ============================================================
 // 颠球游戏（PingPang）新玩法配置

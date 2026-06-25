@@ -164,7 +164,7 @@ export class PingPangPage extends UiBase {
 
         // 将球/球拍初始化到对应位置
         if (this.ballNode)   this.ballNode.setPosition(0, 200, 0);
-        if (this.paddleNode) this.paddleNode.setPosition(pingPangControl.getPaddleX(), 0, 0);
+        if (this.paddleNode) this.paddleNode.setPosition(pingPangControl.getPaddleX(), this.paddleNode.position.y, 0);
     }
 
     private onGameOver(result: IPingPangResult): void {

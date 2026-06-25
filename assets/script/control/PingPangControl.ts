@@ -4,6 +4,7 @@ import {
     BallInitSpeed,
     BallRadius,
     BallVYRatio,
+    AutoPaddle,
     eDifficultyPhase,
     EnablePaddleCheck,
     eShoeFlowerType,
@@ -65,6 +66,8 @@ export class PingPangControl {
     private spawnTimer: number = 0;
     /** 上一次秒级时间更新的整秒值，用于 timeUpdate 事件节流 */
     private lastSecond: number = -1;
+    /** AutoPaddle 模式下球拍相对球的固定偏移，每次接球后重新随机 */
+    private _autoPaddleOffset: number = 0;
 
     // 调试统计
     private _debugNormalCount:  number = 0;
@@ -104,6 +107,12 @@ export class PingPangControl {
      */
     public update(dt: number): void {
         if (!this.model.isPlaying) return;
+
+        if (AutoPaddle) {
+            const autoX = this.model.ballX + this._autoPaddleOffset;
+            this.model.setPaddleX(autoX);
+            UiBase.emitUiEvent(PingPangEvent.paddleMove, autoX);
+        }
 
         this._tickTime(dt);
         this._checkDifficulty();
@@ -251,6 +260,9 @@ export class PingPangControl {
     private _onBallHitPaddle(): void {
         const { delta, buffBonus, buffDesc } = this.model.onHitPaddle();
 
+        // 接球后重新随机下一次偏移，产生斜向弹跳
+        this._autoPaddleOffset = (Math.random() * 2 - 1) * (PaddleWidth * 0.4);
+
         UiBase.emitUiEvent(PingPangEvent.scoreUpdate, this.model.score, delta);
         UiBase.emitUiEvent(PingPangEvent.comboUpdate, this.model.combo);
         if (buffBonus > 0) {
@@ -337,12 +349,24 @@ export class PingPangControl {
         }
 
         const toRemove: number[] = [];
+        const toHit:    number[] = [];
+        const PADDLE_TOP = PaddleInitY + PaddleHeight / 2;
+        const halfW      = PaddleWidth / 2;
+
         for (const flower of this.model.shoeFlowers) {
             const newY = this.model.updateShoeFlowerY(flower.uid, dt);
             UiBase.emitUiEvent(PingPangEvent.shoeFlowerUpdate, flower.uid, newY);
-            if (newY < GroundY) {
+
+            if (newY <= PADDLE_TOP && Math.abs(flower.x - this.model.paddleX) <= halfW) {
+                toHit.push(flower.uid);
+            } else if (newY < GroundY) {
                 toRemove.push(flower.uid);
             }
+        }
+        for (const uid of toHit) {
+            const delta = this.model.onHitShoeFlower(uid);
+            UiBase.emitUiEvent(PingPangEvent.scoreUpdate, this.model.score, delta);
+            UiBase.emitUiEvent(PingPangEvent.shoeFlowerHit, uid, delta);
         }
         for (const uid of toRemove) {
             this.model.removeShoeFlower(uid);
