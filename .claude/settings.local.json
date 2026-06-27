@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__puppeteer__puppeteer_evaluate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "Bash(powershell -ExecutionPolicy Bypass -Command \"Get-ChildItem ''D:\\\\xwechat_files\\\\yutao5230_6307\\\\msg\\\\file\\\\2026-06\\\\FZD_minigame\\\\FZD_minigame\\\\png_750\\\\*.png'' | Select-Object Name, Length | Format-Table -AutoSize\")"
+    ]
+  }
+}
