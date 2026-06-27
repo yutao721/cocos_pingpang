@@ -25,11 +25,11 @@ export class HomePage extends UiBase {
   @property(Node)
   startGameBtn: Node = null;
 
-  @property(Node)
-  shareBtn: Node = null;
+  // @property(Node)
+  // shareBtn: Node = null;
 
-  @property(Node)
-  soundBtn: Node = null;
+  // @property(Node)
+  // soundBtn: Node = null;
 
   @property(Node)
   ruleBtn: Node = null;
@@ -45,8 +45,8 @@ export class HomePage extends UiBase {
       this.pageManager.showUI(UI_PATH.REWARD);
     });
 
-    this.shareBtn.on(Node.EventType.TOUCH_END, shareGame);
-    this.soundBtn.on(Node.EventType.TOUCH_END, this.onClickSound, this);
+    // this.shareBtn.on(Node.EventType.TOUCH_END, shareGame);
+    // this.soundBtn.on(Node.EventType.TOUCH_END, this.onClickSound, this);
 
     this.ruleBtn.on(Node.EventType.TOUCH_END, () => {
       this.pageManager.showUI(UI_PATH.RULE, UILayer.TOP);
@@ -91,8 +91,8 @@ export class HomePage extends UiBase {
 
   private updateSoundState() {
     const isSoundEnabled = userControl.getSoundEnabled();
-    const soundBtn = this.soundBtn.getComponent(Sprite);
-    soundBtn && (soundBtn.spriteFrame = this.soundSprites[isSoundEnabled ? 0 : 1]);
+    // const soundBtn = this.soundBtn.getComponent(Sprite);
+    // soundBtn && (soundBtn.spriteFrame = this.soundSprites[isSoundEnabled ? 0 : 1]);
     userControl.updatePlayBgmState();
   }
 
