@@ -3,41 +3,56 @@ import { UiBase } from '../../framework/ui/UiBase';
 import { RewardConfig } from '../const/GameConst';
 import { RewardItem } from './RewardItem';
 import { userControl } from '../control/UserControl';
+import { UI_PATH } from '../const/UiConfig';
+import { UILayer } from '../../framework/ui/PageManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('RewardPage')
 export class RewardPage extends UiBase {
-    
-    @property(Node)
-    public rewardItem: Node = null;
 
-    @property(Node)
-    public backNode: Node = null;
+  @property(Node)
+  public rewardItem: Node = null;
 
-    protected onLoad(): void {
-        this.rewardItem.active = false;
-        const config = RewardConfig;
-        config.forEach((config, index) => {
-            let node = instantiate(this.rewardItem);
-            node.parent = this.rewardItem.parent;
-            node.active = true;
-            const item: RewardItem = node.getComponent(RewardItem);
-            let count = 0;
-            if (config.key == 'once_a_day' || config.key == 'once_a_week') {
-                count = userControl.getDayGameNum();
-            }
-            else {
-                count = userControl.getMyGeneral().length;
-            }
-            //const 
-            const text = `<b><color=#5D402E>${config.desc}<color=#81B143>(${count}/${config.count})</color>`
-            item.initRewardItem(text, config.type, config.source, config.key);
-        });
+  @property(Node)
+  public backNode: Node = null;
 
-        this.backNode.on(Node.EventType.TOUCH_END, () => {
-            this.pageManager.removeUI(this.node);
-        });
-    }
+  @property(Node)
+  public ruleBtn: Node = null;
+
+  @property(Node)
+  public startGameBtn: Node = null;
+
+  protected onLoad(): void {
+
+
+    this.ruleBtn.on(Node.EventType.TOUCH_END, () => {
+      this.pageManager.showUI(UI_PATH.RULE, UILayer.TOP);
+    })
+
+    this.startGameBtn.on(Node.EventType.TOUCH_END, this.onStartGame, this);
+
+    this.rewardItem.active = false;
+    const config = RewardConfig;
+    console.log(config);
+    config.forEach((config, index) => {
+      let node = instantiate(this.rewardItem);
+      node.parent = this.rewardItem.parent;
+      node.active = true;
+      const item: RewardItem = node.getComponent(RewardItem);
+      const text = `<b><color=#FFFFFF>${config.desc}</color>`
+      item.initRewardItem(text, config.type, config.source, config.key);
+    });
+
+    this.backNode.on(Node.EventType.TOUCH_END, () => {
+      this.pageManager.removeUI(this.node);
+    });
+  }
+
+  private onStartGame() {
+    this.pageManager.showUI(UI_PATH.GAME, UILayer.MIDDLE, () => {
+      this.pageManager.removeUI(this.node);
+    });
+  }
 
 }
 

@@ -12,86 +12,65 @@ const { ccclass, property } = _decorator;
 
 @ccclass('CampPage')
 export class CampPage extends UiBase {
-    
-    @property(Node)
-    rankBtn: Node = null;
 
-    @property(Node)
-    item: Node = null;
 
-    @property(Node)
-    backNode: Node = null;
+  @property(Node)
+  item: Node = null;
 
-    @property(GeneralPopup)
-    generalPopup: GeneralPopup = null;
+  @property(Node)
+  backNode: Node = null;
 
-    private generalSpArr: {sp: Sprite, id: number, has: boolean}[] = [];
 
-    protected onLoad(): void {
-        this.item.active = false;
+  private generalSpArr: { sp: Sprite, id: number, has: boolean }[] = [];
 
-        this.initGeneralView();
+  protected onLoad(): void {
+    this.item.active = false;
 
-        this.rankBtn.on(Node.EventType.TOUCH_END, this.onRankBtnClick, this);
-        this.backNode.on(Node.EventType.TOUCH_END, this.goHome, this);
-    }
+    this.initGeneralView();
 
-    protected start(): void {
-        this.updateMyGeneral();
-    }
+    this.backNode.on(Node.EventType.TOUCH_END, this.goHome, this);
+  }
 
-    private async initGeneralView() {
-        const generalConfig = userControl.getAllGeneralConfig();
-        generalConfig.forEach((item: {id: number}, index: number) => {
-            const node = instantiate(this.item);
-            node.active = true;
-            node.parent = this.item.parent;
-            const sp = node.getComponent(Sprite);
-            this.generalSpArr.push({
-                sp: sp,
-                id: item.id,
-                has: false
-            });
-            getGeneralSprite(item.id, 'card').then((spriteFrame: SpriteFrame) => {
-                sp.spriteFrame = spriteFrame;
-                sp.grayscale = true;
-            });
-            node.on(Node.EventType.TOUCH_END, () => {
-                this.onClickGeneral(index);
-            }, this);
-        });
-    }
+  protected start(): void {
+    // this.updateMyGeneral();
+  }
 
-    private async updateMyGeneral() {
-        const myGeneral = await userControl.updateMyGeneral();
-        myGeneral.forEach(id => {
-            const generalSp = this.generalSpArr.find(item => item.id === id);
-            if (generalSp) {
-                generalSp.sp.grayscale = false;
-                generalSp.has = true;
-            }
-        });
-    }
+  private async initGeneralView() {
+    const generalConfig = userControl.getAllGeneralConfig();
+    generalConfig.forEach((item: { id: number }, index: number) => {
+      const node = instantiate(this.item);
+      node.active = true;
+      node.parent = this.item.parent;
+      const sp = node.getComponent(Sprite);
+      this.generalSpArr.push({
+        sp: sp,
+        id: item.id,
+        has: false
+      });
+      getGeneralSprite(item.id, 'card').then((spriteFrame: SpriteFrame) => {
+        sp.spriteFrame = spriteFrame;
+        sp.grayscale = true;
+      });
+    });
+  }
 
-    private onClickGeneral(index: number) {
-        const item = this.generalSpArr[index];
-        this.generalPopup.showGeneral(item.id, item.has);
-    }
+  private async updateMyGeneral() {
+    const myGeneral = await userControl.updateMyGeneral();
+    myGeneral.forEach(id => {
+      const generalSp = this.generalSpArr.find(item => item.id === id);
+      if (generalSp) {
+        generalSp.sp.grayscale = false;
+        generalSp.has = true;
+      }
+    });
+  }
 
-    private onRankBtnClick() {
-        this.pageManager.showUI(UI_PATH.RANK, UILayer.TOP);
-    }
 
-    public onShowNewGeneral(id: number) {
-        this.generalPopup.node.active = true;
-        this.generalPopup.showNewGeneral(id);
-    }
-
-    public goHome() {
-        this.pageManager.showUI(UI_PATH.HOME, UILayer.MIDDLE, () => {
-            this.pageManager.removeUI(this.node);
-        });
-    }
+  public goHome() {
+    this.pageManager.showUI(UI_PATH.HOME, UILayer.MIDDLE, () => {
+      this.pageManager.removeUI(this.node);
+    });
+  }
 
 }
 

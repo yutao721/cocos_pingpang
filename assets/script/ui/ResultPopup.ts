@@ -34,14 +34,13 @@ export class ResultPopup extends UiBase {
     this.shareBtn.on(Node.EventType.TOUCH_END, this.share, this);
   }
 
- 
+
 
   public showLose(): void {
     this.loseContent.active = true;
-    this.revivalContent.active = false;
   }
 
-  
+
 
   public goHome(): void {
     this.pageManager.removeUI(this.node);
@@ -57,10 +56,6 @@ export class ResultPopup extends UiBase {
 
   public goCamp(): void {
     this.pageManager.showUI(UI_PATH.CAMP, UILayer.MIDDLE, (node: Node) => {
-      const camp = node.getComponent(CampPage);
-      if (camp && this.resultData.status === 1) {
-        camp.onShowNewGeneral(this.resultData.general_id);
-      }
       this.pageManager.removeUI(this.node);
       this.pageManager.removeUI(UI_PATH.GAME);
     });

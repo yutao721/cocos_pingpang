@@ -10,15 +10,15 @@ import { BundleManager } from "../../framework/bundle/BundleManager";
  * @returns 
  */
 export const getItemSprite = (id: number, type: 'icon' | 'game' = 'icon'): Promise<SpriteFrame> => {
-    return new Promise((resolve, reject) => {
-        BundleManager.load(`image/propItem/${type}/${id}/spriteFrame`, SpriteFrame, (err, spriteFrame) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-            resolve(spriteFrame);
-        });
+  return new Promise((resolve, reject) => {
+    BundleManager.load(`image/propItem/${type}/${id}/spriteFrame`, SpriteFrame, (err, spriteFrame) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(spriteFrame);
     });
+  });
 }
 
 /**
@@ -27,15 +27,15 @@ export const getItemSprite = (id: number, type: 'icon' | 'game' = 'icon'): Promi
  * @returns 
  */
 export const getGeneralSprite = (id: number, type: 'common' | 'card' = 'common'): Promise<SpriteFrame> => {
-    return new Promise((resolve, reject) => {
-        BundleManager.load(`image/general/${type}/${id}/spriteFrame`, SpriteFrame, (err, spriteFrame) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-            resolve(spriteFrame);
-        });
+  return new Promise((resolve, reject) => {
+    BundleManager.load(`image/general/${type}/${id}/spriteFrame`, SpriteFrame, (err, spriteFrame) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(spriteFrame);
     });
+  });
 }
 
 /**
@@ -45,15 +45,15 @@ export const getGeneralSprite = (id: number, type: 'common' | 'card' = 'common')
  * @returns 
  */
 export const getGeneralText = (id: number, type: 'obtain' | 'strategy' | 'desc' | 'name'): Promise<SpriteFrame> => {
-    return new Promise((resolve, reject) => {
-        BundleManager.load(`image/generalText/${type}/${id}/spriteFrame`, SpriteFrame, (err, spriteFrame) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-            resolve(spriteFrame);
-        });
+  return new Promise((resolve, reject) => {
+    BundleManager.load(`image/generalText/${type}/${id}/spriteFrame`, SpriteFrame, (err, spriteFrame) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(spriteFrame);
     });
+  });
 }
 
 /**
@@ -65,25 +65,25 @@ export const getGeneralText = (id: number, type: 'obtain' | 'strategy' | 'desc' 
  * @returns 
  */
 export const getPropTopItem = (layer: number, x: number, y: number, mapData: number[][][]) => {
-    const topItemArr = [];
-    for (let layerIndex = layer + 1; layerIndex < mapData.length; ++layerIndex) {
-        if (mapData[layerIndex][x][y] !== 0) {
-            topItemArr.push(mapData[layerIndex][x][y]);
-        }
+  const topItemArr = [];
+  for (let layerIndex = layer + 1; layerIndex < mapData.length; ++layerIndex) {
+    if (mapData[layerIndex][x][y] !== 0) {
+      topItemArr.push(mapData[layerIndex][x][y]);
     }
-    return topItemArr;
+  }
+  return topItemArr;
 }
 
 /**
  * 分享游戏
  */
 export const shareGame = () => {
-    return new Promise((resolve, reject) => {
-        let shareText = '我在三国杀小游戏《木牛流马》帮助谋诸葛亮收集粮草，助力北伐！你也来试试吧！';
-        shareText += window.location.href;
-        copyToClipboard(shareText).then(() => {
-            tipControl.showTip('链接已复制到剪切板~');
-            resolve(null);
-        });
+  return new Promise((resolve, reject) => {
+    let shareText = '我在三国杀小游戏《木牛流马》帮助谋诸葛亮收集粮草，助力北伐！你也来试试吧！';
+    shareText += window.location.href;
+    copyToClipboard(shareText).then(() => {
+      tipControl.showTip('链接已复制到剪切板~');
+      resolve(null);
     });
+  });
 }

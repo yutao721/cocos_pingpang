@@ -56,6 +56,7 @@ export class HomePage extends UiBase {
   }
 
   protected onEnable(): void {
+    userControl.initConfigData();
     // if (userControl.isLoginVal) {
     //   userControl.initUserData();
     // }

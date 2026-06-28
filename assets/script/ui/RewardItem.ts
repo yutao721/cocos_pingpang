@@ -38,23 +38,13 @@ export class RewardItem extends UiBase {
   public initRewardItem(text: string, types: number[], source: number, key: string) {
     this.text.string = text;
     this.source = source;
-    if (types.length > 1) {
-      types.forEach((type, index) => {
-        this.getRewardIcon(type).then(spriteFrame => {
-          this.icon[index].getComponent(Sprite).spriteFrame = spriteFrame;
-          this.icon[index].active = true;
-        });
-      })
-    }
-    else {
-      this.getRewardIcon(types[0]).then(spriteFrame => {
-        this.icon[0].getComponent(Sprite).spriteFrame = spriteFrame;
-        this.icon[0].active = true;
-      });
-      const node = this.icon[0];
-      node.getComponent(UITransform).setContentSize(70, 70);
-      node.x = 0;
-    }
+    this.getRewardIcon(types[0]).then(spriteFrame => {
+      this.icon[0].getComponent(Sprite).spriteFrame = spriteFrame;
+      this.icon[0].active = true;
+    });
+    const node = this.icon[0];
+    node.getComponent(UITransform).setContentSize(70, 70);
+    node.x = 0;
     const state = userControl.getRewardList()[key];
     this.setBtnState(state);
   }
