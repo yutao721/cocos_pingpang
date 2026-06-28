@@ -32,9 +32,9 @@ export interface IResult {
 export interface IShoeFlower {
     uid: number;              // 唯一标识（自增）
     type: number;             // eShoeFlowerType
-    x: number;                // 当前 X 坐标（设计分辨率）
-    y: number;                // 当前 Y 坐标
-    speedY: number;           // 下落速度（像素/秒，正值向下）
+    x: number;                // X 坐标（设计分辨率，固定不变）
+    y: number;                // Y 坐标（设计分辨率，固定不变）
+    lifetime: number;         // 剩余存活时间（秒），倒计时到 0 自动消失
 }
 
 // 颠球游戏结算数据（上报后端 & 弹窗展示）

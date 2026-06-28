@@ -88,8 +88,10 @@ export class PingPangModel {
     /** 球拍 Y 坐标（固定值，由 GameConst.PaddleInitY 决定） */
     public get paddleY(): number { return this._paddleY; }
 
-    /** 球拍半高，用于碰撞检测上边界 */
-    public readonly paddleHalfHeight: number = PaddleHeight / 2;
+    /** 球拍半高，用于碰撞检测上边界，由 View 层同步 Sprite 真实高度 */
+    private _paddleHalfHeight: number = PaddleHeight / 2;
+    public get paddleHalfHeight(): number { return this._paddleHalfHeight; }
+    public setPaddleHalfHeight(h: number): void { this._paddleHalfHeight = h; }
 
     // ----------------------------------------------------------------
     // 球
@@ -272,26 +274,26 @@ export class PingPangModel {
     /**
      * 生成一个鞋花并加入场上列表
      */
-    public spawnShoeFlower(type: eShoeFlowerType, x: number, y: number, speedY: number): IShoeFlower {
+    public spawnShoeFlower(type: eShoeFlowerType, x: number, y: number, lifetime: number): IShoeFlower {
         const flower: IShoeFlower = {
             uid: ++this._shoeFlowerUid,
             type,
             x,
             y,
-            speedY,
+            lifetime,
         };
         this._shoeFlowers.push(flower);
         return flower;
     }
 
     /**
-     * 更新鞋花 Y 坐标（下落位移），返回更新后的 y
+     * 鞋花存活时间倒计时，返回剩余时间（秒）
      */
-    public updateShoeFlowerY(uid: number, dt: number): number {
+    public tickShoeFlowerLifetime(uid: number, dt: number): number {
         const flower = this._shoeFlowers.find(f => f.uid === uid);
-        if (!flower) return NaN;
-        flower.y -= flower.speedY * dt;
-        return flower.y;
+        if (!flower) return 0;
+        flower.lifetime -= dt;
+        return flower.lifetime;
     }
 
     /**

@@ -1,8 +1,8 @@
-import { _decorator, Label, Node, Prefab, instantiate, Sprite, SpriteFrame, Vec3, tween } from 'cc';
+import { _decorator, Color, Label, Node, Prefab, Sprite, SpriteFrame, Tween, Vec3, Widget, instantiate, tween } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
 import { pingPangControl } from '../control/PingPangControl';
 import { PingPangEvent } from '../const/EventDefine';
-import { eDifficultyPhase } from '../const/GameConst';
+import { eDifficultyPhase, eShoeFlowerType, RandomHintTexts, ShoeFlowerHitHint } from '../const/GameConst';
 import { IPingPangResult, IShoeFlower } from '../const/Interface';
 import { UILayer } from '../../framework/ui/PageManager';
 import { UI_PATH } from '../const/UiConfig';
@@ -82,11 +82,27 @@ export class PingPangPage extends UiBase {
     /** uid → Node 的映射，用于按 uid 更新/销毁鞋花节点 */
     private shoeFlowerNodes: Map<number, Node> = new Map();
 
-    /** 当前长按方向：-1 左 / 0 停止 / 1 右 */
-    private touchDir: number = 0;
+    /** uid → 鞋花类型，用于击中时取提示文案 */
+    private shoeFlowerTypes: Map<number, eShoeFlowerType> = new Map();
 
-    /** 球拍可移动的 X 边界，根据场景宽度在 start() 里设置 */
-    private paddleClamp: [number, number] = [-280, 280];
+    /** 当前正在播放的提示优先级：0=无 1=随机 2=连击 3=鞋花 */
+    private _hintPriority: number = 0;
+
+    /** 随机提示计数器，每 3 次颠球触发一次 */
+    private _randomHintCounter: number = 0;
+
+    /** 球拍基础 Y 坐标（由 prefab 决定，不随动画变化） */
+    private _paddleBaseY: number = 0;
+
+    /** 颠球动画当前 Y 偏移（正弦曲线，0→峰值→0） */
+    private _paddleHitOffset: number = 0;
+
+    /** 颠球动画计时器，-1 表示未播放 */
+    private _paddleHitTimer: number = -1;
+
+    /** 颠球动画总时长（秒） */
+    private readonly _paddleHitDuration: number = 0.22;
+
 
     // ----------------------------------------------------------------
     // 生命周期
@@ -110,10 +126,11 @@ export class PingPangPage extends UiBase {
         this.onUiEvent(PingPangEvent.shoeFlowerMiss,         this.onShoeFlowerMiss);
         this.onUiEvent(PingPangEvent.difficultyPhaseChange,  this.onDifficultyPhaseChange);
 
-        // 长按输入：触摸落点在屏幕左/右半区决定方向
-        this.node.on(Node.EventType.TOUCH_START,  this.onTouchStart,  this);
-        this.node.on(Node.EventType.TOUCH_END,    this.onTouchEnd,    this);
-        this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd,    this);
+        // 拖拽输入：触摸跟随手指 X 位置
+        this.node.on(Node.EventType.TOUCH_START,  this.onTouchMove,  this);
+        this.node.on(Node.EventType.TOUCH_MOVE,   this.onTouchMove,  this);
+        this.node.on(Node.EventType.TOUCH_END,    this.onTouchEnd,   this);
+        this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd,   this);
 
         // 初始隐藏提示文字
         if (this.difficultyHintLabel)  this.difficultyHintLabel.node.active  = false;
@@ -128,9 +145,16 @@ export class PingPangPage extends UiBase {
     protected update(dt: number): void {
         pingPangControl.update(dt);
 
-        // 每帧传入长按方向驱动球拍移动
-        if (this.touchDir !== 0) {
-            pingPangControl.movePaddle(this.touchDir, dt, this.paddleClamp);
+        // 颠球动画：拍面沿 Y 轴向上弹起再落回
+        if (this._paddleHitTimer >= 0 && this.paddleNode) {
+            this._paddleHitTimer += dt;
+            const t = this._paddleHitTimer / this._paddleHitDuration;
+            if (t < 1) {
+                this._paddleHitOffset = 22 * Math.sin(t * Math.PI);
+            } else {
+                this._paddleHitOffset = 0;
+                this._paddleHitTimer = -1;
+            }
         }
     }
 
@@ -138,15 +162,13 @@ export class PingPangPage extends UiBase {
     // 触摸输入
     // ----------------------------------------------------------------
 
-    private onTouchStart(e: any): void {
-        // 触摸点 X > 0 向右，< 0 向左（Cocos 坐标系）
-        const localX = e.getUILocation().x - this.node.getComponent('UITransform')?.width / 2 ?? 0;
-        this.touchDir = localX >= 0 ? 1 : -1;
+    private onTouchMove(e: any): void {
+        // 手指 X 映射到游戏坐标（设计分辨率 750，中心为 0）
+        const worldX = e.getUILocation().x - 375;
+        pingPangControl.dragPaddleTo(worldX, [-280, 280]);
     }
 
-    private onTouchEnd(): void {
-        this.touchDir = 0;
-    }
+    private onTouchEnd(): void {}
 
     // ----------------------------------------------------------------
     // 游戏流程事件
@@ -161,10 +183,21 @@ export class PingPangPage extends UiBase {
         // 清空残留鞋花节点
         this.shoeFlowerNodes.forEach(node => node.destroy());
         this.shoeFlowerNodes.clear();
+        this.shoeFlowerTypes.clear();
+
+        // 重置提示状态
+        this._hintPriority = 0;
+        this._randomHintCounter = 0;
 
         // 将球/球拍初始化到对应位置
         if (this.ballNode)   this.ballNode.setPosition(0, 200, 0);
-        if (this.paddleNode) this.paddleNode.setPosition(pingPangControl.getPaddleX(), this.paddleNode.position.y, 0);
+        if (this.paddleNode) {
+            this.paddleNode.getComponent(Widget)?.updateAlignment();
+            this.paddleNode.setPosition(pingPangControl.getPaddleX(), this.paddleNode.position.y, 0);
+            this._paddleBaseY = this.paddleNode.position.y;
+            this._paddleHitTimer = -1;
+            pingPangControl.syncPaddleY(this._paddleBaseY);
+        }
     }
 
     private onGameOver(result: IPingPangResult): void {
@@ -182,7 +215,18 @@ export class PingPangPage extends UiBase {
     }
 
     private onBallHitPaddle(): void {
-        // TODO: 播放击球音效 / 球拍抖动特效
+        // 每 3 次颠球随机显示一条提示（最低优先级）
+        this._randomHintCounter++;
+        if (this._randomHintCounter >= 3) {
+            this._randomHintCounter = 0;
+            const text = RandomHintTexts[Math.floor(Math.random() * RandomHintTexts.length)];
+            this._showHint(text, 1);
+        }
+
+        // 颠球动作：拍面向上抬起，手柄位置不动
+        if (this.paddleNode) {
+            this._paddleHitTimer = 0;
+        }
     }
 
     private onBallFall(): void {
@@ -194,7 +238,7 @@ export class PingPangPage extends UiBase {
     // ----------------------------------------------------------------
 
     private onPaddleMove(x: number): void {
-        this.paddleNode?.setPosition(x, this.paddleNode.position.y, 0);
+        this.paddleNode?.setPosition(x, this._paddleBaseY + this._paddleHitOffset, 0);
     }
 
     // ----------------------------------------------------------------
@@ -216,12 +260,19 @@ export class PingPangPage extends UiBase {
     }
 
     /**
-     * 连颠 Buff 触发，播放飘字动画
+     * 统一提示显示，priority: 1=随机 2=连击 3=鞋花
+     * 低优先级不打断高优先级正在播放的提示
      */
-    private onComboBuff(bonus: number, desc: string): void {
+    private _showHint(text: string, priority: number): void {
         if (!this.comboBuffHintLabel) return;
+        if (priority < this._hintPriority) return;
+
         const label = this.comboBuffHintLabel;
-        label.string = desc;
+        Tween.stopAllByTarget(label.node);
+        this._hintPriority = priority;
+
+        label.string = text;
+        label.color = new Color(30, 144, 255, 255); // 蓝色
         label.node.active = true;
         label.node.setPosition(0, 0, 0);
         label.node.setScale(1, 1, 1);
@@ -229,8 +280,18 @@ export class PingPangPage extends UiBase {
         tween(label.node)
             .to(0.3, { scale: new Vec3(1.3, 1.3, 1) })
             .to(0.5, { position: new Vec3(0, 80, 0) })
-            .call(() => { label.node.active = false; })
+            .call(() => {
+                label.node.active = false;
+                this._hintPriority = 0;
+            })
             .start();
+    }
+
+    /**
+     * 连颠 Buff 触发，播放飘字动画
+     */
+    private onComboBuff(_bonus: number, desc: string): void {
+        this._showHint(desc, 2);
     }
 
     // ----------------------------------------------------------------
@@ -262,6 +323,7 @@ export class PingPangPage extends UiBase {
         }
 
         this.shoeFlowerNodes.set(flower.uid, node);
+        this.shoeFlowerTypes.set(flower.uid, flower.type);
     }
 
     private onShoeFlowerUpdate(uid: number, y: number): void {
@@ -270,6 +332,8 @@ export class PingPangPage extends UiBase {
     }
 
     private onShoeFlowerHit(uid: number, _score: number): void {
+        const type = this.shoeFlowerTypes.get(uid) ?? eShoeFlowerType.normal;
+        this._showHint(ShoeFlowerHitHint[type], 3);
         this._removeShoeFlowerNode(uid);
         // TODO: 播放消除特效/音效
     }
@@ -281,9 +345,11 @@ export class PingPangPage extends UiBase {
     private _removeShoeFlowerNode(uid: number): void {
         const node = this.shoeFlowerNodes.get(uid);
         if (node) {
+            node.active = false;
             node.destroy();
             this.shoeFlowerNodes.delete(uid);
         }
+        this.shoeFlowerTypes.delete(uid);
     }
 
     // ----------------------------------------------------------------

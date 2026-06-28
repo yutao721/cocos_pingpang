@@ -1,29 +1,33 @@
 import { UiBase } from '../../framework/ui/UiBase';
 import { PingPangEvent } from '../const/EventDefine';
 import {
-    BallInitSpeed,
-    BallRadius,
-    BallVYRatio,
-    AutoPaddle,
-    eDifficultyPhase,
-    EnablePaddleCheck,
-    eShoeFlowerType,
-    GameDuration,
-    GroundY,
-    MaxShoeFlowerOnStage,
-    PaddleHeight,
-    PaddleInitY,
-    PaddleMoveSpeed,
-    PaddleWidth,
-    Phase1BallSpeedMul,
-    Phase1HintText,
-    Phase1ScoreThreshold,
-    Phase2DurationThreshold,
-    Phase2HintText,
-    Phase2ShoeFlowerSpeedMul,
-    Phase2SpawnIntervalMul,
-    ShoeFlowerFallSpeed,
-    ShoeFlowerSpawnInterval,
+  BallInitSpeed,
+  BallRadius,
+  BallVYRatio,
+  BallVXRatio,
+  BallGravity,
+  AutoPaddle,
+  eDifficultyPhase,
+  EnablePaddleCheck,
+  eShoeFlowerType,
+  GameDuration,
+  GroundY,
+  MaxShoeFlowerOnStage,
+  PaddleHeight,
+  PaddleMoveSpeed,
+  PaddleWidth,
+  Phase1BallSpeedMul,
+  Phase1HintText,
+  Phase1ScoreThreshold,
+  Phase2DurationThreshold,
+  Phase2HintText,
+  Phase2SpawnIntervalMul,
+  ShoeFlowerLifetime,
+  ShoeFlowerLifetimeMulPhase2,
+  ShoeFlowerRadius,
+  ShoeFlowerSpawnInterval,
+  ShoeFlowerSpawnRangeX,
+  ShoeFlowerSpawnRangeY,
 } from '../const/GameConst';
 import { IShoeFlower } from '../const/Interface';
 import { PingPangModel } from '../model/PingPangModel';
@@ -49,374 +53,381 @@ import { PingPangModel } from '../model/PingPangModel';
  */
 export class PingPangControl {
 
-    private static _instance: PingPangControl;
-    public static get Instance(): PingPangControl {
-        if (!this._instance) this._instance = new PingPangControl();
-        return this._instance;
+  private static _instance: PingPangControl;
+  public static get Instance(): PingPangControl {
+    if (!this._instance) this._instance = new PingPangControl();
+    return this._instance;
+  }
+  private constructor() { }
+
+  private model: PingPangModel = new PingPangModel();
+
+  // ----------------------------------------------------------------
+  // 内部定时器状态（不依赖 Cocos scheduler，由外部 update 驱动）
+  // ----------------------------------------------------------------
+
+  /** 下一次鞋花生成的倒计时（秒） */
+  private spawnTimer: number = 0;
+  /** 上一次秒级时间更新的整秒值，用于 timeUpdate 事件节流 */
+  private lastSecond: number = -1;
+  /** AutoPaddle 模式下球拍相对球的固定偏移，每次接球后重新随机 */
+  private _autoPaddleOffset: number = 0;
+
+  // 调试统计
+  private _debugNormalCount: number = 0;
+  private _debugLimitedCount: number = 0;
+
+  // 屏幕水平边界（设计分辨率 750，留球半径边距）
+  private readonly WALL_LEFT = -375 + BallRadius;
+  private readonly WALL_RIGHT = 375 - BallRadius;
+
+  // ----------------------------------------------------------------
+  // 游戏流程
+  // ----------------------------------------------------------------
+
+  /**
+   * 开始一局游戏
+   * 初始化 Model，重置内部定时器，发出 gameStart 事件
+   */
+  public startGame(): void {
+    this.model.init();
+    this.spawnTimer = this._randomSpawnInterval();
+    this.lastSecond = -1;
+    this._debugNormalCount = 0;
+    this._debugLimitedCount = 0;
+    // 初始直线下落，速度放缓让玩家有准备时间；接到第一球后才有横向速度
+    this.model.setBall(0, this.model.ballY, 0, -600);
+    this.model.setPlaying(true);
+    UiBase.emitUiEvent(PingPangEvent.gameStart);
+  }
+
+  /**
+   * 每帧驱动入口，由 View 的 update(dt) 调用
+   * @param dt 帧时间（秒）
+   */
+  public update(dt: number): void {
+    if (!this.model.isPlaying) return;
+
+    if (AutoPaddle) {
+      const autoX = this.model.ballX + this._autoPaddleOffset;
+      this.model.setPaddleX(autoX);
+      UiBase.emitUiEvent(PingPangEvent.paddleMove, autoX);
     }
-    private constructor() {}
 
-    private model: PingPangModel = new PingPangModel();
+    this._tickTime(dt);
+    this._checkDifficulty();
+    this._tickBall(dt);
+    this._tickShoeFlowers(dt);
+  }
 
-    // ----------------------------------------------------------------
-    // 内部定时器状态（不依赖 Cocos scheduler，由外部 update 驱动）
-    // ----------------------------------------------------------------
+  // ----------------------------------------------------------------
+  // 球拍输入
+  // ----------------------------------------------------------------
 
-    /** 下一次鞋花生成的倒计时（秒） */
-    private spawnTimer: number = 0;
-    /** 上一次秒级时间更新的整秒值，用于 timeUpdate 事件节流 */
-    private lastSecond: number = -1;
-    /** AutoPaddle 模式下球拍相对球的固定偏移，每次接球后重新随机 */
-    private _autoPaddleOffset: number = 0;
+  /**
+   * 长按移动球拍，由 View 每帧传入水平输入值（-1 ~ 1）
+   * @param dir   方向（-1 向左，+1 向右，0 静止）
+   * @param dt    帧时间（秒）
+   * @param clamp 球拍可移动的 X 边界 [minX, maxX]
+   */
+  public movePaddle(dir: number, dt: number, clamp: [number, number]): void {
+    if (!this.model.isPlaying) return;
+    const dx = dir * PaddleMoveSpeed * dt;
+    const newX = Math.min(clamp[1], Math.max(clamp[0], this.model.paddleX + dx));
+    this.model.setPaddleX(newX);
+    UiBase.emitUiEvent(PingPangEvent.paddleMove, newX);
+  }
+
+  public dragPaddleTo(x: number, clamp: [number, number]): void {
+    if (!this.model.isPlaying) return;
+    const newX = Math.min(clamp[1], Math.max(clamp[0], x));
+    this.model.setPaddleX(newX);
+    UiBase.emitUiEvent(PingPangEvent.paddleMove, newX);
+  }
+
+  // ----------------------------------------------------------------
+  // 数据读取（供 View 使用）
+  // ----------------------------------------------------------------
+
+  public getScore(): number { return this.model.score; }
+  public syncPaddleY(y: number, halfH?: number): void {
+    this.model.setPaddleY(y);
+    if (halfH !== undefined) this.model.setPaddleHalfHeight(halfH);
+  }
+  public getCombo(): number { return this.model.combo; }
+  public getRemainTime(): number { return this.model.remainTime; }
+  public getPaddleX(): number { return this.model.paddleX; }
+  public getDifficultyPhase(): eDifficultyPhase { return this.model.difficultyPhase; }
+  public getShoeFlowers(): ReadonlyArray<IShoeFlower> { return this.model.shoeFlowers; }
+
+  // ----------------------------------------------------------------
+  // 私有：球运动（手动模拟，方案B）
+  // 详细公式见 BALL_PHYSICS.md
+  // ----------------------------------------------------------------
+
+  /**
+   * 每帧更新球的位置，处理墙壁反弹、球拍碰撞、落地判定
+   *
+   * 运动模型（无重力，匀速）：
+   *   ballX += vx * dt
+   *   ballY += vy * dt
+   *
+   * 反弹规则：
+   *   碰左/右墙 → vx 取反
+   *   碰顶部   → vy 取反
+   *   到球拍高度：
+   *     命中球拍范围内 → 按偏移比例计算新 vx/vy（见 _calcPaddleBounce）
+   *     超出球拍范围  → 球落地，游戏结束
+   */
+  private _tickBall(dt: number): void {
+    let { ballX: x, ballY: y, ballVX: vx, ballVY: vy } = this.model;
+
+    // 移动（重力每帧对 vy 施加向下加速度）
+    vy -= BallGravity * dt;
+    x += vx * dt;
+    y += vy * dt;
+
+    // 碰左/右墙反弹：vx 取反，并修正位置防止穿墙
+    if (x < this.WALL_LEFT) {
+      x = this.WALL_LEFT;
+      vx = Math.abs(vx);
+    } else if (x > this.WALL_RIGHT) {
+      x = this.WALL_RIGHT;
+      vx = -Math.abs(vx);
+    }
+
+
+    if (!EnablePaddleCheck) {
+      // 调试模式：球到屏幕底部直接反弹，全程运动不触发落地
+      if (vy < 0 && y - BallRadius <= GroundY) {
+        vy = Math.abs(vy);
+        y = GroundY + BallRadius;
+      }
+    } else {
+      // 正式模式：到达球拍顶面高度时判断命中/落地
+      const PADDLE_TOP = this.model.paddleY + PaddleHeight + (PaddleHeight / 2);
+      if (vy < 0 && y - BallRadius <= PADDLE_TOP) {
+        const halfW = PaddleWidth / 2;
+        if (Math.abs(x - this.model.paddleX) <= halfW + BallRadius) {
+          // 命中球拍，重新计算反弹速度，先修正视觉位置再通知 View
+          const { newVX, newVY } = this._calcPaddleBounce(x);
+          vx = newVX;
+          vy = newVY;
+          y = PADDLE_TOP + BallRadius;
+          this.model.setBall(x, y, vx, vy);
+          UiBase.emitUiEvent(PingPangEvent.ballUpdate, x, y, vx, vy);
+          this._onBallHitPaddle();
+          return;
+        } else {
+          // 未命中球拍，落地游戏结束
+          this.model.setBall(x, y, vx, vy);
+          this._onBallFall();
+          return;
+        }
+      }
+    }
+
+    this.model.setBall(x, y, vx, vy);
+    UiBase.emitUiEvent(PingPangEvent.ballUpdate, x, y, vx, vy);
+  }
+
+  /**
+   * 球拍反弹速度计算
+   *
+   * 核心公式（详见 BALL_PHYSICS.md 四、4.2）：
+   *   offset = ballX - paddleX                    // 球相对球拍中心的偏移
+   *   ratio  = clamp(offset / halfPaddleWidth, -1, 1)
+   *   speed  = BallInitSpeed * Phase1BallSpeedMul（Phase1后）
+   *   vx     = ratio * speed                      // 偏左→往左，偏右→往右
+   *   vy     = +speed * BallVYRatio               // 固定向上
+   *
+   * 图示：
+   *   撞左侧(ratio≈-0.8) → 向左上飞  ↖
+   *   撞中心(ratio≈0)    → 垂直弹起  ↑
+   *   撞右侧(ratio≈+0.8) → 向右上飞  ↗
+   */
+  private _calcPaddleBounce(ballX: number): { newVX: number; newVY: number } {
+    const halfW = PaddleWidth / 2;
+    const offset = ballX - this.model.paddleX;
+    const ratio = Math.max(-1, Math.min(1, offset / halfW));
+
+    // Phase1 只加快水平速度，垂直速度不变（避免只是弹更高）
+    const vxMul = this.model.difficultyPhase >= eDifficultyPhase.phase1 ? Phase1BallSpeedMul : 1;
+
+    return {
+      newVX: ratio * BallInitSpeed * BallVXRatio * vxMul,
+      newVY: BallInitSpeed * BallVYRatio,
+    };
+  }
+
+  /**
+   * 球命中球拍后的得分/连颠处理
+   */
+  private _onBallHitPaddle(): void {
+    const { delta, buffBonus, buffDesc } = this.model.onHitPaddle();
+
+    UiBase.emitUiEvent(PingPangEvent.scoreUpdate, this.model.score, delta);
+    UiBase.emitUiEvent(PingPangEvent.comboUpdate, this.model.combo);
+    if (buffBonus > 0) {
+      UiBase.emitUiEvent(PingPangEvent.comboBuff, buffBonus, buffDesc);
+    }
+    UiBase.emitUiEvent(PingPangEvent.ballHitPaddle);
+    this._checkDifficulty();
+  }
+
+  /**
+   * 球落地（未被接住）
+   */
+  private _onBallFall(): void {
+    this.model.onBallFall();
+    UiBase.emitUiEvent(PingPangEvent.comboUpdate, 0);
+    UiBase.emitUiEvent(PingPangEvent.ballFall);
+    this._endGame();
+  }
+
+  // ----------------------------------------------------------------
+  // 私有：计时
+  // ----------------------------------------------------------------
+
+  private _tickTime(dt: number): void {
+    const timeUp = this.model.tickTime(dt);
+
+    const curSecond = Math.ceil(this.model.remainTime);
+    if (curSecond !== this.lastSecond) {
+      this.lastSecond = curSecond;
+      UiBase.emitUiEvent(PingPangEvent.timeUpdate, this.model.remainTime);
+    }
+
+    if (timeUp && GameDuration > 0) {
+      UiBase.emitUiEvent(PingPangEvent.timeUp);
+      this._endGame();
+    }
+  }
+
+  // ----------------------------------------------------------------
+  // 私有：难度检测
+  // ----------------------------------------------------------------
+
+  private _checkDifficulty(): void {
+    const phase = this.model.difficultyPhase;
+
+    // Phase1：分数达到阈值
+    if (phase < eDifficultyPhase.phase1 && this.model.score >= Phase1ScoreThreshold) {
+      const changed = this.model.setDifficultyPhase(eDifficultyPhase.phase1);
+      if (changed) {
+        UiBase.emitUiEvent(
+          PingPangEvent.difficultyPhaseChange,
+          eDifficultyPhase.phase1,
+          Phase1HintText,
+        );
+      }
+      return;
+    }
+
+    // Phase2：Phase1 触发后，已用时超过阈值
+    if (phase === eDifficultyPhase.phase1 && this.model.phase1StartTime >= 0) {
+      const phase1Elapsed = this.model.elapsedTime - this.model.phase1StartTime;
+      if (phase1Elapsed >= Phase2DurationThreshold) {
+        const changed = this.model.setDifficultyPhase(eDifficultyPhase.phase2);
+        if (changed) {
+          UiBase.emitUiEvent(
+            PingPangEvent.difficultyPhaseChange,
+            eDifficultyPhase.phase2,
+            Phase2HintText,
+          );
+        }
+      }
+    }
+  }
+
+  // ----------------------------------------------------------------
+  // 私有：鞋花生成 & 下落
+  // ----------------------------------------------------------------
+
+  private _tickShoeFlowers(dt: number): void {
+    this.spawnTimer -= dt;
+    if (this.spawnTimer <= 0 && this.model.shoeFlowers.length < MaxShoeFlowerOnStage) {
+      this._spawnShoeFlower();
+      this.spawnTimer = this._randomSpawnInterval();
+    }
+
+    const toRemove: number[] = [];
+    const toHit: number[] = [];
+
+    for (const flower of this.model.shoeFlowers) {
+      // 球与鞋花的距离碰撞检测
+      const dx = this.model.ballX - flower.x;
+      const dy = this.model.ballY - flower.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist <= BallRadius + ShoeFlowerRadius) {
+        toHit.push(flower.uid);
+        continue;
+      }
+
+      // 存活时间倒计时
+      const remaining = this.model.tickShoeFlowerLifetime(flower.uid, dt);
+      if (remaining <= 0) {
+        toRemove.push(flower.uid);
+      }
+    }
+
+    for (const uid of toHit) {
+      const delta = this.model.onHitShoeFlower(uid);
+      UiBase.emitUiEvent(PingPangEvent.scoreUpdate, this.model.score, delta);
+      UiBase.emitUiEvent(PingPangEvent.shoeFlowerHit, uid, delta);
+    }
+    for (const uid of toRemove) {
+      this.model.removeShoeFlower(uid);
+      UiBase.emitUiEvent(PingPangEvent.shoeFlowerMiss, uid);
+    }
+  }
+
+  private _spawnShoeFlower(): void {
+    const type = Math.random() < 0.2 ? eShoeFlowerType.limited : eShoeFlowerType.normal;
+
+    const [xMin, xMax] = ShoeFlowerSpawnRangeX;
+    const [yMin, yMax] = ShoeFlowerSpawnRangeY;
+    const x = xMin + Math.random() * (xMax - xMin);
+    const y = yMin + Math.random() * (yMax - yMin);
+
+    const [ltMin, ltMax] = ShoeFlowerLifetime;
+    const lifetimeMul = this.model.difficultyPhase >= eDifficultyPhase.phase2
+      ? ShoeFlowerLifetimeMulPhase2 : 1;
+    const lifetime = (ltMin + Math.random() * (ltMax - ltMin)) * lifetimeMul;
+
+    const flower = this.model.spawnShoeFlower(type, x, y, lifetime);
+    UiBase.emitUiEvent(PingPangEvent.shoeFlowerSpawn, flower);
 
     // 调试统计
-    private _debugNormalCount:  number = 0;
-    private _debugLimitedCount: number = 0;
-
-    // 屏幕水平边界（设计分辨率 750，留球半径边距）
-    private readonly WALL_LEFT  = -375 + BallRadius;
-    private readonly WALL_RIGHT =  375 - BallRadius;
-    private readonly WALL_TOP   =  667 - BallRadius;
-
-    // ----------------------------------------------------------------
-    // 游戏流程
-    // ----------------------------------------------------------------
-
-    /**
-     * 开始一局游戏
-     * 初始化 Model，重置内部定时器，发出 gameStart 事件
-     */
-    public startGame(): void {
-        this.model.init();
-        this.spawnTimer = this._randomSpawnInterval();
-        this.lastSecond = -1;
-        this._debugNormalCount  = 0;
-        this._debugLimitedCount = 0;
-        // 初始 vx 随机方向，避免球每次都垂直掉落
-        const initSpeed = BallInitSpeed;
-        const initVX    = (Math.random() < 0.5 ? 1 : -1) * initSpeed * 0.6;
-        const initVY    = -initSpeed * BallVYRatio;
-        this.model.setBall(0, this.model.ballY, initVX, initVY);
-        this.model.setPlaying(true);
-        UiBase.emitUiEvent(PingPangEvent.gameStart);
+    if (type === eShoeFlowerType.limited) {
+      this._debugLimitedCount++;
+    } else {
+      this._debugNormalCount++;
     }
+    console.log(`[ShoeFlower] 生成: ${type === eShoeFlowerType.limited ? '限量款' : '普通款'}  普通=${this._debugNormalCount}  限量=${this._debugLimitedCount}  合计=${this._debugNormalCount + this._debugLimitedCount}`);
+  }
 
-    /**
-     * 每帧驱动入口，由 View 的 update(dt) 调用
-     * @param dt 帧时间（秒）
-     */
-    public update(dt: number): void {
-        if (!this.model.isPlaying) return;
+  // ----------------------------------------------------------------
+  // 私有：游戏结束
+  // ----------------------------------------------------------------
 
-        if (AutoPaddle) {
-            const autoX = this.model.ballX + this._autoPaddleOffset;
-            this.model.setPaddleX(autoX);
-            UiBase.emitUiEvent(PingPangEvent.paddleMove, autoX);
-        }
+  private _endGame(): void {
+    if (this.model.isGameOver) return;
+    this.model.setGameOver();
+    const result = this.model.buildResult();
+    UiBase.emitUiEvent(PingPangEvent.gameOver, result);
+  }
 
-        this._tickTime(dt);
-        this._checkDifficulty();
-        this._tickBall(dt);
-        this._tickShoeFlowers(dt);
-    }
+  // ----------------------------------------------------------------
+  // 私有：工具
+  // ----------------------------------------------------------------
 
-    // ----------------------------------------------------------------
-    // 球拍输入
-    // ----------------------------------------------------------------
-
-    /**
-     * 长按移动球拍，由 View 每帧传入水平输入值（-1 ~ 1）
-     * @param dir   方向（-1 向左，+1 向右，0 静止）
-     * @param dt    帧时间（秒）
-     * @param clamp 球拍可移动的 X 边界 [minX, maxX]
-     */
-    public movePaddle(dir: number, dt: number, clamp: [number, number]): void {
-        if (!this.model.isPlaying) return;
-        const dx   = dir * PaddleMoveSpeed * dt;
-        const newX = Math.min(clamp[1], Math.max(clamp[0], this.model.paddleX + dx));
-        this.model.setPaddleX(newX);
-        UiBase.emitUiEvent(PingPangEvent.paddleMove, newX);
-    }
-
-    // ----------------------------------------------------------------
-    // 数据读取（供 View 使用）
-    // ----------------------------------------------------------------
-
-    public getScore(): number       { return this.model.score; }
-    public getCombo(): number       { return this.model.combo; }
-    public getRemainTime(): number  { return this.model.remainTime; }
-    public getPaddleX(): number     { return this.model.paddleX; }
-    public getDifficultyPhase(): eDifficultyPhase { return this.model.difficultyPhase; }
-    public getShoeFlowers(): ReadonlyArray<IShoeFlower> { return this.model.shoeFlowers; }
-
-    // ----------------------------------------------------------------
-    // 私有：球运动（手动模拟，方案B）
-    // 详细公式见 BALL_PHYSICS.md
-    // ----------------------------------------------------------------
-
-    /**
-     * 每帧更新球的位置，处理墙壁反弹、球拍碰撞、落地判定
-     *
-     * 运动模型（无重力，匀速）：
-     *   ballX += vx * dt
-     *   ballY += vy * dt
-     *
-     * 反弹规则：
-     *   碰左/右墙 → vx 取反
-     *   碰顶部   → vy 取反
-     *   到球拍高度：
-     *     命中球拍范围内 → 按偏移比例计算新 vx/vy（见 _calcPaddleBounce）
-     *     超出球拍范围  → 球落地，游戏结束
-     */
-    private _tickBall(dt: number): void {
-        let { ballX: x, ballY: y, ballVX: vx, ballVY: vy } = this.model;
-
-        // 移动
-        x += vx * dt;
-        y += vy * dt;
-
-        // 碰左/右墙反弹：vx 取反，并修正位置防止穿墙
-        if (x < this.WALL_LEFT) {
-            x  = this.WALL_LEFT;
-            vx = Math.abs(vx);
-        } else if (x > this.WALL_RIGHT) {
-            x  = this.WALL_RIGHT;
-            vx = -Math.abs(vx);
-        }
-
-        // 碰顶部反弹：vy 取反
-        if (y > this.WALL_TOP) {
-            y  = this.WALL_TOP;
-            vy = -Math.abs(vy);
-        }
-
-        if (!EnablePaddleCheck) {
-            // 调试模式：球到屏幕底部直接反弹，全程运动不触发落地
-            if (vy < 0 && y - BallRadius <= GroundY) {
-                vy = Math.abs(vy);
-                y  = GroundY + BallRadius;
-            }
-        } else {
-            // 正式模式：到达球拍顶面高度时判断命中/落地
-            const PADDLE_TOP = PaddleInitY + PaddleHeight / 2;
-            if (vy < 0 && y - BallRadius <= PADDLE_TOP) {
-                const halfW = PaddleWidth / 2;
-                if (Math.abs(x - this.model.paddleX) <= halfW) {
-                    // 命中球拍，重新计算反弹速度
-                    const { newVX, newVY } = this._calcPaddleBounce(x);
-                    vx = newVX;
-                    vy = newVY;
-                    y  = PADDLE_TOP + BallRadius;
-                    this.model.setBall(x, y, vx, vy);
-                    this._onBallHitPaddle();
-                    return;
-                } else {
-                    // 未命中球拍，落地游戏结束
-                    this.model.setBall(x, y, vx, vy);
-                    this._onBallFall();
-                    return;
-                }
-            }
-        }
-
-        this.model.setBall(x, y, vx, vy);
-        UiBase.emitUiEvent(PingPangEvent.ballUpdate, x, y, vx, vy);
-    }
-
-    /**
-     * 球拍反弹速度计算
-     *
-     * 核心公式（详见 BALL_PHYSICS.md 四、4.2）：
-     *   offset = ballX - paddleX                    // 球相对球拍中心的偏移
-     *   ratio  = clamp(offset / halfPaddleWidth, -1, 1)
-     *   speed  = BallInitSpeed * Phase1BallSpeedMul（Phase1后）
-     *   vx     = ratio * speed                      // 偏左→往左，偏右→往右
-     *   vy     = +speed * BallVYRatio               // 固定向上
-     *
-     * 图示：
-     *   撞左侧(ratio≈-0.8) → 向左上飞  ↖
-     *   撞中心(ratio≈0)    → 垂直弹起  ↑
-     *   撞右侧(ratio≈+0.8) → 向右上飞  ↗
-     */
-    private _calcPaddleBounce(ballX: number): { newVX: number; newVY: number } {
-        const halfW  = PaddleWidth / 2;
-        const offset = ballX - this.model.paddleX;
-        const ratio  = Math.max(-1, Math.min(1, offset / halfW));
-
-        // Phase1 触发后速度加快
-        const speed  = BallInitSpeed * (
-            this.model.difficultyPhase >= eDifficultyPhase.phase1 ? Phase1BallSpeedMul : 1
-        );
-
-        return {
-            newVX: ratio * speed,
-            newVY: speed * BallVYRatio,   // 固定向上
-        };
-    }
-
-    /**
-     * 球命中球拍后的得分/连颠处理
-     */
-    private _onBallHitPaddle(): void {
-        const { delta, buffBonus, buffDesc } = this.model.onHitPaddle();
-
-        // 接球后重新随机下一次偏移，产生斜向弹跳
-        this._autoPaddleOffset = (Math.random() * 2 - 1) * (PaddleWidth * 0.4);
-
-        UiBase.emitUiEvent(PingPangEvent.scoreUpdate, this.model.score, delta);
-        UiBase.emitUiEvent(PingPangEvent.comboUpdate, this.model.combo);
-        if (buffBonus > 0) {
-            UiBase.emitUiEvent(PingPangEvent.comboBuff, buffBonus, buffDesc);
-        }
-        UiBase.emitUiEvent(PingPangEvent.ballHitPaddle);
-        this._checkDifficulty();
-    }
-
-    /**
-     * 球落地（未被接住）
-     */
-    private _onBallFall(): void {
-        this.model.onBallFall();
-        UiBase.emitUiEvent(PingPangEvent.comboUpdate, 0);
-        UiBase.emitUiEvent(PingPangEvent.ballFall);
-        this._endGame();
-    }
-
-    // ----------------------------------------------------------------
-    // 私有：计时
-    // ----------------------------------------------------------------
-
-    private _tickTime(dt: number): void {
-        const timeUp = this.model.tickTime(dt);
-
-        const curSecond = Math.ceil(this.model.remainTime);
-        if (curSecond !== this.lastSecond) {
-            this.lastSecond = curSecond;
-            UiBase.emitUiEvent(PingPangEvent.timeUpdate, this.model.remainTime);
-        }
-
-        if (timeUp && GameDuration > 0) {
-            UiBase.emitUiEvent(PingPangEvent.timeUp);
-            this._endGame();
-        }
-    }
-
-    // ----------------------------------------------------------------
-    // 私有：难度检测
-    // ----------------------------------------------------------------
-
-    private _checkDifficulty(): void {
-        const phase = this.model.difficultyPhase;
-
-        // Phase1：分数达到阈值
-        if (phase < eDifficultyPhase.phase1 && this.model.score >= Phase1ScoreThreshold) {
-            const changed = this.model.setDifficultyPhase(eDifficultyPhase.phase1);
-            if (changed) {
-                UiBase.emitUiEvent(
-                    PingPangEvent.difficultyPhaseChange,
-                    eDifficultyPhase.phase1,
-                    Phase1HintText,
-                );
-            }
-            return;
-        }
-
-        // Phase2：Phase1 触发后，已用时超过阈值
-        if (phase === eDifficultyPhase.phase1 && this.model.phase1StartTime >= 0) {
-            const phase1Elapsed = this.model.elapsedTime - this.model.phase1StartTime;
-            if (phase1Elapsed >= Phase2DurationThreshold) {
-                const changed = this.model.setDifficultyPhase(eDifficultyPhase.phase2);
-                if (changed) {
-                    UiBase.emitUiEvent(
-                        PingPangEvent.difficultyPhaseChange,
-                        eDifficultyPhase.phase2,
-                        Phase2HintText,
-                    );
-                }
-            }
-        }
-    }
-
-    // ----------------------------------------------------------------
-    // 私有：鞋花生成 & 下落
-    // ----------------------------------------------------------------
-
-    private _tickShoeFlowers(dt: number): void {
-        this.spawnTimer -= dt;
-        if (this.spawnTimer <= 0 && this.model.shoeFlowers.length < MaxShoeFlowerOnStage) {
-            this._spawnShoeFlower();
-            this.spawnTimer = this._randomSpawnInterval();
-        }
-
-        const toRemove: number[] = [];
-        const toHit:    number[] = [];
-        const PADDLE_TOP = PaddleInitY + PaddleHeight / 2;
-        const halfW      = PaddleWidth / 2;
-
-        for (const flower of this.model.shoeFlowers) {
-            const newY = this.model.updateShoeFlowerY(flower.uid, dt);
-            UiBase.emitUiEvent(PingPangEvent.shoeFlowerUpdate, flower.uid, newY);
-
-            if (newY <= PADDLE_TOP && Math.abs(flower.x - this.model.paddleX) <= halfW) {
-                toHit.push(flower.uid);
-            } else if (newY < GroundY) {
-                toRemove.push(flower.uid);
-            }
-        }
-        for (const uid of toHit) {
-            const delta = this.model.onHitShoeFlower(uid);
-            UiBase.emitUiEvent(PingPangEvent.scoreUpdate, this.model.score, delta);
-            UiBase.emitUiEvent(PingPangEvent.shoeFlowerHit, uid, delta);
-        }
-        for (const uid of toRemove) {
-            this.model.removeShoeFlower(uid);
-            UiBase.emitUiEvent(PingPangEvent.shoeFlowerMiss, uid);
-        }
-    }
-
-    private _spawnShoeFlower(): void {
-        const type = Math.random() < 0.2 ? eShoeFlowerType.limited : eShoeFlowerType.normal;
-        const x    = -315 + Math.random() * 630;
-        const y    = 750;
-
-        const speedMul = this.model.difficultyPhase >= eDifficultyPhase.phase2
-            ? Phase2ShoeFlowerSpeedMul : 1;
-        const speedY = (ShoeFlowerFallSpeed[0] + Math.random() * (ShoeFlowerFallSpeed[1] - ShoeFlowerFallSpeed[0]))
-            * speedMul;
-
-        const flower = this.model.spawnShoeFlower(type, x, y, speedY);
-        UiBase.emitUiEvent(PingPangEvent.shoeFlowerSpawn, flower);
-
-        // 调试统计
-        if (type === eShoeFlowerType.limited) {
-            this._debugLimitedCount++;
-        } else {
-            this._debugNormalCount++;
-        }
-        console.log(`[ShoeFlower] 生成: ${type === eShoeFlowerType.limited ? '限量款' : '普通款'}  普通=${this._debugNormalCount}  限量=${this._debugLimitedCount}  合计=${this._debugNormalCount + this._debugLimitedCount}`);
-    }
-
-    // ----------------------------------------------------------------
-    // 私有：游戏结束
-    // ----------------------------------------------------------------
-
-    private _endGame(): void {
-        if (this.model.isGameOver) return;
-        this.model.setGameOver();
-        const result = this.model.buildResult();
-        UiBase.emitUiEvent(PingPangEvent.gameOver, result);
-    }
-
-    // ----------------------------------------------------------------
-    // 私有：工具
-    // ----------------------------------------------------------------
-
-    private _randomSpawnInterval(): number {
-        const [min, max] = ShoeFlowerSpawnInterval;
-        const mul = this.model.difficultyPhase >= eDifficultyPhase.phase2
-            ? Phase2SpawnIntervalMul : 1;
-        return (min + Math.random() * (max - min)) * mul;
-    }
+  private _randomSpawnInterval(): number {
+    const [min, max] = ShoeFlowerSpawnInterval;
+    const mul = this.model.difficultyPhase >= eDifficultyPhase.phase2
+      ? Phase2SpawnIntervalMul : 1;
+    return (min + Math.random() * (max - min)) * mul;
+  }
 }
 
 export const pingPangControl = PingPangControl.Instance;

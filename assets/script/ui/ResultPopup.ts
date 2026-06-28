@@ -8,6 +8,7 @@ import { getGeneralText, getGeneralSprite, shareGame } from '../utils/utils';
 import { CampPage } from './CampPage';
 import { FollowConfig as GameFollowConfig } from '../const/GameConst';
 import { BundleManager } from '../../framework/bundle/BundleManager';
+import { pingPangControl } from '../control/PingPangControl';
 const { ccclass, property } = _decorator;
 
 @ccclass('ResultPopup')
@@ -51,30 +52,32 @@ export class ResultPopup extends UiBase {
 
   public restart(): void {
     this.pageManager.removeUI(this.node);
-    gameControl.initGameMap();
+    // gameControl.initGameMap();
+    // 重新开始：通知 PingPangPage 重启游戏
+    pingPangControl.startGame();
   }
 
   public goCamp(): void {
-    this.pageManager.showUI(UI_PATH.CAMP, UILayer.MIDDLE, (node: Node) => {
-      this.pageManager.removeUI(this.node);
-      this.pageManager.removeUI(UI_PATH.GAME);
-    });
+    // this.pageManager.showUI(UI_PATH.CAMP, UILayer.MIDDLE, (node: Node) => {
+    //   this.pageManager.removeUI(this.node);
+    //   this.pageManager.removeUI(UI_PATH.GAME);
+    // });
   }
 
   public share(): void {
-    // TODO: 分享
-    const index = this.getShareIndex();
-    localStorage.setItem('revivalIndex' + new Date().toLocaleDateString(), (index + 1).toString());
-    if (index < GameFollowConfig.length) {
-      const follow = GameFollowConfig[index];
-      location.href = follow.url;
-      this.revivalGame();
-    }
-    else {
-      shareGame().then(() => {
-        this.revivalGame();
-      });
-    }
+    // // TODO: 分享
+    // const index = this.getShareIndex();
+    // localStorage.setItem('revivalIndex' + new Date().toLocaleDateString(), (index + 1).toString());
+    // if (index < GameFollowConfig.length) {
+    //   const follow = GameFollowConfig[index];
+    //   location.href = follow.url;
+    //   this.revivalGame();
+    // }
+    // else {
+    //   shareGame().then(() => {
+    //     this.revivalGame();
+    //   });
+    // }
   }
 
   private revivalGame(): void {
