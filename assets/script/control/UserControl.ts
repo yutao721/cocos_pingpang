@@ -18,7 +18,7 @@ export class UserControl {
     private generalModel: GeneralModel = null;
     private userInfoModel: UserInfoModel = null;
 
-    private isLogin: boolean = false;
+    private isLogin: boolean = true;
     public get isLoginVal(): boolean {
         return this.isLogin;
     }

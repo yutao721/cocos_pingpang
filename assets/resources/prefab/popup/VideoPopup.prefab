@@ -416,7 +416,7 @@
       "__id__": 17
     },
     "_resourceType": 0,
-    "_remoteURL": "http://mwxzsstatic.zmdjsgs.com/wxapp_wxzs/video/0.mp4",
+    "_remoteURL": "https://crocsdmstatic.solomochina.com/game/pingpong/video.mp4",
     "_clip": {
       "__uuid__": "2be36297-9abb-4fee-8049-9ed5e271da8a",
       "__expectedType__": "cc.VideoClip"

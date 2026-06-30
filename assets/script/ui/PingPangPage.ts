@@ -7,6 +7,7 @@ import { IPingPangResult, IShoeFlower } from '../const/Interface';
 import { UILayer } from '../../framework/ui/PageManager';
 import { UI_PATH } from '../const/UiConfig';
 import { PingPangResultPopup } from './PingPangResultPopup';
+import { getShoeFlowerSpritePool } from '../utils/utils';
 const { ccclass, property } = _decorator;
 
 /**
@@ -33,345 +34,383 @@ const { ccclass, property } = _decorator;
 @ccclass('PingPangPage')
 export class PingPangPage extends UiBase {
 
-    // ----------------------------------------------------------------
-    // 节点绑定（在 Cocos 编辑器中拖入）
-    // ----------------------------------------------------------------
+  // ----------------------------------------------------------------
+  // 节点绑定（在 Cocos 编辑器中拖入）
+  // ----------------------------------------------------------------
 
-    @property(Node)
-    ballNode: Node = null;
+  @property(Node)
+  ballNode: Node = null;
 
-    @property(Node)
-    paddleNode: Node = null;
+  @property(Node)
+  paddleNode: Node = null;
 
-    @property(Node)
-    shoeFlowerLayer: Node = null;
+  @property(Node)
+  shoeFlowerLayer: Node = null;
 
-    /** 鞋花 Prefab，节点上需挂 Sprite 组件，普通/限量款通过 spriteFrame 区分 */
-    @property(Prefab)
-    shoeFlowerPfb: Prefab = null;
+  /** 鞋花 Prefab，节点上需挂 Sprite 组件，普通/限量款通过 spriteFrame 区分 */
+  @property(Prefab)
+  shoeFlowerPfb: Prefab = null;
 
-    @property(Label)
-    scoreLabel: Label = null;
+  @property(Label)
+  scoreLabel: Label = null;
 
-    @property(Label)
-    comboLabel: Label = null;
+  @property(Label)
+  comboLabel: Label = null;
 
-    @property(Label)
-    timerLabel: Label = null;
+  @property(Label)
+  timerLabel: Label = null;
 
-    /** 难度提示（"球速加快了！" / "鞋花加速了！"） */
-    @property(Label)
-    difficultyHintLabel: Label = null;
+  /** 难度提示（"球速加快了！" / "鞋花加速了！"） */
+  @property(Label)
+  difficultyHintLabel: Label = null;
 
-    /** 连颠 Buff 飘字（"+30" 之类） */
-    @property(Label)
-    comboBuffHintLabel: Label = null;
+  /** 连颠 Buff 飘字（"+30" 之类） */
+  @property(Label)
+  comboBuffHintLabel: Label = null;
 
-    /** 普通鞋花 SpriteFrame，在编辑器中拖入 */
-    @property(SpriteFrame)
-    normalShoeFlowerSF: SpriteFrame = null;
+  /** 普通鞋花 SpriteFrame，在编辑器中拖入 */
+  @property(SpriteFrame)
+  normalShoeFlowerSF: SpriteFrame = null;
 
-    /** 限量款鞋花 SpriteFrame，在编辑器中拖入 */
-    @property(SpriteFrame)
-    limitedShoeFlowerSF: SpriteFrame = null;
+  /** 限量款鞋花 SpriteFrame，在编辑器中拖入 */
+  @property(SpriteFrame)
+  limitedShoeFlowerSF: SpriteFrame = null;
 
-    // ----------------------------------------------------------------
-    // 内部状态
-    // ----------------------------------------------------------------
+  /** 普通鞋花资源目录（resources 内路径） */
+  @property
+  normalShoeFlowerDir: string = 'image/game/normal';
 
-    /** uid → Node 的映射，用于按 uid 更新/销毁鞋花节点 */
-    private shoeFlowerNodes: Map<number, Node> = new Map();
+  /** 限量鞋花资源目录（resources 内路径） */
+  @property
+  limitedShoeFlowerDir: string = 'image/game/limited';
 
-    /** uid → 鞋花类型，用于击中时取提示文案 */
-    private shoeFlowerTypes: Map<number, eShoeFlowerType> = new Map();
+  // ----------------------------------------------------------------
+  // 内部状态
+  // ----------------------------------------------------------------
 
-    /** 当前正在播放的提示优先级：0=无 1=随机 2=连击 3=鞋花 */
-    private _hintPriority: number = 0;
+  /** uid → Node 的映射，用于按 uid 更新/销毁鞋花节点 */
+  private shoeFlowerNodes: Map<number, Node> = new Map();
 
-    /** 随机提示计数器，每 3 次颠球触发一次 */
-    private _randomHintCounter: number = 0;
+  /** uid → 鞋花类型，用于击中时取提示文案 */
+  private shoeFlowerTypes: Map<number, eShoeFlowerType> = new Map();
 
-    /** 球拍基础 Y 坐标（由 prefab 决定，不随动画变化） */
-    private _paddleBaseY: number = 0;
+  /** 当前正在播放的提示优先级：0=无 1=随机 2=连击 3=鞋花 */
+  private _hintPriority: number = 0;
 
-    /** 颠球动画当前 Y 偏移（正弦曲线，0→峰值→0） */
-    private _paddleHitOffset: number = 0;
+  /** 随机提示计数器，每 3 次颠球触发一次 */
+  private _randomHintCounter: number = 0;
 
-    /** 颠球动画计时器，-1 表示未播放 */
-    private _paddleHitTimer: number = -1;
+  /** 球拍基础 Y 坐标（由 prefab 决定，不随动画变化） */
+  private _paddleBaseY: number = 0;
 
-    /** 颠球动画总时长（秒） */
-    private readonly _paddleHitDuration: number = 0.22;
+  /** 颠球动画当前 Y 偏移（正弦曲线，0→峰值→0） */
+  private _paddleHitOffset: number = 0;
+
+  /** 颠球动画计时器，-1 表示未播放 */
+  private _paddleHitTimer: number = -1;
+
+  /** 颠球动画总时长（秒） */
+  private readonly _paddleHitDuration: number = 0.22;
+
+  /** 普通鞋花候选图集（运行时从目录加载） */
+  private _normalShoeFlowerPool: SpriteFrame[] = [];
+
+  /** 限量鞋花候选图集（运行时从目录加载） */
+  private _limitedShoeFlowerPool: SpriteFrame[] = [];
 
 
-    // ----------------------------------------------------------------
-    // 生命周期
-    // ----------------------------------------------------------------
+  // ----------------------------------------------------------------
+  // 生命周期
+  // ----------------------------------------------------------------
 
-    protected onLoad(): void {
-        // 注册所有 PingPang 事件
-        this.onUiEvent(PingPangEvent.gameStart,              this.onGameStart);
-        this.onUiEvent(PingPangEvent.gameOver,               this.onGameOver);
-        this.onUiEvent(PingPangEvent.ballUpdate,             this.onBallUpdate);
-        this.onUiEvent(PingPangEvent.ballHitPaddle,          this.onBallHitPaddle);
-        this.onUiEvent(PingPangEvent.ballFall,               this.onBallFall);
-        this.onUiEvent(PingPangEvent.paddleMove,             this.onPaddleMove);
-        this.onUiEvent(PingPangEvent.scoreUpdate,            this.onScoreUpdate);
-        this.onUiEvent(PingPangEvent.comboUpdate,            this.onComboUpdate);
-        this.onUiEvent(PingPangEvent.comboBuff,              this.onComboBuff);
-        this.onUiEvent(PingPangEvent.timeUpdate,             this.onTimeUpdate);
-        this.onUiEvent(PingPangEvent.shoeFlowerSpawn,        this.onShoeFlowerSpawn);
-        this.onUiEvent(PingPangEvent.shoeFlowerUpdate,       this.onShoeFlowerUpdate);
-        this.onUiEvent(PingPangEvent.shoeFlowerHit,          this.onShoeFlowerHit);
-        this.onUiEvent(PingPangEvent.shoeFlowerMiss,         this.onShoeFlowerMiss);
-        this.onUiEvent(PingPangEvent.difficultyPhaseChange,  this.onDifficultyPhaseChange);
+  protected onLoad(): void {
+    // 注册所有 PingPang 事件
+    this.onUiEvent(PingPangEvent.gameStart, this.onGameStart);
+    this.onUiEvent(PingPangEvent.gameOver, this.onGameOver);
+    this.onUiEvent(PingPangEvent.ballUpdate, this.onBallUpdate);
+    this.onUiEvent(PingPangEvent.ballHitPaddle, this.onBallHitPaddle);
+    this.onUiEvent(PingPangEvent.ballFall, this.onBallFall);
+    this.onUiEvent(PingPangEvent.paddleMove, this.onPaddleMove);
+    this.onUiEvent(PingPangEvent.scoreUpdate, this.onScoreUpdate);
+    this.onUiEvent(PingPangEvent.comboUpdate, this.onComboUpdate);
+    this.onUiEvent(PingPangEvent.comboBuff, this.onComboBuff);
+    this.onUiEvent(PingPangEvent.timeUpdate, this.onTimeUpdate);
+    this.onUiEvent(PingPangEvent.shoeFlowerSpawn, this.onShoeFlowerSpawn);
+    this.onUiEvent(PingPangEvent.shoeFlowerUpdate, this.onShoeFlowerUpdate);
+    this.onUiEvent(PingPangEvent.shoeFlowerHit, this.onShoeFlowerHit);
+    this.onUiEvent(PingPangEvent.shoeFlowerMiss, this.onShoeFlowerMiss);
+    this.onUiEvent(PingPangEvent.difficultyPhaseChange, this.onDifficultyPhaseChange);
 
-        // 拖拽输入：触摸跟随手指 X 位置
-        this.node.on(Node.EventType.TOUCH_START,  this.onTouchMove,  this);
-        this.node.on(Node.EventType.TOUCH_MOVE,   this.onTouchMove,  this);
-        this.node.on(Node.EventType.TOUCH_END,    this.onTouchEnd,   this);
-        this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd,   this);
+    // 拖拽输入：触摸跟随手指 X 位置
+    this.node.on(Node.EventType.TOUCH_START, this.onTouchMove, this);
+    this.node.on(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
+    this.node.on(Node.EventType.TOUCH_END, this.onTouchEnd, this);
+    this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
 
-        // 初始隐藏提示文字
-        if (this.difficultyHintLabel)  this.difficultyHintLabel.node.active  = false;
-        if (this.comboBuffHintLabel)   this.comboBuffHintLabel.node.active   = false;
-        if (this.comboLabel)           this.comboLabel.node.active           = false;
+    // 初始隐藏提示文字
+    if (this.difficultyHintLabel) this.difficultyHintLabel.node.active = false;
+    if (this.comboBuffHintLabel) this.comboBuffHintLabel.node.active = false;
+    if (this.comboLabel) this.comboLabel.node.active = false;
+
+    this._loadShoeFlowerSpritePools();
+  }
+
+  protected start(): void {
+    pingPangControl.startGame();
+  }
+
+  protected update(dt: number): void {
+    pingPangControl.update(dt);
+
+    // 颠球动画：拍面沿 Y 轴向上弹起再落回
+    if (this._paddleHitTimer >= 0 && this.paddleNode) {
+      this._paddleHitTimer += dt;
+      const t = this._paddleHitTimer / this._paddleHitDuration;
+      if (t < 1) {
+        this._paddleHitOffset = 22 * Math.sin(t * Math.PI);
+      } else {
+        this._paddleHitOffset = 0;
+        this._paddleHitTimer = -1;
+      }
+    }
+  }
+
+  // ----------------------------------------------------------------
+  // 触摸输入
+  // ----------------------------------------------------------------
+
+  private onTouchMove(e: any): void {
+    // 手指 X 映射到游戏坐标（设计分辨率 750，中心为 0）
+    const worldX = e.getUILocation().x - 375;
+    pingPangControl.dragPaddleTo(worldX, [-280, 280]);
+  }
+
+  private onTouchEnd(): void { }
+
+  // ----------------------------------------------------------------
+  // 游戏流程事件
+  // ----------------------------------------------------------------
+
+  private onGameStart(): void {
+    // 重置分数/连颠/时间显示
+    if (this.scoreLabel) this.scoreLabel.string = '0分';
+    if (this.comboLabel) this.comboLabel.node.active = false;
+    if (this.timerLabel) this.timerLabel.string = '';
+
+    // 清空残留鞋花节点
+    this.shoeFlowerNodes.forEach(node => node.destroy());
+    this.shoeFlowerNodes.clear();
+    this.shoeFlowerTypes.clear();
+
+    // 重置提示状态
+    this._hintPriority = 0;
+    this._randomHintCounter = 0;
+
+    // 将球/球拍初始化到对应位置
+    if (this.ballNode) this.ballNode.setPosition(0, 200, 0);
+    if (this.paddleNode) {
+      this.paddleNode.getComponent(Widget)?.updateAlignment();
+      this.paddleNode.setPosition(pingPangControl.getPaddleX(), this.paddleNode.position.y, 0);
+      this._paddleBaseY = this.paddleNode.position.y;
+      this._paddleHitTimer = -1;
+      pingPangControl.syncPaddleY(this._paddleBaseY);
+    }
+  }
+
+  private onGameOver(result: IPingPangResult): void {
+    this.pageManager.showUI(UI_PATH.PINGPANG_RESULT, UILayer.TOP, (node: Node) => {
+      node.getComponent(PingPangResultPopup)?.show(result);
+    });
+  }
+
+  // ----------------------------------------------------------------
+  // 球事件
+  // ----------------------------------------------------------------
+
+  private onBallUpdate(x: number, y: number, _vx: number, _vy: number): void {
+    this.ballNode?.setPosition(x, y, 0);
+  }
+
+  private onBallHitPaddle(): void {
+    // 每 3 次颠球随机显示一条提示（最低优先级）
+    this._randomHintCounter++;
+    if (this._randomHintCounter >= 3) {
+      this._randomHintCounter = 0;
+      const text = RandomHintTexts[Math.floor(Math.random() * RandomHintTexts.length)];
+      this._showHint(text, 1);
     }
 
-    protected start(): void {
-        pingPangControl.startGame();
+    // 颠球动作：拍面向上抬起，手柄位置不动
+    if (this.paddleNode) {
+      this._paddleHitTimer = 0;
     }
+  }
 
-    protected update(dt: number): void {
-        pingPangControl.update(dt);
+  private onBallFall(): void {
+    // TODO: 播放落地音效
+  }
 
-        // 颠球动画：拍面沿 Y 轴向上弹起再落回
-        if (this._paddleHitTimer >= 0 && this.paddleNode) {
-            this._paddleHitTimer += dt;
-            const t = this._paddleHitTimer / this._paddleHitDuration;
-            if (t < 1) {
-                this._paddleHitOffset = 22 * Math.sin(t * Math.PI);
-            } else {
-                this._paddleHitOffset = 0;
-                this._paddleHitTimer = -1;
-            }
-        }
+  // ----------------------------------------------------------------
+  // 球拍事件
+  // ----------------------------------------------------------------
+
+  private onPaddleMove(x: number): void {
+    this.paddleNode?.setPosition(x, this._paddleBaseY + this._paddleHitOffset, 0);
+  }
+
+  // ----------------------------------------------------------------
+  // 得分 / 连颠事件
+  // ----------------------------------------------------------------
+
+  private onScoreUpdate(score: number, _delta: number): void {
+    if (this.scoreLabel) this.scoreLabel.string = `${score}分`;
+  }
+
+  private onComboUpdate(combo: number): void {
+    if (!this.comboLabel) return;
+    if (combo <= 1) {
+      this.comboLabel.node.active = false;
+    } else {
+      this.comboLabel.node.active = true;
+      this.comboLabel.string = `x${combo}`;
     }
+  }
 
-    // ----------------------------------------------------------------
-    // 触摸输入
-    // ----------------------------------------------------------------
+  /**
+   * 统一提示显示，priority: 1=随机 2=连击 3=鞋花
+   * 低优先级不打断高优先级正在播放的提示
+   */
+  private _showHint(text: string, priority: number): void {
+    if (!this.comboBuffHintLabel) return;
+    if (priority < this._hintPriority) return;
 
-    private onTouchMove(e: any): void {
-        // 手指 X 映射到游戏坐标（设计分辨率 750，中心为 0）
-        const worldX = e.getUILocation().x - 375;
-        pingPangControl.dragPaddleTo(worldX, [-280, 280]);
-    }
+    const label = this.comboBuffHintLabel;
+    Tween.stopAllByTarget(label.node);
+    this._hintPriority = priority;
 
-    private onTouchEnd(): void {}
+    label.string = text;
+    label.color = new Color(30, 144, 255, 255); // 蓝色
+    label.node.active = true;
+    label.node.setPosition(0, 0, 0);
+    label.node.setScale(1, 1, 1);
 
-    // ----------------------------------------------------------------
-    // 游戏流程事件
-    // ----------------------------------------------------------------
-
-    private onGameStart(): void {
-        // 重置分数/连颠/时间显示
-        if (this.scoreLabel)  this.scoreLabel.string = '0分';
-        if (this.comboLabel)  this.comboLabel.node.active = false;
-        if (this.timerLabel)  this.timerLabel.string = '';
-
-        // 清空残留鞋花节点
-        this.shoeFlowerNodes.forEach(node => node.destroy());
-        this.shoeFlowerNodes.clear();
-        this.shoeFlowerTypes.clear();
-
-        // 重置提示状态
+    tween(label.node)
+      .to(0.3, { scale: new Vec3(1.3, 1.3, 1) })
+      .to(0.5, { position: new Vec3(0, 80, 0) })
+      .call(() => {
+        label.node.active = false;
         this._hintPriority = 0;
-        this._randomHintCounter = 0;
+      })
+      .start();
+  }
 
-        // 将球/球拍初始化到对应位置
-        if (this.ballNode)   this.ballNode.setPosition(0, 200, 0);
-        if (this.paddleNode) {
-            this.paddleNode.getComponent(Widget)?.updateAlignment();
-            this.paddleNode.setPosition(pingPangControl.getPaddleX(), this.paddleNode.position.y, 0);
-            this._paddleBaseY = this.paddleNode.position.y;
-            this._paddleHitTimer = -1;
-            pingPangControl.syncPaddleY(this._paddleBaseY);
-        }
+  /**
+   * 连颠 Buff 触发，播放飘字动画
+   */
+  private onComboBuff(_bonus: number, desc: string): void {
+    this._showHint(desc, 2);
+  }
+
+  // ----------------------------------------------------------------
+  // 计时事件
+  // ----------------------------------------------------------------
+
+  private onTimeUpdate(remainTime: number): void {
+    if (this.timerLabel) {
+      this.timerLabel.string = `${Math.ceil(remainTime)}s`;
+    }
+  }
+
+  // ----------------------------------------------------------------
+  // 鞋花事件
+  // ----------------------------------------------------------------
+
+  private onShoeFlowerSpawn(flower: IShoeFlower): void {
+    if (!this.shoeFlowerPfb || !this.shoeFlowerLayer) return;
+
+    const node = instantiate(this.shoeFlowerPfb);
+    node.parent = this.shoeFlowerLayer;
+    node.setPosition(flower.x, flower.y, 0);
+
+    // 根据类型切换 SpriteFrame（在编辑器拖入资源后生效）
+    const sprite = node.getComponent(Sprite);
+    if (sprite) {
+      const sf = this._pickShoeFlowerSpriteFrame(flower.type);
+      sprite.spriteFrame = sf;
     }
 
-    private onGameOver(result: IPingPangResult): void {
-        this.pageManager.showUI(UI_PATH.PINGPANG_RESULT, UILayer.TOP, (node: Node) => {
-            node.getComponent(PingPangResultPopup)?.show(result);
-        });
+    this.shoeFlowerNodes.set(flower.uid, node);
+    this.shoeFlowerTypes.set(flower.uid, flower.type as eShoeFlowerType);
+  }
+
+  private onShoeFlowerUpdate(uid: number, y: number): void {
+    const node = this.shoeFlowerNodes.get(uid);
+    if (node) node.setPosition(node.position.x, y, 0);
+  }
+
+  private onShoeFlowerHit(uid: number, _score: number): void {
+    const type = this.shoeFlowerTypes.get(uid) ?? eShoeFlowerType.normal;
+    this._showHint(ShoeFlowerHitHint[type], 3);
+    this._removeShoeFlowerNode(uid);
+    // TODO: 播放消除特效/音效
+  }
+
+  private onShoeFlowerMiss(uid: number): void {
+    this._removeShoeFlowerNode(uid);
+  }
+
+  private _removeShoeFlowerNode(uid: number): void {
+    const node = this.shoeFlowerNodes.get(uid);
+    if (node) {
+      node.active = false;
+      node.destroy();
+      this.shoeFlowerNodes.delete(uid);
     }
+    this.shoeFlowerTypes.delete(uid);
+  }
 
-    // ----------------------------------------------------------------
-    // 球事件
-    // ----------------------------------------------------------------
+  // ----------------------------------------------------------------
+  // 难度提升事件
+  // ----------------------------------------------------------------
 
-    private onBallUpdate(x: number, y: number, _vx: number, _vy: number): void {
-        this.ballNode?.setPosition(x, y, 0);
+  private onDifficultyPhaseChange(phase: eDifficultyPhase, hintText: string): void {
+    if (!this.difficultyHintLabel) return;
+
+    const label = this.difficultyHintLabel;
+    label.string = hintText;
+    label.node.active = true;
+    label.node.setPosition(0, 0, 0);
+    label.node.setScale(1, 1, 1);
+
+    // 出现 → 放大 → 停留 → 上移淡出
+    tween(label.node)
+      .to(0.2, { scale: new Vec3(1.2, 1.2, 1) })
+      .to(0.1, { scale: new Vec3(1.0, 1.0, 1) })
+      .delay(1.2)
+      .to(0.4, { position: new Vec3(0, 60, 0) })
+      .call(() => { label.node.active = false; })
+      .start();
+  }
+
+  private async _loadShoeFlowerSpritePools(): Promise<void> {
+    const [normalPool, limitedPool] = await Promise.all([
+      getShoeFlowerSpritePool('normal', this.normalShoeFlowerDir),
+      getShoeFlowerSpritePool('limited', this.limitedShoeFlowerDir),
+    ]);
+
+    this._normalShoeFlowerPool = normalPool;
+    this._limitedShoeFlowerPool = limitedPool;
+
+    console.log(`[ShoeFlower] sprite pool loaded: normal=${this._normalShoeFlowerPool.length}, limited=${this._limitedShoeFlowerPool.length}`);
+  }
+
+  private _pickShoeFlowerSpriteFrame(type: number): SpriteFrame {
+    const isLimited = type === eShoeFlowerType.limited;
+    const pool = isLimited ? this._limitedShoeFlowerPool : this._normalShoeFlowerPool;
+    if (pool.length > 0) {
+      const index = Math.floor(Math.random() * pool.length);
+      return pool[index];
     }
-
-    private onBallHitPaddle(): void {
-        // 每 3 次颠球随机显示一条提示（最低优先级）
-        this._randomHintCounter++;
-        if (this._randomHintCounter >= 3) {
-            this._randomHintCounter = 0;
-            const text = RandomHintTexts[Math.floor(Math.random() * RandomHintTexts.length)];
-            this._showHint(text, 1);
-        }
-
-        // 颠球动作：拍面向上抬起，手柄位置不动
-        if (this.paddleNode) {
-            this._paddleHitTimer = 0;
-        }
-    }
-
-    private onBallFall(): void {
-        // TODO: 播放落地音效
-    }
-
-    // ----------------------------------------------------------------
-    // 球拍事件
-    // ----------------------------------------------------------------
-
-    private onPaddleMove(x: number): void {
-        this.paddleNode?.setPosition(x, this._paddleBaseY + this._paddleHitOffset, 0);
-    }
-
-    // ----------------------------------------------------------------
-    // 得分 / 连颠事件
-    // ----------------------------------------------------------------
-
-    private onScoreUpdate(score: number, _delta: number): void {
-        if (this.scoreLabel) this.scoreLabel.string = `${score}分`;
-    }
-
-    private onComboUpdate(combo: number): void {
-        if (!this.comboLabel) return;
-        if (combo <= 1) {
-            this.comboLabel.node.active = false;
-        } else {
-            this.comboLabel.node.active = true;
-            this.comboLabel.string = `x${combo}`;
-        }
-    }
-
-    /**
-     * 统一提示显示，priority: 1=随机 2=连击 3=鞋花
-     * 低优先级不打断高优先级正在播放的提示
-     */
-    private _showHint(text: string, priority: number): void {
-        if (!this.comboBuffHintLabel) return;
-        if (priority < this._hintPriority) return;
-
-        const label = this.comboBuffHintLabel;
-        Tween.stopAllByTarget(label.node);
-        this._hintPriority = priority;
-
-        label.string = text;
-        label.color = new Color(30, 144, 255, 255); // 蓝色
-        label.node.active = true;
-        label.node.setPosition(0, 0, 0);
-        label.node.setScale(1, 1, 1);
-
-        tween(label.node)
-            .to(0.3, { scale: new Vec3(1.3, 1.3, 1) })
-            .to(0.5, { position: new Vec3(0, 80, 0) })
-            .call(() => {
-                label.node.active = false;
-                this._hintPriority = 0;
-            })
-            .start();
-    }
-
-    /**
-     * 连颠 Buff 触发，播放飘字动画
-     */
-    private onComboBuff(_bonus: number, desc: string): void {
-        this._showHint(desc, 2);
-    }
-
-    // ----------------------------------------------------------------
-    // 计时事件
-    // ----------------------------------------------------------------
-
-    private onTimeUpdate(remainTime: number): void {
-        if (this.timerLabel) {
-            this.timerLabel.string = `${Math.ceil(remainTime)}s`;
-        }
-    }
-
-    // ----------------------------------------------------------------
-    // 鞋花事件
-    // ----------------------------------------------------------------
-
-    private onShoeFlowerSpawn(flower: IShoeFlower): void {
-        if (!this.shoeFlowerPfb || !this.shoeFlowerLayer) return;
-
-        const node = instantiate(this.shoeFlowerPfb);
-        node.parent = this.shoeFlowerLayer;
-        node.setPosition(flower.x, flower.y, 0);
-
-        // 根据类型切换 SpriteFrame（在编辑器拖入资源后生效）
-        const sprite = node.getComponent(Sprite);
-        if (sprite) {
-            const sf = flower.type === 2 ? this.limitedShoeFlowerSF : this.normalShoeFlowerSF;
-            sprite.spriteFrame = sf;
-        }
-
-        this.shoeFlowerNodes.set(flower.uid, node);
-        this.shoeFlowerTypes.set(flower.uid, flower.type);
-    }
-
-    private onShoeFlowerUpdate(uid: number, y: number): void {
-        const node = this.shoeFlowerNodes.get(uid);
-        if (node) node.setPosition(node.position.x, y, 0);
-    }
-
-    private onShoeFlowerHit(uid: number, _score: number): void {
-        const type = this.shoeFlowerTypes.get(uid) ?? eShoeFlowerType.normal;
-        this._showHint(ShoeFlowerHitHint[type], 3);
-        this._removeShoeFlowerNode(uid);
-        // TODO: 播放消除特效/音效
-    }
-
-    private onShoeFlowerMiss(uid: number): void {
-        this._removeShoeFlowerNode(uid);
-    }
-
-    private _removeShoeFlowerNode(uid: number): void {
-        const node = this.shoeFlowerNodes.get(uid);
-        if (node) {
-            node.active = false;
-            node.destroy();
-            this.shoeFlowerNodes.delete(uid);
-        }
-        this.shoeFlowerTypes.delete(uid);
-    }
-
-    // ----------------------------------------------------------------
-    // 难度提升事件
-    // ----------------------------------------------------------------
-
-    private onDifficultyPhaseChange(phase: eDifficultyPhase, hintText: string): void {
-        if (!this.difficultyHintLabel) return;
-
-        const label = this.difficultyHintLabel;
-        label.string = hintText;
-        label.node.active = true;
-        label.node.setPosition(0, 0, 0);
-        label.node.setScale(1, 1, 1);
-
-        // 出现 → 放大 → 停留 → 上移淡出
-        tween(label.node)
-            .to(0.2, { scale: new Vec3(1.2, 1.2, 1) })
-            .to(0.1, { scale: new Vec3(1.0, 1.0, 1) })
-            .delay(1.2)
-            .to(0.4, { position: new Vec3(0, 60, 0) })
-            .call(() => { label.node.active = false; })
-            .start();
-    }
+    return isLimited ? this.limitedShoeFlowerSF : this.normalShoeFlowerSF;
+  }
 }

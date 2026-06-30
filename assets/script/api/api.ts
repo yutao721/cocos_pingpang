@@ -47,9 +47,9 @@ export class Api {
 
       console.log('api response', responseData);
 
-      if (responseData.code !== 0 && responseData.code !== -600) {
+      if (responseData.errcode !== 0) {
         const error = new Error(responseData.msg || '请求失败');
-        (error as any).code = responseData.code;
+        (error as any).errcode = responseData.code;
         throw error;
       }
 
@@ -98,7 +98,7 @@ export class Api {
    * @returns 
    */
   public static async getUserInfo() {
-    return HttpClient.get<any>(ApiPath.USER_INFO, {});
+    return HttpClient.post<any>(ApiPath.USER_INFO, {});
   }
 
   /**
@@ -154,4 +154,11 @@ export class Api {
   }
 }
 
-Api.init('http://dm.crocs.cn/webapi/pingpong');
+const LOCAL_PROXY_BASE_URL = 'http://127.0.0.1:3001/';
+const PROD_BASE_URL = 'http://dm.crocs.cn/webapi/pingpong';
+
+const isLocalHost = typeof window !== 'undefined'
+  && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+// 本地开发走代理（仅转发 /webapi/pingpong 前缀）
+Api.init(isLocalHost ? LOCAL_PROXY_BASE_URL : PROD_BASE_URL);

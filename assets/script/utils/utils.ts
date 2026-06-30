@@ -1,7 +1,59 @@
-import { resources, SpriteFrame } from "cc";
+import { SpriteFrame } from "cc";
 import { copyToClipboard } from "../../framework/utils/CommonFun";
 import { tipControl } from "../control/TipControl";
 import { BundleManager } from "../../framework/bundle/BundleManager";
+
+type ShoeFlowerSpriteType = 'normal' | 'limited';
+
+const shoeFlowerDefaultDirs: Record<ShoeFlowerSpriteType, string> = {
+  normal: 'image/game/normal',
+  limited: 'image/game/limited',
+};
+
+const spriteFrameDirCache: Map<string, Promise<SpriteFrame[]>> = new Map();
+
+const sortSpriteFrames = (frames: SpriteFrame[]): SpriteFrame[] => {
+  return [...frames].sort((a, b) => {
+    const an = Number(a.name);
+    const bn = Number(b.name);
+    const aIsNum = Number.isFinite(an);
+    const bIsNum = Number.isFinite(bn);
+    if (aIsNum && bIsNum) return an - bn;
+    if (aIsNum) return -1;
+    if (bIsNum) return 1;
+    return a.name.localeCompare(b.name);
+  });
+};
+
+/**
+ * 按目录加载 SpriteFrame 列表（含缓存）
+ * @param dir resources 下目录路径
+ */
+export const getSpriteFramesByDir = (dir: string): Promise<SpriteFrame[]> => {
+  const cached = spriteFrameDirCache.get(dir);
+  if (cached) return cached;
+
+  const task = BundleManager.loadDirAsync(dir, SpriteFrame)
+    .then((frames) => sortSpriteFrames((frames ?? []).filter(Boolean)))
+    .catch((err) => {
+      console.warn(`[SpritePool] load dir failed: ${dir}`, err);
+      spriteFrameDirCache.delete(dir);
+      return [];
+    });
+
+  spriteFrameDirCache.set(dir, task);
+  return task;
+};
+
+/**
+ * 获取鞋花图池（普通/限量）
+ * @param type normal | limited
+ * @param customDir 自定义目录（可选）
+ */
+export const getShoeFlowerSpritePool = (type: ShoeFlowerSpriteType, customDir?: string): Promise<SpriteFrame[]> => {
+  const dir = customDir || shoeFlowerDefaultDirs[type];
+  return getSpriteFramesByDir(dir);
+};
 
 /**
  * 获取道具sprite frame

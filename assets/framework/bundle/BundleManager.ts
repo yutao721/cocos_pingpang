@@ -76,4 +76,56 @@ export class BundleManager {
         });
     }
 
+    /**
+     * 按目录加载同类型资源（回调版）
+     * @param path 目录路径（相对 bundle 根目录）
+     * @param type 资源类型
+     * @param onComplete 完成回调
+     * @param bundleName bundle 名称
+     * @param onProgress 进度回调（可选）
+     */
+    public static loadDir<T extends Asset>(
+        path: string,
+        type: new (...args: any[]) => T,
+        onComplete: (err: Error | null, assets: T[] | null) => void,
+        bundleName?: string,
+        onProgress?: (finished: number, total: number, item: any) => void,
+    ) {
+        const bundle = this.getBundle(bundleName);
+        if (!bundle) {
+            onComplete(new Error(`Bundle not found: ${bundleName || this.defaultBundle}`), null);
+            return;
+        }
+
+        if (onProgress) {
+            bundle.loadDir(path, type, onProgress, onComplete);
+        } else {
+            bundle.loadDir(path, type, onComplete);
+        }
+    }
+
+    /**
+     * 按目录加载同类型资源（Promise 版）
+     * @param path 目录路径（相对 bundle 根目录）
+     * @param type 资源类型
+     * @param bundleName bundle 名称
+     * @param onProgress 进度回调（可选）
+     */
+    public static loadDirAsync<T extends Asset>(
+        path: string,
+        type: new (...args: any[]) => T,
+        bundleName?: string,
+        onProgress?: (finished: number, total: number, item: any) => void,
+    ): Promise<T[]> {
+        return new Promise((resolve, reject) => {
+            this.loadDir(path, type, (err, assets) => {
+                if (err || !assets) {
+                    reject(err);
+                } else {
+                    resolve(assets);
+                }
+            }, bundleName, onProgress);
+        });
+    }
+
 }
