@@ -56,26 +56,14 @@ export class HomePage extends UiBase {
   }
 
   protected onEnable(): void {
-    userControl.initConfigData();
-    // if (userControl.isLoginVal) {
-    //   userControl.initUserData();
-    // }
-    // else {
-    //   this.pageManager.showUI(UI_PATH.LOGIN, UILayer.TOP);
-    // }
+    // userControl.initConfigData();
+    if (userControl.isLoginVal) {
+      userControl.initUserData();
+    }
   }
 
   protected start(): void {
-    // resources.loadDir("animation/mainBg", SpriteFrame, (err, frames: SpriteFrame[]) => {
-    //   if (err) {
-    //     console.error(err);
-    //     return;
-    //   };
-    //   // 确保按照文件名排序
-    //   frames.sort((a, b) => a.name.localeCompare(b.name));
-    //   const controller = playFrameAnimation(this.bgSprite, frames, 25, true);
-    //   controller.play();
-    // });
+
   }
 
   private onStartGame() {

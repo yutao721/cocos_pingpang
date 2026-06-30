@@ -54,7 +54,7 @@ export class LoginPopup extends UiBase {
             //console.log('res ===>', res);
             localStorage.setItem('guid', guid);
             localStorage.setItem('gcode', code);
-            this.loginSuccess(res.data.token);
+            this.loginSuccess(res.data.openid);
             console.log('登录成功~~');
             console.log('res ===>', res);
         }).catch(() => {
@@ -79,8 +79,8 @@ export class LoginPopup extends UiBase {
         // })
     }
 
-    private loginSuccess(token) {
-        localStorage.setItem('token', token);
+    private loginSuccess(openid: string) {
+        localStorage.setItem('openid', openid);
         this.removeFromPageManager();
         userControl.login();
         userControl.initUserData();

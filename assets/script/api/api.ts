@@ -1,14 +1,15 @@
 import { HttpClient } from "../../framework/http/HttpClient";
+import { md5 } from '../../framework/utils/MD5';
 
 /**
  * API路径
  */
 export const ApiPath = {
-  LOGIN: 'api/login/game/uid/send/email',
+  LOGIN: 'webapi/pingpong/record',
   GAME_START: 'api/game/start',
   GENERAL: 'api/user/general',
   TASK_REPORT: 'api/game/task/report',
-  USER_INFO: 'api/user/info',
+  USER_INFO: 'webapi/pingpong/record',
   GAME_END: 'api/game/complete',
   QLD_REPORT: 'api/qld/report',
   QLD_COUNT: 'api/qld',
@@ -17,36 +18,41 @@ export const ApiPath = {
   PROP_SHARE: 'api/user/prop/share'
 };
 
+// 签名配置
+const API_KEY = 'crocsdm.2026';
+
 export class Api {
 
   public static init(baseUrl: string) {
     HttpClient.init(baseUrl);
+
+    // 请求拦截器：自动组装 openid / timestamp / signature 签名
     HttpClient.addRequestInterceptor((request) => {
-      // 从本地存储获取token
-      const token = localStorage.getItem('token');
-      if (token) {
-        request.headers = {
-          ...request.headers,
-          'Authorization': `${token}`
-          //'Authorization': `test`
-        };
-      }
+      const openid = localStorage.getItem('openid') || 'oQol45ehzK1YandpPERyoCYBUB8Q';
+      const timestamp = String(Math.floor(Date.now() / 1000));
+      const signature = md5(API_KEY + openid + timestamp + API_KEY);
+
+      request.headers = {
+        ...request.headers,
+        'openid': openid,
+        'timestamp': timestamp,
+        'signature': signature,
+      };
       return request;
     });
+
+    // 响应拦截器
     HttpClient.addResponseInterceptor((response) => {
-      // 服务端返回格式为 { code: number, data: any, msg: string }
       const responseData = response.data as any;
 
       console.log('api response', responseData);
 
-      // 检查业务状态码
       if (responseData.code !== 0 && responseData.code !== -600) {
         const error = new Error(responseData.msg || '请求失败');
         (error as any).code = responseData.code;
         throw error;
       }
 
-      // 提取实际数据
       response.data = responseData.data;
       return response;
     });
@@ -148,5 +154,4 @@ export class Api {
   }
 }
 
-Api.init('https://sgsolmnlmtest.sanguosha.com/');
-//Api.init('http://10.225.68.209:8300/');
+Api.init('http://dm.crocs.cn/webapi/pingpong');
