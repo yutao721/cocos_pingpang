@@ -91,5 +91,3 @@ export class ResultPopup extends UiBase {
   }
 
 }
-
-

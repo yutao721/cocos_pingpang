@@ -5,17 +5,11 @@ import { md5 } from '../../framework/utils/MD5';
  * API路径
  */
 export const ApiPath = {
-  LOGIN: 'webapi/pingpong/record',
-  GAME_START: 'api/game/start',
-  GENERAL: 'api/user/general',
-  TASK_REPORT: 'api/game/task/report',
-  USER_INFO: 'webapi/pingpong/record',
-  GAME_END: 'api/game/complete',
-  QLD_REPORT: 'api/qld/report',
-  QLD_COUNT: 'api/qld',
-  REWARD: 'api/user/reward/obtain',
-  RANK: 'api/user/general/ranking',
-  PROP_SHARE: 'api/user/prop/share'
+  USER_INFO: 'webapi/pingpong/userinfo',
+  GAME_END: 'webapi/pingpong/result',
+  REWARD: 'webapi/pingpong/record',
+  RANK: 'webapi/pingpong/rank',
+  CLEAR: 'webapi/pingpong/clear'
 };
 
 // 签名配置
@@ -53,87 +47,37 @@ export class Api {
         throw error;
       }
 
-      response.data = responseData.data;
+      response.data = responseData;
       return response;
     });
   }
 
-
-
-  /**
-   * 用户登录
-  */
-  public static async login(param: any) {
-    return HttpClient.post<{ token: string }>(ApiPath.LOGIN, param);
-  }
-
-  /**
-   * 开始游戏
-   * @param param 
-   * @returns 
-   */
-  public static async gameStart() {
-    return HttpClient.post<any>(ApiPath.GAME_START, {});
-  }
-
-  /**
-   * 拥有武将
-   * @returns 
-   */
-  public static async getGeneral() {
-    return HttpClient.get<any>(ApiPath.GENERAL, {});
-  }
-
-  /**
-   * 任务完成上报
-   * @param param 
-   * @returns 
-   */
-  public static async taskReport(param: { game_id: number, task_id: number, status: number }) {
-    return HttpClient.post<any>(ApiPath.TASK_REPORT, param);
-  }
 
   /**
    * 获取用户信息
    * @returns 
    */
   public static async getUserInfo() {
-    return HttpClient.post<any>(ApiPath.USER_INFO, {});
+    return HttpClient.post<any>(ApiPath.USER_INFO);
   }
 
   /**
-   * 游戏结束
+   * 游戏结束，提交游戏结果
    * @param param 
    * @returns 
    */
-  public static async gameEnd(param: { game_id: number, status: number, general_status: number }) {
+  public static async gameEnd(param: { score: number, second: number }) {
     return HttpClient.post<any>(ApiPath.GAME_END, param);
   }
 
-  /**
-   * 获取青龙刀任务上报
-   * @param param 
-   * @returns 
-   */
-  public static async qldReport(param: { game_id: number }) {
-    return HttpClient.post<any>(ApiPath.QLD_REPORT, param);
-  }
-
-  /**
-   * 获取青龙刀数量
-   * @returns 
-   */
-  public static async getQldCount() {
-    return HttpClient.get<any>(ApiPath.QLD_COUNT);
-  }
 
   /**
    * 获取奖励
    * @param param 
    * @returns 
    */
-  public static async getReward(param: { source: number }) {
-    return HttpClient.get<any>(ApiPath.REWARD, param);
+  public static async getReward() {
+    return HttpClient.get<any>(ApiPath.REWARD);
   }
 
   /**
@@ -141,17 +85,9 @@ export class Api {
    * @returns 
    */
   public static async getRankList() {
-    return HttpClient.get<{ list: { nickname: string, general: number }[] }>(ApiPath.RANK);
+    return HttpClient.get<any>(ApiPath.RANK);
   }
 
-  /**
-   * 道具分享后使用上报
-   * @param param 
-   * @returns 
-   */
-  public static async propShare(param: { source: number }) {
-    return HttpClient.post<any>(ApiPath.PROP_SHARE, param);
-  }
 }
 
 const LOCAL_PROXY_BASE_URL = 'http://127.0.0.1:3001/';

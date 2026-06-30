@@ -1,8 +1,14 @@
 import { Api } from "../api/api";
-import { ePropType } from "../const/GameConst";
 
+export interface IUserInfo {
+  nickname: string;
+  openid: string;
+  headimgurl: string;
+}
 
 export class UserInfoModel {
+
+  private static readonly USER_INFO_CACHE_KEY = 'pp_user_info';
 
   private rewardArr: Array<any> = [];
   public get rewardList() {
@@ -20,17 +26,16 @@ export class UserInfoModel {
     return this.isSoundEnabled;
   }
 
-  // 无懈可击今日使用次数
-  private flawlessCount: number = 0;
-  // 铁索连环今日使用次数
-  private chainCount: number = 0;
-  // 重置今日使用次数
-  private resetCount: number = 0;
+  private userInfo: IUserInfo | null = null;
+  public get userInfoVal(): IUserInfo | null {
+    return this.userInfo;
+  }
 
   public initConfig() {
     if (localStorage.getItem('soundEnabled') === 'false') {
       this.isSoundEnabled = false;
     }
+    this.loadUserInfoFromCache();
   }
 
   public initUserInfo() {
@@ -38,61 +43,52 @@ export class UserInfoModel {
   }
 
   public updateUserInfo() {
-    Api.getUserInfo().then(res => {
-      const info = res.data;
-      if (info) {
-        this.rewardArr = info.user_prize;
-        this.dayGameNum = info.day_game_num;
-        this.flawlessCount = info.arbitrary;
-        this.chainCount = info.automatic;
-        this.resetCount = info.recharge;
-      }
-    });
+    Api.getUserInfo()
+      .then(res => {
+        const info = res?.data?.userinfo;
+        if (!info) return;
+        const nextInfo: IUserInfo = {
+          nickname: String(info.nickname || ''),
+          openid: String(info.openid || ''),
+          headimgurl: String(info.headimgurl || ''),
+        };
+        this.setUserInfo(nextInfo);
+      })
+      .catch(err => {
+        console.warn('updateUserInfo failed', err);
+      });
   }
 
   /**
    * 设置声音开关
-   * @param val 
+   * @param val
    */
   public setSoundEnabled(val: boolean) {
     this.isSoundEnabled = val;
     localStorage.setItem('soundEnabled', val.toString());
   }
 
-  /**
-   * 使用道具
-   * @param type 
-   */
-  public useProp(type: ePropType) {
-    switch (type) {
-      case ePropType.flawless:
-        this.flawlessCount++;
-        break;
-      case ePropType.chain:
-        this.chainCount++;
-        break;
-      case ePropType.reset:
-        this.resetCount++;
-        break;
-    }
-    Api.propShare({ source: type });
+  private setUserInfo(info: IUserInfo) {
+    this.userInfo = info;
+    localStorage.setItem(UserInfoModel.USER_INFO_CACHE_KEY, JSON.stringify(info));
+    console.log('updateUserInfo', info.nickname);
+    console.log('updateUserInfo', info.openid);
+    console.log('updateUserInfo', info.headimgurl);
   }
 
-  /**
-   * 使用道具次数
-   * @param type 
-   * @returns 
-   */
-  public getPropCount(type: ePropType) {
-    switch (type) {
-      case ePropType.flawless:
-        return this.flawlessCount;
-      case ePropType.chain:
-        return this.chainCount;
-      case ePropType.reset:
-        return this.resetCount;
+  private loadUserInfoFromCache() {
+    const raw = localStorage.getItem(UserInfoModel.USER_INFO_CACHE_KEY);
+    if (!raw) return;
+    try {
+      const info = JSON.parse(raw);
+      this.userInfo = {
+        nickname: String(info.nickname || ''),
+        openid: String(info.openid || ''),
+        headimgurl: String(info.headimgurl || ''),
+      };
+    } catch (err) {
+      console.warn('parse user info cache failed', err);
+      localStorage.removeItem(UserInfoModel.USER_INFO_CACHE_KEY);
     }
-    return 0;
   }
-
 }

@@ -381,13 +381,13 @@
     "_overflow": 0,
     "_enableWrapText": true,
     "_font": {
-      "__uuid__": "9fe1d26e-fa5a-46ff-b944-567f6e970eed",
+      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_isItalic": false,
-    "_isBold": false,
+    "_isBold": true,
     "_isUnderline": false,
     "_underlineHeight": 2,
     "_cacheMode": 1,
@@ -546,7 +546,7 @@
     "_overflow": 0,
     "_enableWrapText": true,
     "_font": {
-      "__uuid__": "9fe1d26e-fa5a-46ff-b944-567f6e970eed",
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -1780,13 +1780,15 @@
       "__id__": 65
     },
     "normalShoeFlowerSF": {
-      "__uuid__": "eaede3f6-d6eb-4235-8399-cf37474e5d17@f9941",
+      "__uuid__": "297dc40d-d105-49d2-81b5-f69c2e0a0b71@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "limitedShoeFlowerSF": {
-      "__uuid__": "db81e29f-0ac3-4510-a001-edd5a8227c8f@f9941",
+      "__uuid__": "356870c6-022e-4406-9467-ae62473066c2@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
+    "normalShoeFlowerDir": "image/game/normal",
+    "limitedShoeFlowerDir": "image/game/limited",
     "_id": ""
   },
   {

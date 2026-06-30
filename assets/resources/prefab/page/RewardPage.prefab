@@ -424,8 +424,11 @@
     "_lineHeight": 38,
     "_overflow": 3,
     "_enableWrapText": true,
-    "_font": null,
-    "_isSystemFontUsed": true,
+    "_font": {
+      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__expectedType__": "cc.TTFFont"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_isItalic": false,
     "_isBold": true,
@@ -554,7 +557,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -192,
+      "x": -234,
       "y": 0,
       "z": 0
     },
@@ -595,8 +598,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 71.1875,
-      "height": 161.28
+      "width": 88.91999816894531,
+      "height": 196.56
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -626,25 +629,28 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 194,
-      "g": 214,
-      "b": 90,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 255
     },
-    "_string": "3",
+    "_string": "2",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 128,
-    "_fontSize": 128,
+    "_actualFontSize": 156,
+    "_fontSize": 156,
     "_fontFamily": "Arial",
-    "_lineHeight": 128,
+    "_lineHeight": 156,
     "_overflow": 0,
     "_enableWrapText": true,
-    "_font": null,
-    "_isSystemFontUsed": true,
+    "_font": {
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
+      "__expectedType__": "cc.TTFFont"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_isItalic": false,
-    "_isBold": false,
+    "_isBold": true,
     "_isUnderline": false,
     "_underlineHeight": 2,
     "_cacheMode": 0,
@@ -713,7 +719,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 35.59375,
+      "x": 44.459999084472656,
       "y": 0,
       "z": 0
     },
@@ -754,8 +760,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 384,
-      "height": 161.28
+      "width": 468,
+      "height": 196.56
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -793,14 +799,17 @@
     "_string": "项成就",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 128,
-    "_fontSize": 128,
+    "_actualFontSize": 156,
+    "_fontSize": 156,
     "_fontFamily": "Arial",
-    "_lineHeight": 128,
+    "_lineHeight": 156,
     "_overflow": 0,
     "_enableWrapText": true,
-    "_font": null,
-    "_isSystemFontUsed": true,
+    "_font": {
+      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__expectedType__": "cc.TTFFont"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_isItalic": false,
     "_isBold": false,
@@ -863,7 +872,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 455.1875,
+      "width": 556.9199981689453,
       "height": 100
     },
     "_anchorPoint": {
@@ -1286,7 +1295,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 130.716796875,
+      "width": 131.87997436523438,
       "height": 35.28
     },
     "_anchorPoint": {
@@ -1326,9 +1335,15 @@
     },
     "_maxWidth": 0,
     "_fontFamily": "Arial",
-    "_font": null,
-    "_isSystemFontUsed": true,
-    "_userDefinedFont": null,
+    "_font": {
+      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__expectedType__": "cc.TTFFont"
+    },
+    "_isSystemFontUsed": false,
+    "_userDefinedFont": {
+      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__expectedType__": "cc.TTFFont"
+    },
     "_cacheMode": 0,
     "_imageAtlas": null,
     "_handleTouchEvent": true,
