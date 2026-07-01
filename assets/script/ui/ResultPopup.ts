@@ -1,13 +1,8 @@
-import { _decorator, Component, Label, Node, Sprite, SpriteFrame } from 'cc';
+import { _decorator, Node, } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
 import { UI_PATH } from '../const/UiConfig';
 import { UILayer } from '../../framework/ui/PageManager';
-import { gameControl } from '../control/GameControl';
 import { IResult } from '../const/Interface';
-import { getGeneralText, getGeneralSprite, shareGame } from '../utils/utils';
-import { CampPage } from './CampPage';
-import { FollowConfig as GameFollowConfig } from '../const/GameConst';
-import { BundleManager } from '../../framework/bundle/BundleManager';
 import { pingPangControl } from '../control/PingPangControl';
 const { ccclass, property } = _decorator;
 
@@ -22,7 +17,7 @@ export class ResultPopup extends UiBase {
   againBtn: Node = null;
 
   @property(Node)
-  goCampBtn: Node = null;
+  goRankBtn: Node = null;
 
   @property(Node)
   shareBtn: Node = null;
@@ -31,7 +26,7 @@ export class ResultPopup extends UiBase {
 
   protected onLoad(): void {
     this.againBtn.on(Node.EventType.TOUCH_END, this.restart, this);
-    this.goCampBtn.on(Node.EventType.TOUCH_END, this.goCamp, this);
+    this.goRankBtn.on(Node.EventType.TOUCH_END, this.goRank, this);
     this.shareBtn.on(Node.EventType.TOUCH_END, this.share, this);
   }
 
@@ -57,11 +52,11 @@ export class ResultPopup extends UiBase {
     pingPangControl.startGame();
   }
 
-  public goCamp(): void {
-    // this.pageManager.showUI(UI_PATH.CAMP, UILayer.MIDDLE, (node: Node) => {
-    //   this.pageManager.removeUI(this.node);
-    //   this.pageManager.removeUI(UI_PATH.GAME);
-    // });
+  public goRank(): void {
+    this.pageManager.showUI(UI_PATH.RANK, UILayer.MIDDLE, (node: Node) => {
+      this.pageManager.removeUI(this.node);
+      this.pageManager.removeUI(UI_PATH.GAME);
+    });
   }
 
   public share(): void {
@@ -80,14 +75,6 @@ export class ResultPopup extends UiBase {
     // }
   }
 
-  private revivalGame(): void {
-    this.pageManager.removeUI(this.node);
-    gameControl.revival();
-  }
 
-  private getShareIndex(): number {
-    const dateString = new Date().toLocaleDateString();
-    return parseInt(localStorage.getItem('revivalIndex' + dateString)) || 0;
-  }
 
 }

@@ -6,7 +6,7 @@ import { eDifficultyPhase, eShoeFlowerType, RandomHintTexts, ShoeFlowerHitHint }
 import { IPingPangResult, IShoeFlower } from '../const/Interface';
 import { UILayer } from '../../framework/ui/PageManager';
 import { UI_PATH } from '../const/UiConfig';
-import { PingPangResultPopup } from './PingPangResultPopup';
+import { ResultPopup } from './ResultPopup';
 import { getShoeFlowerSpritePool } from '../utils/utils';
 const { ccclass, property } = _decorator;
 
@@ -218,8 +218,8 @@ export class PingPangPage extends UiBase {
   }
 
   private onGameOver(result: IPingPangResult): void {
-    this.pageManager.showUI(UI_PATH.PINGPANG_RESULT, UILayer.TOP, (node: Node) => {
-      node.getComponent(PingPangResultPopup)?.show(result);
+    this.pageManager.showUI(UI_PATH.RESULT, UILayer.TOP, (node: Node) => {
+      node.getComponent(ResultPopup)?.show(result);
     });
   }
 

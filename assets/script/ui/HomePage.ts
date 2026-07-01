@@ -86,7 +86,7 @@ export class HomePage extends UiBase {
   }
 
   private goCamp() {
-    this.pageManager.showUI(UI_PATH.CAMP, UILayer.MIDDLE, () => {
+    this.pageManager.showUI(UI_PATH.RANK, UILayer.MIDDLE, () => {
       this.pageManager.removeUI(this.node);
     });
   }
