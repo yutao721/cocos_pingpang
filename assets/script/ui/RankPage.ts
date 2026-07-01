@@ -30,6 +30,16 @@ export class RankPage extends UiBase {
 
   }
 
+  protected onEnable(): void {
+    this.getRank();
+  }
+
+  public getRank() {
+    Api.getRankList().then(res => {
+      console.log(res);
+    })
+  }
+
   public goHome() {
     this.pageManager.showUI(UI_PATH.HOME, UILayer.MIDDLE, () => {
       this.pageManager.removeUI(this.node);

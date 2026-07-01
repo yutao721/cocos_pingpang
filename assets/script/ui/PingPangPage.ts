@@ -193,7 +193,7 @@ export class PingPangPage extends UiBase {
 
   private onGameStart(): void {
     // 重置分数/连颠/时间显示
-    if (this.scoreLabel) this.scoreLabel.string = '0分';
+    if (this.scoreLabel) this.scoreLabel.string = '0';
     if (this.comboLabel) this.comboLabel.node.active = false;
     if (this.timerLabel) this.timerLabel.string = '';
 
@@ -263,7 +263,7 @@ export class PingPangPage extends UiBase {
   // ----------------------------------------------------------------
 
   private onScoreUpdate(score: number, _delta: number): void {
-    if (this.scoreLabel) this.scoreLabel.string = `${score}分`;
+    if (this.scoreLabel) this.scoreLabel.string = `${score}`;
   }
 
   private onComboUpdate(combo: number): void {
@@ -289,14 +289,13 @@ export class PingPangPage extends UiBase {
     this._hintPriority = priority;
 
     label.string = text;
-    label.color = new Color(30, 144, 255, 255); // 蓝色
+    // label.color = new Color(30, 144, 255, 255); // 蓝色
     label.node.active = true;
-    label.node.setPosition(0, 0, 0);
-    label.node.setScale(1, 1, 1);
+    // label.node.setPosition(0, 0, 0);
+    // label.node.setScale(1, 1, 1);
 
     tween(label.node)
-      .to(0.3, { scale: new Vec3(1.3, 1.3, 1) })
-      .to(0.5, { position: new Vec3(0, 80, 0) })
+      .to(1.5, { scale: new Vec3(1.1, 1.1, 1) })
       .call(() => {
         label.node.active = false;
         this._hintPriority = 0;

@@ -85,7 +85,7 @@ export class Api {
    * @returns 
    */
   public static async getRankList() {
-    return HttpClient.get<any>(ApiPath.RANK);
+    return HttpClient.post<any>(ApiPath.RANK);
   }
 
 }
