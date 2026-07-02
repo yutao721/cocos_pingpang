@@ -24,7 +24,7 @@ export const RewardConfig: {
 }[] = [
     { key: 'video', desc: '明星视频', count: 1, type: [11], source: 1 },
     { key: '100_hole', desc: '100洞力值', count: 3, type: [12], source: 2 },
-    { key: '500_hole', desc: '500洞力值', count: 5, type: [13], source: 3 },
+    { key: '500_hole', desc: '500洞力值', count: 5, type: [13], source: 1 },
   ];
 
 export enum eItemType {
@@ -130,16 +130,16 @@ export interface IComboBuffConfig {
 }
 
 export const ComboBuffConfig: IComboBuffConfig[] = [
-  { count: 5,   bonus: 10,  desc: '5连击！\n洞门buff拉满！' },
-  { count: 10,  bonus: 20,  desc: '10连击！\n稳住节奏，继续努力！' },
-  { count: 20,  bonus: 40,  desc: '20连击！\n洞门高手，尽显实力！' },
-  { count: 30,  bonus: 60,  desc: '30连击封神！\n无人能挡，持续领跑！' },
-  { count: 40,  bonus: 80,  desc: '40连击！\n洞感全开，持续领跑！' },
-  { count: 50,  bonus: 100, desc: '50连击！\n节奏拉满，自在发力！' },
-  { count: 60,  bonus: 120, desc: '60连击！\n稳控全场，洞感狂飙！' },
-  { count: 70,  bonus: 140, desc: '70连击！\n实力爆表，锁定洞门高分！' },
-  { count: 80,  bonus: 160, desc: '80连击！\n巅峰状态，自在拿捏！' },
-  { count: 90,  bonus: 180, desc: '90连击！\n步步进阶，冲刺洞门榜首！' },
+  { count: 5, bonus: 10, desc: '5连击！\n洞门buff拉满！' },
+  { count: 10, bonus: 20, desc: '10连击！\n稳住节奏，继续努力！' },
+  { count: 20, bonus: 40, desc: '20连击！\n洞门高手，尽显实力！' },
+  { count: 30, bonus: 60, desc: '30连击封神！\n无人能挡，持续领跑！' },
+  { count: 40, bonus: 80, desc: '40连击！\n洞感全开，持续领跑！' },
+  { count: 50, bonus: 100, desc: '50连击！\n节奏拉满，自在发力！' },
+  { count: 60, bonus: 120, desc: '60连击！\n稳控全场，洞感狂飙！' },
+  { count: 70, bonus: 140, desc: '70连击！\n实力爆表，锁定洞门高分！' },
+  { count: 80, bonus: 160, desc: '80连击！\n巅峰状态，自在拿捏！' },
+  { count: 90, bonus: 180, desc: '90连击！\n步步进阶，冲刺洞门榜首！' },
   { count: 100, bonus: 200, desc: '100连击！\n满级操作，洞门封神' },
 ];
 
@@ -159,7 +159,7 @@ export const RandomHintTexts: string[] = [
 
 // 击中鞋花提示文案（优先级最高）
 export const ShoeFlowerHitHint: Record<number, string> = {
-  [eShoeFlowerType.normal]:  '颠得漂亮\n鞋花接住',
+  [eShoeFlowerType.normal]: '颠得漂亮\n鞋花接住',
   [eShoeFlowerType.limited]: '接住限量鞋花\n分数飙升',
 };
 

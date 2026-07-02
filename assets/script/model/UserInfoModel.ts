@@ -57,6 +57,8 @@ export class UserInfoModel {
       .catch(err => {
         console.warn('updateUserInfo failed', err);
       });
+     
+     Api.getReward 
   }
 
   /**

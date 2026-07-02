@@ -2,6 +2,8 @@ import { _decorator, Button, Component, Node, resources, RichText, Sprite, Sprit
 import { UiBase } from '../../framework/ui/UiBase';
 import { userControl } from '../control/UserControl';
 import { Api } from '../api/api';
+import { UI_PATH } from '../const/UiConfig';
+import { UILayer } from '../../framework/ui/PageManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('RewardItem')
@@ -29,14 +31,14 @@ export class RewardItem extends UiBase {
   }
 
   private onReceive() {
-    this.setBtnState(1);
-    Api.getReward({ source: this.source }).then(() => {
-      userControl.initUserData();
-    });
+    console.log(this.source);
+    // this.setBtnState(1);
+    this.pageManager.showUI(UI_PATH.VIDEO, UILayer.TOP);
   }
 
   public initRewardItem(text: string, types: number[], source: number, key: string) {
     this.text.string = text;
+    console.log(types, source, key, text)
     this.source = source;
     this.getRewardIcon(types[0]).then(spriteFrame => {
       this.icon[0].getComponent(Sprite).spriteFrame = spriteFrame;
@@ -46,7 +48,7 @@ export class RewardItem extends UiBase {
     node.getComponent(UITransform).setContentSize(70, 70);
     node.x = 0;
     const state = userControl.getRewardList()[key];
-    this.setBtnState(state);
+    this.setBtnState(2);
   }
 
   public getRewardIcon(type: number): Promise<SpriteFrame> {
@@ -76,7 +78,7 @@ export class RewardItem extends UiBase {
         this.receiveBtn.active = true;
         break;
       default:
-        this.unfinished.active = true;
+        this.receiveBtn.active = true;
         break;
     }
   }
