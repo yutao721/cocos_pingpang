@@ -177,7 +177,7 @@ export const ShoeFlowerSpawnInterval: [number, number] = [2.0, 5.0];
 
 // 鞋花随机出现的位置范围（设计分辨率 750x1334，Cocos 坐标系）
 export const ShoeFlowerSpawnRangeX: [number, number] = [-180, 180];
-export const ShoeFlowerSpawnRangeY: [number, number] = [-220, 60];
+export const ShoeFlowerSpawnRangeY: [number, number] = [-220, 20];
 
 // 鞋花存活时间范围（秒）[min, max]，倒计时到 0 后消失
 export const ShoeFlowerLifetime: [number, number] = [5, 8];
