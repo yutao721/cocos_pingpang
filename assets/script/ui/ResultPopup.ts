@@ -2,8 +2,10 @@ import { _decorator, Node, } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
 import { UI_PATH } from '../const/UiConfig';
 import { UILayer } from '../../framework/ui/PageManager';
-import { IResult } from '../const/Interface';
+import { IPingPangResult } from '../const/Interface';
 import { pingPangControl } from '../control/PingPangControl';
+import { userControl } from '../control/UserControl';
+import { PosterHelper } from '../utils/PosterHelper';
 const { ccclass, property } = _decorator;
 
 @ccclass('ResultPopup')
@@ -22,12 +24,16 @@ export class ResultPopup extends UiBase {
   @property(Node)
   shareBtn: Node = null;
 
-  private resultData: IResult = null;
+  private resultData: IPingPangResult = null;
 
   protected onLoad(): void {
     this.againBtn.on(Node.EventType.TOUCH_END, this.restart, this);
     this.goRankBtn.on(Node.EventType.TOUCH_END, this.goRank, this);
     this.shareBtn.on(Node.EventType.TOUCH_END, this.share, this);
+  }
+
+  public show(result: IPingPangResult): void {
+    this.resultData = result;
   }
 
 
@@ -60,19 +66,26 @@ export class ResultPopup extends UiBase {
   }
 
   public share(): void {
-    // // TODO: 分享
-    // const index = this.getShareIndex();
-    // localStorage.setItem('revivalIndex' + new Date().toLocaleDateString(), (index + 1).toString());
-    // if (index < GameFollowConfig.length) {
-    //   const follow = GameFollowConfig[index];
-    //   location.href = follow.url;
-    //   this.revivalGame();
-    // }
-    // else {
-    //   shareGame().then(() => {
-    //     this.revivalGame();
-    //   });
-    // }
+    const userInfo = {
+      rank: 1,
+      nickname: 'NuMen',
+      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
+      score: 10000,
+      openid: '112111'
+    }
+    const result = {
+      score: 1000,
+      maxCombo: 12,
+      hitCount: 145,
+      shoeFlowerHit: 123,
+      duration: 1234,
+    }
+    // const userInfo = userControl.getUserInfo();
+    // const result = this.resultData;
+    if (!result) return;
+    PosterHelper.generate(result, userInfo).catch(err => {
+      console.warn('[ResultPopup] generate poster failed', err);
+    });
   }
 
 
