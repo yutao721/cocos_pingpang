@@ -1,5 +1,13 @@
-import { assetManager, JsonAsset, Node, Size, Sprite, SpriteFrame, screen, ResolutionPolicy, view } from 'cc';
+import { assetManager, ImageAsset, JsonAsset, Node, Size, Sprite, SpriteFrame, Texture2D, screen, ResolutionPolicy, view } from 'cc';
 import { AnimationPlayer } from '../ui/AnimationPlayer';
+
+const remoteSpriteFrameCache: Map<string, Promise<SpriteFrame>> = new Map();
+
+function getRemoteImageExt(url: string): string | null {
+    const cleanUrl = url.split('?')[0].split('#')[0];
+    const match = cleanUrl.match(/\.(png|jpg|jpeg|webp|bmp)$/i);
+    return match ? `.${match[1].toLowerCase()}` : null;
+}
 
 /**
  * 播放帧动画
@@ -207,4 +215,51 @@ export function setPcWindowSize(width: number, height: number, resolutionPolicy?
     const policy = resolutionPolicy || new ResolutionPolicy(ResolutionPolicy.ContainerStrategy.PROPORTION_TO_FRAME, ResolutionPolicy.ContentStrategy.FIXED_WIDTH);
     view.setResolutionPolicy(policy);
     screen.windowSize = new Size(width, height);
+}
+
+/**
+ * Load a remote image and wrap it as a SpriteFrame.
+ * Requests for the same URL share one in-flight/result cache entry.
+ */
+export function loadRemoteSpriteFrame(url: string): Promise<SpriteFrame> {
+    const normalizedUrl = url?.trim();
+    if (!normalizedUrl) {
+        return Promise.reject(new Error('Remote image url is required'));
+    }
+
+    const cachedTask = remoteSpriteFrameCache.get(normalizedUrl);
+    if (cachedTask) {
+        return cachedTask;
+    }
+
+    const loadTask = new Promise<SpriteFrame>((resolve, reject) => {
+        const handleComplete = (err: Error | null, imageAsset: ImageAsset | null) => {
+            if (err || !imageAsset) {
+                reject(err ?? new Error(`Load remote image failed: ${normalizedUrl}`));
+                return;
+            }
+
+            const texture = new Texture2D();
+            texture.image = imageAsset;
+
+            const spriteFrame = new SpriteFrame();
+            spriteFrame.texture = texture;
+            spriteFrame.name = normalizedUrl;
+            resolve(spriteFrame);
+        };
+
+        const ext = getRemoteImageExt(normalizedUrl);
+        if (ext) {
+            assetManager.loadRemote<ImageAsset>(normalizedUrl, { ext }, handleComplete);
+            return;
+        }
+
+        assetManager.loadRemote<ImageAsset>(normalizedUrl, handleComplete);
+    }).catch((err) => {
+        remoteSpriteFrameCache.delete(normalizedUrl);
+        throw err;
+    });
+
+    remoteSpriteFrameCache.set(normalizedUrl, loadTask);
+    return loadTask;
 }
