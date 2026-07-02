@@ -23,7 +23,7 @@ export enum PingPangEvent {
     gameOver        = 'pp_gameOver',        // 游戏结束（球落地/超时）：参数 IPingPangResult
 
     // --- 计时 ---
-    timeUpdate      = 'pp_timeUpdate',      // 每秒更新剩余时间：参数 remainTime:number
+    timeUpdate      = 'pp_timeUpdate',      // 每秒更新本局已用时：参数 elapsedSeconds:number
     timeUp          = 'pp_timeUp',          // 倒计时归零（时间模式专用）
 
     // --- 球拍 ---

@@ -21,7 +21,7 @@ const { ccclass, property } = _decorator;
  *   ├─ shoeFlowerPfb          鞋花 Prefab（@property 拖入）
  *   ├─ ScoreLabel             分数
  *   ├─ ComboLabel             连颠次数（不颠时隐藏）
- *   ├─ TimerLabel             倒计时（无限时模式可隐藏）
+ *   ├─ TimerLabel             本局用时（正向计时）
  *   ├─ DifficultyHintLabel    难度提示文字（相位切换时播放动画）
  *   └─ ComboBuffHintLabel     连颠 Buff 飘字（触发时播放动画）
  *
@@ -195,7 +195,7 @@ export class PingPangPage extends UiBase {
     // 重置分数/连颠/时间显示
     if (this.scoreLabel) this.scoreLabel.string = '0';
     if (this.comboLabel) this.comboLabel.node.active = false;
-    if (this.timerLabel) this.timerLabel.string = '';
+    if (this.timerLabel) this.timerLabel.string = this._formatElapsedTime(0);
 
     // 清空残留鞋花节点
     this.shoeFlowerNodes.forEach(node => node.destroy());
@@ -314,9 +314,9 @@ export class PingPangPage extends UiBase {
   // 计时事件
   // ----------------------------------------------------------------
 
-  private onTimeUpdate(remainTime: number): void {
+  private onTimeUpdate(elapsedSeconds: number): void {
     if (this.timerLabel) {
-      this.timerLabel.string = `${Math.ceil(remainTime)}s`;
+      this.timerLabel.string = this._formatElapsedTime(elapsedSeconds);
     }
   }
 
@@ -411,5 +411,14 @@ export class PingPangPage extends UiBase {
       return pool[index];
     }
     return isLimited ? this.limitedShoeFlowerSF : this.normalShoeFlowerSF;
+  }
+
+  private _formatElapsedTime(totalSeconds: number): string {
+    const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+    const minutes = Math.floor(safeSeconds / 60);
+    const seconds = safeSeconds % 60;
+    const minuteText = minutes < 10 ? `0${minutes}` : `${minutes}`;
+    const secondText = seconds < 10 ? `0${seconds}` : `${seconds}`;
+    return `${minuteText}:${secondText}`;
   }
 }

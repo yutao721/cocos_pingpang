@@ -104,7 +104,7 @@ export const EnablePaddleCheck = true;
  * true  → 球拍每帧自动移动到球正下方，方便测试得分/连颠/难度逻辑
  * false → 正常玩家手动控制
  */
-export const AutoPaddle = true;
+export const AutoPaddle = false;
 
 // ============================================================
 // 颠球游戏（PingPang）新玩法配置
@@ -177,7 +177,7 @@ export const ShoeFlowerSpawnInterval: [number, number] = [2.0, 5.0];
 
 // 鞋花随机出现的位置范围（设计分辨率 750x1334，Cocos 坐标系）
 export const ShoeFlowerSpawnRangeX: [number, number] = [-180, 180];
-export const ShoeFlowerSpawnRangeY: [number, number] = [-100, 200];
+export const ShoeFlowerSpawnRangeY: [number, number] = [-220, 60];
 
 // 鞋花存活时间范围（秒）[min, max]，倒计时到 0 后消失
 export const ShoeFlowerLifetime: [number, number] = [5, 8];
@@ -192,13 +192,13 @@ export const ShoeFlowerRadius: number = 45
 export const BallInitSpeed = 3200;
 
 // 球反弹时垂直速度占总速度的比例（0~1），值越大弹起越高
-export const BallVYRatio = 0.8;
+export const BallVYRatio = 0.66;
 
 // 球反弹时水平速度占总速度的比例（0~1），控制横向速度上限
-export const BallVXRatio = 0.35;
+export const BallVXRatio = 0.22;
 
 // 重力加速度（像素/秒²），每帧对 vy 施加向下加速，模拟真实乒乓球弧线
-export const BallGravity = 4300;
+export const BallGravity = 4700;
 
 // 球初始生成位置 Y 坐标
 export const BallInitY = 200;
@@ -246,7 +246,7 @@ export enum eDifficultyPhase {
 export const Phase1ScoreThreshold = 100;
 
 // 球速提升倍率（当前速度 × 此系数）
-export const Phase1BallSpeedMul = 1.4;
+export const Phase1BallSpeedMul = 1.15;
 
 // Phase 1 触发时的 UI 提示文案
 export const Phase1HintText = '⚡ 球速加快了！';

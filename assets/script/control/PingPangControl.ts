@@ -1,3 +1,4 @@
+import { Api } from '../api/api';
 import { UiBase } from '../../framework/ui/UiBase';
 import { PingPangEvent } from '../const/EventDefine';
 import {
@@ -29,7 +30,7 @@ import {
   ShoeFlowerSpawnRangeX,
   ShoeFlowerSpawnRangeY,
 } from '../const/GameConst';
-import { IShoeFlower } from '../const/Interface';
+import { IPingPangResult, IShoeFlower } from '../const/Interface';
 import { PingPangModel } from '../model/PingPangModel';
 
 /**
@@ -92,13 +93,14 @@ export class PingPangControl {
   public startGame(): void {
     this.model.init();
     this.spawnTimer = this._randomSpawnInterval();
-    this.lastSecond = -1;
+    this.lastSecond = 0;
     this._debugNormalCount = 0;
     this._debugLimitedCount = 0;
     // 初始直线下落，速度放缓让玩家有准备时间；接到第一球后才有横向速度
     this.model.setBall(0, this.model.ballY, 0, -600);
     this.model.setPlaying(true);
     UiBase.emitUiEvent(PingPangEvent.gameStart);
+    UiBase.emitUiEvent(PingPangEvent.timeUpdate, 0);
   }
 
   /**
@@ -156,6 +158,7 @@ export class PingPangControl {
   }
   public getCombo(): number { return this.model.combo; }
   public getRemainTime(): number { return this.model.remainTime; }
+  public getElapsedTime(): number { return this.model.elapsedTime; }
   public getPaddleX(): number { return this.model.paddleX; }
   public getDifficultyPhase(): eDifficultyPhase { return this.model.difficultyPhase; }
   public getShoeFlowers(): ReadonlyArray<IShoeFlower> { return this.model.shoeFlowers; }
@@ -292,10 +295,10 @@ export class PingPangControl {
   private _tickTime(dt: number): void {
     const timeUp = this.model.tickTime(dt);
 
-    const curSecond = Math.ceil(this.model.remainTime);
+    const curSecond = Math.floor(this.model.elapsedTime);
     if (curSecond !== this.lastSecond) {
       this.lastSecond = curSecond;
-      UiBase.emitUiEvent(PingPangEvent.timeUpdate, this.model.remainTime);
+      UiBase.emitUiEvent(PingPangEvent.timeUpdate, curSecond);
     }
 
     if (timeUp && GameDuration > 0) {
@@ -415,7 +418,19 @@ export class PingPangControl {
     if (this.model.isGameOver) return;
     this.model.setGameOver();
     const result = this.model.buildResult();
+    void this._submitResult(result);
     UiBase.emitUiEvent(PingPangEvent.gameOver, result);
+  }
+
+  private async _submitResult(result: IPingPangResult): Promise<void> {
+    try {
+      await Api.gameEnd({
+        score: result.score,
+        second: result.duration,
+      });
+    } catch (error) {
+      console.warn('[PingPangControl] submit result failed', error);
+    }
   }
 
   // ----------------------------------------------------------------

@@ -43,22 +43,21 @@ export class UserInfoModel {
   }
 
   public updateUserInfo() {
-    Api.getUserInfo()
-      .then(res => {
-        const info = res?.data?.userinfo;
-        if (!info) return;
-        const nextInfo: IUserInfo = {
-          nickname: String(info.nickname || ''),
-          openid: String(info.openid || ''),
-          headimgurl: String(info.headimgurl || ''),
-        };
-        this.setUserInfo(nextInfo);
-      })
-      .catch(err => {
-        console.warn('updateUserInfo failed', err);
-      });
+    // Api.getUserInfo()
+    //   .then(res => {
+    //     const info = res?.data?.userinfo;
+    //     if (!info) return;
+    //     const nextInfo: IUserInfo = {
+    //       nickname: String(info.nickname || ''),
+    //       openid: String(info.openid || ''),
+    //       headimgurl: String(info.headimgurl || ''),
+    //     };
+    //     this.setUserInfo(nextInfo);
+    //   })
+    //   .catch(err => {
+    //     console.warn('updateUserInfo failed', err);
+    //   });
      
-     Api.getReward 
   }
 
   /**
