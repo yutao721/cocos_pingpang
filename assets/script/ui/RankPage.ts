@@ -10,8 +10,8 @@ const RANK_DATA = {
   myrank: {
     rank: 1,
     nickname: 'NuMen',
-    headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png',
-    score: 100,
+    headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
+    score: 10000,
   },
   datas: [
     {
@@ -33,14 +33,14 @@ const RANK_DATA = {
       openid: 'oQol45fv2odvF-YLEDdEgkjifKOQ',
       nickname: 'User3',
       headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
-      score: 566,
+      score: 56,
     },
     {
       rank: 4,
       openid: 'oQol45ehzK1YandpPERyoCYBUB8Q',
       nickname: 'NuMen1',
       headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png',
-      score: 324,
+      score: 132114,
     },
     {
       rank: 5,
@@ -54,7 +54,28 @@ const RANK_DATA = {
       openid: 'oQol45fv2odvF-YLEDdEgkjifKOQ',
       nickname: 'User6',
       headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
-      score: 199,
+      score: 99,
+    },
+    {
+      rank: 7,
+      openid: 'oQol45ehzK1YandpPERyoCYBUB8Q',
+      nickname: 'NuMen1',
+      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png',
+      score: 1324,
+    },
+    {
+      rank: 8,
+      openid: 'oQol45R6YStDp-i3R9YVlbotZsiQ',
+      nickname: 'User5',
+      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202403/171159961960775.png',
+      score: 231,
+    },
+    {
+      rank: 9,
+      openid: 'oQol45fv2odvF-YLEDdEgkjifKOQ',
+      nickname: 'User6',
+      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
+      score: 99,
     },
   ],
 };
@@ -91,6 +112,50 @@ export class RankPage extends UiBase {
     // 处理我的排行榜数据
     this.handleMyRank(myrank as typeof RANK_DATA['myrank']);
 
+    // 处理前3名
+    this.handleTop3(datas.slice(0, 3));
+
+    // 处理剩余排行榜数据
+    this.handleRestRank(datas.slice(3));
+
+
+  }
+
+  public handleTop3(datas: typeof RANK_DATA['datas']) {
+    const rankNode = this.node.getChildByName('rank');
+    // 获取所有子节点
+    const children = rankNode.children;
+    console.log('children', children);
+    for (let i = 0; i < children.length; i++) {
+      const item = children[i];
+      const rankLabel = item.getChildByPath('rank/num')?.getComponent(Label);
+      const headNode = item.getChildByPath('avatarBg/Mask/avatar');
+      const nameLabel = item.getChildByPath('nickname')?.getComponent(Label);
+      const scoreLabel = item.getChildByPath('scoreRow/score')?.getComponent(Label);
+      console.log('rankLabel', rankLabel);
+      console.log('headNode', headNode);
+      console.log('nameLabel', nameLabel);
+      console.log('scoreLabel', scoreLabel)
+
+      if (rankLabel) {
+        rankLabel.string = String(datas[i].rank ?? '');
+      }
+
+      if (nameLabel) {
+        nameLabel.string = String(datas[i].nickname ?? '');
+      }
+
+      if (scoreLabel) {
+        scoreLabel.string = String(datas[i].score ?? '');
+      }
+
+      if (headNode) {
+        void this.loadHeadImg(headNode, String(datas[i].headimgurl ?? ''));
+      }
+    }
+  }
+
+  public handleRestRank(datas: typeof RANK_DATA['datas']) {
     for (let i = 0; i < datas.length; i++) {
       const item = instantiate(this.item);
       item.parent = this.item.parent;
@@ -123,7 +188,7 @@ export class RankPage extends UiBase {
   public handleMyRank(data: typeof RANK_DATA['myrank']) {
     const item = this.node.getChildByName('mine');
     const rankLabel = item.getChildByPath('rank/num')?.getComponent(Label);
-    const headNode = item.getChildByName('avatar');
+    const headNode = item.getChildByPath('head/Mask/avatar');
     const nameLabel = item.getChildByPath('info/nickname')?.getComponent(Label);
     const scoreLabel = item.getChildByPath('info/scoreRow/score')?.getComponent(Label);
 
