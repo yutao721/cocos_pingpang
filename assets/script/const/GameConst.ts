@@ -104,7 +104,7 @@ export const EnablePaddleCheck = true;
  * true  → 球拍每帧自动移动到球正下方，方便测试得分/连颠/难度逻辑
  * false → 正常玩家手动控制
  */
-export const AutoPaddle = false;
+export const AutoPaddle = true;
 
 // ============================================================
 // 颠球游戏（PingPang）新玩法配置

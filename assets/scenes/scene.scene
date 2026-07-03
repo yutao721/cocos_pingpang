@@ -347,7 +347,7 @@
     "propertyPath": [
       "_active"
     ],
-    "value": true
+    "value": false
   },
   {
     "__type__": "cc.Node",
@@ -640,7 +640,7 @@
     "propertyPath": [
       "_active"
     ],
-    "value": false
+    "value": true
   },
   {
     "__type__": "CCPropertyOverrideInfo",
@@ -672,7 +672,7 @@
     "value": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -567,
+      "y": -517,
       "z": 0
     }
   },
@@ -754,7 +754,7 @@
     "value": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -239.39999999999995,
+      "y": -239.40000000000006,
       "z": 0
     }
   },
@@ -772,7 +772,7 @@
     "propertyPath": [
       "_bottom"
     ],
-    "value": 2.842170943040401e-14
+    "value": -2.842170943040401e-14
   },
   {
     "__type__": "cc.TargetInfo",

@@ -1938,8 +1938,8 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
+      "x": 0.8,
+      "y": 0.8,
       "z": 1
     },
     "_mobility": 0,
@@ -2866,11 +2866,24 @@
     "paddleNode": {
       "__id__": 76
     },
+    "paddleNormalSF": {
+      "__uuid__": "6a4dd6a9-698d-4d5e-8557-076c8015ef5b@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "paddleHitSF": {
+      "__uuid__": "752b9516-c58f-4ecd-8861-5e2c339295b5@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "paddleHitFrameDuration": 0.07,
     "shoeFlowerLayer": {
       "__id__": 90
     },
     "shoeFlowerPfb": {
       "__uuid__": "863fe749-bf4f-479c-b342-75657fdf3fdc",
+      "__expectedType__": "cc.Prefab"
+    },
+    "shoeFlowerScorePfb": {
+      "__uuid__": "a2706d3b-eba2-4d0e-8cb9-e476ead6ac4c",
       "__expectedType__": "cc.Prefab"
     },
     "scoreLabel": {

@@ -66,6 +66,15 @@ export class PingPangPage extends UiBase {
   @property(Node)
   paddleNode: Node = null;
 
+  @property(SpriteFrame)
+  paddleNormalSF: SpriteFrame = null;
+
+  @property(SpriteFrame)
+  paddleHitSF: SpriteFrame = null;
+
+  @property
+  paddleHitFrameDuration: number = 0.07;
+
   @property(Node)
   shoeFlowerLayer: Node = null;
 
@@ -133,13 +142,12 @@ export class PingPangPage extends UiBase {
   private _paddleBaseY: number = 0;
 
   /** 颠球动画当前 Y 偏移（正弦曲线，0→峰值→0） */
-  private _paddleHitOffset: number = 0;
+  private _paddleSprite: Sprite = null;
 
   /** 颠球动画计时器，-1 表示未播放 */
-  private _paddleHitTimer: number = -1;
+  private _paddleHitFrameTimer: number = -1;
 
   /** 颠球动画总时长（秒） */
-  private readonly _paddleHitDuration: number = 0.22;
 
   /** 普通鞋花候选图集（运行时从目录加载） */
   private _normalShoeFlowerPool: SpriteFrame[] = [];
@@ -181,6 +189,12 @@ export class PingPangPage extends UiBase {
     if (this.comboBuffHintLabel) this.comboBuffHintLabel.node.active = false;
     if (this.comboLabel) this.comboLabel.node.active = false;
 
+    this._paddleSprite = this._findSprite(this.paddleNode);
+    if (!this.paddleNormalSF) {
+      this.paddleNormalSF = this._paddleSprite?.spriteFrame ?? null;
+    }
+    this._restorePaddleSprite();
+
     this._loadShoeFlowerSpritePools();
   }
 
@@ -192,17 +206,7 @@ export class PingPangPage extends UiBase {
     pingPangControl.update(dt);
 
     // 颠球动画：拍面沿 Y 轴向上弹起再落回
-    if (this._paddleHitTimer >= 0 && this.paddleNode) {
-      this._paddleHitTimer += dt;
-      const t = this._paddleHitTimer / this._paddleHitDuration;
-      if (t < 1) {
-        this._paddleHitOffset = 22 * Math.sin(t * Math.PI);
-      } else {
-        this._paddleHitOffset = 0;
-        this._paddleHitTimer = -1;
-      }
-    }
-
+    this._tickPaddleHitFrame(dt);
     this._tickShoeFlowerEffects(dt);
   }
 
@@ -246,7 +250,8 @@ export class PingPangPage extends UiBase {
       this.paddleNode.getComponent(Widget)?.updateAlignment();
       this.paddleNode.setPosition(pingPangControl.getPaddleX(), this.paddleNode.position.y, 0);
       this._paddleBaseY = this.paddleNode.position.y;
-      this._paddleHitTimer = -1;
+      this._paddleHitFrameTimer = -1;
+      this._restorePaddleSprite();
       pingPangControl.syncPaddleY(this._paddleBaseY);
     }
   }
@@ -277,9 +282,7 @@ export class PingPangPage extends UiBase {
     }
 
     // 颠球动作：拍面向上抬起，手柄位置不动
-    if (this.paddleNode) {
-      this._paddleHitTimer = 0;
-    }
+    this._playPaddleHitFrame();
   }
 
   private onBallFall(): void {
@@ -291,7 +294,36 @@ export class PingPangPage extends UiBase {
   // ----------------------------------------------------------------
 
   private onPaddleMove(x: number): void {
-    this.paddleNode?.setPosition(x, this._paddleBaseY + this._paddleHitOffset, 0);
+    this.paddleNode?.setPosition(x, this._paddleBaseY, 0);
+  }
+
+  private _tickPaddleHitFrame(dt: number): void {
+    if (this._paddleHitFrameTimer < 0) return;
+
+    this._paddleHitFrameTimer += dt;
+    if (this._paddleHitFrameTimer >= Math.max(0.02, this.paddleHitFrameDuration)) {
+      this._paddleHitFrameTimer = -1;
+      this._restorePaddleSprite();
+    }
+  }
+
+  private _playPaddleHitFrame(): void {
+    if (!this.paddleHitSF && !this.paddleNormalSF) return;
+
+    this._paddleHitFrameTimer = 0;
+    this._setPaddleSprite(this.paddleHitSF ?? this.paddleNormalSF);
+  }
+
+  private _restorePaddleSprite(): void {
+    this._setPaddleSprite(this.paddleNormalSF);
+  }
+
+  private _setPaddleSprite(spriteFrame: SpriteFrame | null): void {
+    if (!this._paddleSprite) {
+      this._paddleSprite = this._findSprite(this.paddleNode);
+    }
+    if (!this._paddleSprite || !spriteFrame) return;
+    this._paddleSprite.spriteFrame = spriteFrame;
   }
 
   // ----------------------------------------------------------------
@@ -617,6 +649,19 @@ export class PingPangPage extends UiBase {
     if (opacity) Tween.stopAllByTarget(opacity);
     this.shoeFlowerScoreNodes.delete(node);
     node.destroy();
+  }
+
+  private _findSprite(node: Node | null): Sprite | null {
+    if (!node) return null;
+
+    const sprite = node.getComponent(Sprite);
+    if (sprite) return sprite;
+
+    for (const child of node.children) {
+      const found = this._findSprite(child);
+      if (found) return found;
+    }
+    return null;
   }
 
   private _findLabel(node: Node): Label | null {
