@@ -1745,7 +1745,7 @@
     "__prefab": {
       "__id__": 73
     },
-    "maskClosable": true,
+    "maskClosable": false,
     "maskNode": {
       "__id__": 2
     },

@@ -37,6 +37,15 @@ export interface IShoeFlower {
     lifetime: number;         // 剩余存活时间（秒），倒计时到 0 自动消失
 }
 
+// 鞋花命中后的表现数据（用于 UI 反馈）
+export interface IShoeFlowerHitEffectData {
+    uid: number;
+    type: number;
+    x: number;
+    y: number;
+    score: number;
+}
+
 // 颠球游戏结算数据（上报后端 & 弹窗展示）
 export interface IPingPangResult {
     score: number;            // 最终分数

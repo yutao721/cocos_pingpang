@@ -1,14 +1,36 @@
-import { _decorator, Color, Label, Node, Prefab, Sprite, SpriteFrame, Tween, Vec3, Widget, instantiate, tween } from 'cc';
+import { _decorator, Color, Label, Node, Prefab, Sprite, SpriteFrame, Tween, UIOpacity, UITransform, Vec3, Widget, instantiate, tween } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
 import { pingPangControl } from '../control/PingPangControl';
 import { PingPangEvent } from '../const/EventDefine';
-import { eDifficultyPhase, eShoeFlowerType, RandomHintTexts, ShoeFlowerHitHint } from '../const/GameConst';
-import { IPingPangResult, IShoeFlower } from '../const/Interface';
+import {
+  eDifficultyPhase,
+  eShoeFlowerType,
+  RandomHintHitInterval,
+  RandomHintTexts,
+  ShoeFlowerExpireBlinkInterval,
+  ShoeFlowerExpireWarnMinOpacity,
+  ShoeFlowerExpireWarnScale,
+  ShoeFlowerExpireWarnTime,
+  ShoeFlowerHitHint,
+  ShoeFlowerHitSwingAngle,
+  ShoeFlowerHitSwingDuration,
+  ShoeFlowerHitSwingOffsetX,
+} from '../const/GameConst';
+import { IPingPangResult, IShoeFlower, IShoeFlowerHitEffectData } from '../const/Interface';
 import { UILayer } from '../../framework/ui/PageManager';
 import { UI_PATH } from '../const/UiConfig';
 import { ResultPopup } from './ResultPopup';
 import { getShoeFlowerSpritePool } from '../utils/utils';
 const { ccclass, property } = _decorator;
+
+interface IShoeFlowerViewState {
+  node: Node;
+  opacity: UIOpacity;
+  remainingLifetime: number;
+  totalLifetime: number;
+  baseScale: Vec3;
+  baseAngle: number;
+}
 
 /**
  * 颠球游戏 View 层
@@ -51,6 +73,10 @@ export class PingPangPage extends UiBase {
   @property(Prefab)
   shoeFlowerPfb: Prefab = null;
 
+  /** 鞋花得分飘字 Prefab（可选，用于自定义字体/样式） */
+  @property(Prefab)
+  shoeFlowerScorePfb: Prefab = null;
+
   @property(Label)
   scoreLabel: Label = null;
 
@@ -89,10 +115,13 @@ export class PingPangPage extends UiBase {
   // ----------------------------------------------------------------
 
   /** uid → Node 的映射，用于按 uid 更新/销毁鞋花节点 */
-  private shoeFlowerNodes: Map<number, Node> = new Map();
+  private shoeFlowerNodes: Map<number, IShoeFlowerViewState> = new Map();
 
-  /** uid → 鞋花类型，用于击中时取提示文案 */
-  private shoeFlowerTypes: Map<number, eShoeFlowerType> = new Map();
+  /** 当前场上正在播放的鞋花得分飘字 */
+  private shoeFlowerScoreNodes: Set<Node> = new Set();
+
+  /** 当前仍在播放命中消失动画的鞋花节点 */
+  private shoeFlowerFxNodes: Set<Node> = new Set();
 
   /** 当前正在播放的提示优先级：0=无 1=随机 2=连击 3=鞋花 */
   private _hintPriority: number = 0;
@@ -173,6 +202,8 @@ export class PingPangPage extends UiBase {
         this._paddleHitTimer = -1;
       }
     }
+
+    this._tickShoeFlowerEffects(dt);
   }
 
   // ----------------------------------------------------------------
@@ -198,9 +229,12 @@ export class PingPangPage extends UiBase {
     if (this.timerLabel) this.timerLabel.string = this._formatElapsedTime(0);
 
     // 清空残留鞋花节点
-    this.shoeFlowerNodes.forEach(node => node.destroy());
+    this.shoeFlowerNodes.forEach(state => this._disposeShoeFlowerNode(state.node));
     this.shoeFlowerNodes.clear();
-    this.shoeFlowerTypes.clear();
+    Array.from(this.shoeFlowerFxNodes).forEach(node => this._disposeShoeFlowerNode(node));
+    this.shoeFlowerFxNodes.clear();
+    Array.from(this.shoeFlowerScoreNodes).forEach(node => this._disposeShoeFlowerScoreNode(node));
+    this.shoeFlowerScoreNodes.clear();
 
     // 重置提示状态
     this._hintPriority = 0;
@@ -232,12 +266,14 @@ export class PingPangPage extends UiBase {
   }
 
   private onBallHitPaddle(): void {
-    // 每 3 次颠球随机显示一条提示（最低优先级）
-    this._randomHintCounter++;
-    if (this._randomHintCounter >= 3) {
-      this._randomHintCounter = 0;
-      const text = RandomHintTexts[Math.floor(Math.random() * RandomHintTexts.length)];
-      this._showHint(text, 1);
+    // 按配置间隔显示随机激励提示（最低优先级）
+    if (RandomHintHitInterval > 0) {
+      this._randomHintCounter++;
+      if (this._randomHintCounter >= RandomHintHitInterval) {
+        this._randomHintCounter = 0;
+        const text = RandomHintTexts[Math.floor(Math.random() * RandomHintTexts.length)];
+        this._showHint(text, 1);
+      }
     }
 
     // 颠球动作：拍面向上抬起，手柄位置不动
@@ -330,6 +366,7 @@ export class PingPangPage extends UiBase {
     const node = instantiate(this.shoeFlowerPfb);
     node.parent = this.shoeFlowerLayer;
     node.setPosition(flower.x, flower.y, 0);
+    node.angle = 0;
 
     // 根据类型切换 SpriteFrame（在编辑器拖入资源后生效）
     const sprite = node.getComponent(Sprite);
@@ -338,19 +375,29 @@ export class PingPangPage extends UiBase {
       sprite.spriteFrame = sf;
     }
 
-    this.shoeFlowerNodes.set(flower.uid, node);
-    this.shoeFlowerTypes.set(flower.uid, flower.type as eShoeFlowerType);
+    const opacity = node.getComponent(UIOpacity) ?? node.addComponent(UIOpacity);
+    opacity.opacity = 255;
+
+    this.shoeFlowerNodes.set(flower.uid, {
+      node,
+      opacity,
+      remainingLifetime: flower.lifetime,
+      totalLifetime: flower.lifetime,
+      baseScale: new Vec3(node.scale.x, node.scale.y, node.scale.z),
+      baseAngle: node.angle,
+    });
   }
 
   private onShoeFlowerUpdate(uid: number, y: number): void {
-    const node = this.shoeFlowerNodes.get(uid);
+    const node = this.shoeFlowerNodes.get(uid)?.node;
     if (node) node.setPosition(node.position.x, y, 0);
   }
 
-  private onShoeFlowerHit(uid: number, _score: number): void {
-    const type = this.shoeFlowerTypes.get(uid) ?? eShoeFlowerType.normal;
+  private onShoeFlowerHit(hitData: IShoeFlowerHitEffectData): void {
+    const type = (hitData.type as eShoeFlowerType) ?? eShoeFlowerType.normal;
     this._showHint(ShoeFlowerHitHint[type], 3);
-    this._removeShoeFlowerNode(uid);
+    this._playShoeFlowerHitEffect(hitData.uid);
+    this._showShoeFlowerScore(hitData);
     // TODO: 播放消除特效/音效
   }
 
@@ -359,13 +406,119 @@ export class PingPangPage extends UiBase {
   }
 
   private _removeShoeFlowerNode(uid: number): void {
-    const node = this.shoeFlowerNodes.get(uid);
-    if (node) {
-      node.active = false;
-      node.destroy();
-      this.shoeFlowerNodes.delete(uid);
-    }
-    this.shoeFlowerTypes.delete(uid);
+    const node = this.shoeFlowerNodes.get(uid)?.node;
+    if (node) this._disposeShoeFlowerNode(node);
+    this.shoeFlowerNodes.delete(uid);
+  }
+
+  private _tickShoeFlowerEffects(dt: number): void {
+    this.shoeFlowerNodes.forEach(state => {
+      if (!state.node || !state.node.isValid) return;
+
+      state.remainingLifetime = Math.max(0, state.remainingLifetime - dt);
+      const warnWindow = Math.min(ShoeFlowerExpireWarnTime, state.totalLifetime);
+      if (warnWindow <= 0 || state.remainingLifetime > warnWindow) {
+        this._resetShoeFlowerVisual(state);
+        return;
+      }
+
+      const warnElapsed = warnWindow - state.remainingLifetime;
+      const progress = Math.max(0, Math.min(1, warnElapsed / warnWindow));
+      const cycle = Math.max(0.05, ShoeFlowerExpireBlinkInterval);
+      const pulse = 0.5 - 0.5 * Math.cos((warnElapsed / cycle) * Math.PI * 2);
+      const strength = 0.35 + 0.65 * progress;
+      const amount = pulse * strength;
+      const opacity = Math.round(255 - (255 - ShoeFlowerExpireWarnMinOpacity) * amount);
+      const scaleMul = 1 + (ShoeFlowerExpireWarnScale - 1) * amount;
+      this._applyShoeFlowerVisual(state, scaleMul, opacity, state.baseAngle);
+    });
+  }
+
+  private _playShoeFlowerHitEffect(uid: number): void {
+    const state = this.shoeFlowerNodes.get(uid);
+    if (!state) return;
+
+    this.shoeFlowerNodes.delete(uid);
+    if (!state.node || !state.node.isValid) return;
+
+    this._resetShoeFlowerVisual(state);
+    this.shoeFlowerFxNodes.add(state.node);
+
+    const { x, y, z } = state.node.position;
+    const baseScale = state.baseScale;
+    const duration = Math.max(0.12, ShoeFlowerHitSwingDuration);
+    const step = duration / 4;
+    const leftPos = new Vec3(x - ShoeFlowerHitSwingOffsetX, y, z);
+    const rightPos = new Vec3(x + ShoeFlowerHitSwingOffsetX * 0.85, y, z);
+    const settleLeftPos = new Vec3(x - ShoeFlowerHitSwingOffsetX * 0.45, y, z);
+    const originPos = new Vec3(x, y, z);
+    const smallScale = new Vec3(baseScale.x * 0.97, baseScale.y * 0.97, baseScale.z);
+    const smallerScale = new Vec3(baseScale.x * 0.92, baseScale.y * 0.92, baseScale.z);
+    const finishScale = new Vec3(baseScale.x * 0.88, baseScale.y * 0.88, baseScale.z);
+
+    Tween.stopAllByTarget(state.node);
+    Tween.stopAllByTarget(state.opacity);
+
+    tween(state.node)
+      .to(step, {
+        position: leftPos,
+        angle: state.baseAngle - ShoeFlowerHitSwingAngle,
+        scale: smallScale,
+      })
+      .to(step, {
+        position: rightPos,
+        angle: state.baseAngle + ShoeFlowerHitSwingAngle,
+        scale: new Vec3(baseScale.x, baseScale.y, baseScale.z),
+      })
+      .to(step, {
+        position: settleLeftPos,
+        angle: state.baseAngle - ShoeFlowerHitSwingAngle * 0.6,
+        scale: smallerScale,
+      })
+      .to(step, {
+        position: originPos,
+        angle: state.baseAngle,
+        scale: finishScale,
+      })
+      .call(() => this._disposeAnimatedShoeFlowerNode(state.node))
+      .start();
+
+    tween(state.opacity)
+      .to(duration, { opacity: 0 })
+      .start();
+  }
+
+  private _applyShoeFlowerVisual(
+    state: IShoeFlowerViewState,
+    scaleMul: number,
+    opacity: number,
+    angle: number,
+  ): void {
+    state.node.setScale(
+      state.baseScale.x * scaleMul,
+      state.baseScale.y * scaleMul,
+      state.baseScale.z,
+    );
+    state.node.angle = angle;
+    state.opacity.opacity = opacity;
+  }
+
+  private _resetShoeFlowerVisual(state: IShoeFlowerViewState): void {
+    this._applyShoeFlowerVisual(state, 1, 255, state.baseAngle);
+  }
+
+  private _disposeAnimatedShoeFlowerNode(node: Node): void {
+    this.shoeFlowerFxNodes.delete(node);
+    this._disposeShoeFlowerNode(node);
+  }
+
+  private _disposeShoeFlowerNode(node: Node): void {
+    if (!node || !node.isValid) return;
+    Tween.stopAllByTarget(node);
+    const opacity = node.getComponent(UIOpacity);
+    if (opacity) Tween.stopAllByTarget(opacity);
+    node.active = false;
+    node.destroy();
   }
 
   // ----------------------------------------------------------------
@@ -411,6 +564,77 @@ export class PingPangPage extends UiBase {
       return pool[index];
     }
     return isLimited ? this.limitedShoeFlowerSF : this.normalShoeFlowerSF;
+  }
+
+  private _showShoeFlowerScore(hitData: IShoeFlowerHitEffectData): void {
+    const parent = this.shoeFlowerLayer ?? this.node;
+    if (!parent) return;
+
+    const usingCustomPrefab = !!this.shoeFlowerScorePfb;
+    const node = usingCustomPrefab
+      ? instantiate(this.shoeFlowerScorePfb)
+      : this._createDefaultShoeFlowerScoreNode();
+    const label = this._findLabel(node) ?? node.addComponent(Label);
+    const opacity = node.getComponent(UIOpacity) ?? node.addComponent(UIOpacity);
+    node.getComponent(UITransform) ?? node.addComponent(UITransform);
+
+    node.parent = parent;
+    node.active = true;
+    node.setPosition(hitData.x, hitData.y + 12, 0);
+    node.setScale(0.92, 0.92, 1);
+    label.string = `+${hitData.score}`;
+    if (!usingCustomPrefab) {
+      label.color = this._getShoeFlowerScoreColor(hitData.type);
+    }
+    opacity.opacity = 255;
+
+    this.shoeFlowerScoreNodes.add(node);
+
+    tween(node)
+      .to(0.12, { scale: new Vec3(1.06, 1.06, 1) })
+      .to(0.45, { position: new Vec3(hitData.x, hitData.y + 72, 0), scale: new Vec3(1, 1, 1) })
+      .call(() => this._disposeShoeFlowerScoreNode(node))
+      .start();
+
+    tween(opacity)
+      .delay(0.1)
+      .to(0.4, { opacity: 0 })
+      .start();
+  }
+
+  private _createDefaultShoeFlowerScoreNode(): Node {
+    const node = new Node('ShoeFlowerScore');
+    node.addComponent(UITransform);
+    const label = node.addComponent(Label);
+    label.fontSize = 34;
+    label.lineHeight = 36;
+    return node;
+  }
+
+  private _disposeShoeFlowerScoreNode(node: Node): void {
+    Tween.stopAllByTarget(node);
+    const opacity = node.getComponent(UIOpacity);
+    if (opacity) Tween.stopAllByTarget(opacity);
+    this.shoeFlowerScoreNodes.delete(node);
+    node.destroy();
+  }
+
+  private _findLabel(node: Node): Label | null {
+    const label = node.getComponent(Label);
+    if (label) return label;
+
+    for (const child of node.children) {
+      const found = this._findLabel(child);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  private _getShoeFlowerScoreColor(type: number): Color {
+    if (type === eShoeFlowerType.limited) {
+      return new Color(255, 214, 88, 255);
+    }
+    return new Color(255, 245, 170, 255);
   }
 
   private _formatElapsedTime(totalSeconds: number): string {

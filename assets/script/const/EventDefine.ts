@@ -42,7 +42,7 @@ export enum PingPangEvent {
     // --- 鞋花 ---
     shoeFlowerSpawn = 'pp_shoeFlowerSpawn', // 鞋花出现：参数 IShoeFlower
     shoeFlowerUpdate= 'pp_shoeFlowerUpdate',// 鞋花位置帧更新：参数 uid:number, y:number
-    shoeFlowerHit   = 'pp_shoeFlowerHit',   // 鞋花被球撞击消除：参数 uid:number, score:number
+    shoeFlowerHit   = 'pp_shoeFlowerHit',   // 鞋花被球撞击消除：参数 IShoeFlowerHitEffectData
     shoeFlowerMiss  = 'pp_shoeFlowerMiss',  // 鞋花落出屏幕（未被撞）：参数 uid:number
 
     // --- 难度提升 ---

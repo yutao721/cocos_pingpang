@@ -30,7 +30,7 @@ import {
   ShoeFlowerSpawnRangeX,
   ShoeFlowerSpawnRangeY,
 } from '../const/GameConst';
-import { IPingPangResult, IShoeFlower } from '../const/Interface';
+import { IPingPangResult, IShoeFlower, IShoeFlowerHitEffectData } from '../const/Interface';
 import { PingPangModel } from '../model/PingPangModel';
 
 /**
@@ -355,7 +355,8 @@ export class PingPangControl {
     }
 
     const toRemove: number[] = [];
-    const toHit: number[] = [];
+    const toHit: IShoeFlowerHitEffectData[] = [];
+    const hitUidSet: Set<number> = new Set();
 
     for (const flower of this.model.shoeFlowers) {
       // 球与鞋花的距离碰撞检测
@@ -363,7 +364,16 @@ export class PingPangControl {
       const dy = this.model.ballY - flower.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       if (dist <= BallRadius + ShoeFlowerRadius) {
-        toHit.push(flower.uid);
+        if (!hitUidSet.has(flower.uid)) {
+          hitUidSet.add(flower.uid);
+          toHit.push({
+            uid: flower.uid,
+            type: flower.type,
+            x: flower.x,
+            y: flower.y,
+            score: 0,
+          });
+        }
         continue;
       }
 
@@ -374,10 +384,12 @@ export class PingPangControl {
       }
     }
 
-    for (const uid of toHit) {
-      const delta = this.model.onHitShoeFlower(uid);
+    for (const hitData of toHit) {
+      const delta = this.model.onHitShoeFlower(hitData.uid);
+      if (delta <= 0) continue;
+      hitData.score = delta;
       UiBase.emitUiEvent(PingPangEvent.scoreUpdate, this.model.score, delta);
-      UiBase.emitUiEvent(PingPangEvent.shoeFlowerHit, uid, delta);
+      UiBase.emitUiEvent(PingPangEvent.shoeFlowerHit, hitData);
     }
     for (const uid of toRemove) {
       this.model.removeShoeFlower(uid);

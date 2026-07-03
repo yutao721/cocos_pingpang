@@ -148,6 +148,9 @@ export const ComboBuffStep = 10;
 // 超出表格最大次数后，每步额外加分的基础值（最后一档 bonus + (超出段数 * ComboBuffStepBonus)）
 export const ComboBuffStepBonus = 10;
 
+// 随机激励提示触发间隔（每颠多少次出现 1 条，<= 0 表示关闭）
+export const RandomHintHitInterval = 8;
+
 // 随机提示文案（每次颠球低概率触发，优先级最低）
 export const RandomHintTexts: string[] = [
   '洞门自在，这一拍超稳！',
@@ -184,6 +187,17 @@ export const ShoeFlowerLifetime: [number, number] = [5, 8];
 
 // Phase2 时鞋花存活时间倍率（< 1 使鞋花消失更快）
 export const ShoeFlowerLifetimeMulPhase2: number = 0.6;
+
+// 鞋花临近超时时的原地预警效果配置
+export const ShoeFlowerExpireWarnTime: number = 1.2;
+export const ShoeFlowerExpireWarnMinOpacity: number = 160;
+export const ShoeFlowerExpireBlinkInterval: number = 0.2;
+export const ShoeFlowerExpireWarnScale: number = 1.05;
+
+// 鞋花被命中后的左右摇摆消失效果配置
+export const ShoeFlowerHitSwingOffsetX: number = 14;
+export const ShoeFlowerHitSwingAngle: number = 10;
+export const ShoeFlowerHitSwingDuration: number = 0.22;
 
 // 鞋花碰撞半径（像素），球与鞋花中心距离 ≤ BallRadius + ShoeFlowerRadius 时触发击中
 export const ShoeFlowerRadius: number = 45
