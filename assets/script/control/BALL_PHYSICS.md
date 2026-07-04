@@ -198,3 +198,108 @@ speed = BallInitSpeed * Phase1BallSpeedMul(1.4)
 | `Phase1BallSpeedMul` | 1.4 | Phase1 球速倍率 |
 | `VY_RATIO` | 0.75 | 垂直速度比例（写在 Control 常量里） |
 | `Phase1ScoreThreshold` | 100 | 触发球速加快的分数 |
+
+---
+
+## 八、当前代码中的球拍判定补充说明（以代码为准）
+
+下面这部分是对“现在实际怎么判球碰到球拍”的补充说明，后续如果要调手感，优先以这里和 `PingPangControl.ts` 当前实现为准。
+
+### 8.1 当前命中判定条件
+
+当前正式接球判定开启时（`EnablePaddleCheck = true`），球命中球拍需要同时满足：
+
+```ts
+vy < 0
+&& y - BallRadius <= PADDLE_TOP
+&& Math.abs(x - paddleX) <= PaddleWidth / 2 + BallRadius
+```
+
+含义：
+- `vy < 0`：球必须处于下落状态。
+- `y - BallRadius <= PADDLE_TOP`：用“球底部”去碰一条隐形的接球判定线。
+- `Math.abs(x - paddleX) <= PaddleWidth / 2 + BallRadius`：球心的横向位置必须进入球拍有效范围。
+
+如果球已经下落到接球判定线，但横向没有进入范围，就会直接判定为没接住，进入落地结束流程。
+
+### 8.2 当前球拍有效区域
+
+当前代码里的“有效区域”并不是按球拍图片外形逐像素判定，而是：
+
+- 一条固定高度的接球判定线
+- 加上一段横向有效范围
+
+当前公式：
+
+```ts
+PADDLE_TOP = paddleY + PaddleHeight + (PaddleHeight / 2)
+halfW = PaddleWidth / 2
+hitXRange = [paddleX - (halfW + BallRadius), paddleX + (halfW + BallRadius)]
+```
+
+按当前配置值：
+
+- `PaddleWidth = 190`
+- `PaddleHeight = 214`
+- `BallRadius = 53`
+
+可得：
+
+- 横向有效半宽 = `190 / 2 + 53 = 148`
+- 横向总有效宽度 = `296`
+- 也就是说，当前是以 `paddleX` 为中心，左右各 `148` 像素都算可接住
+
+### 8.3 当前判定线高度的理解
+
+当前判定线高度使用的是：
+
+```ts
+PADDLE_TOP = paddleY + PaddleHeight + (PaddleHeight / 2)
+```
+
+注意：
+
+- 这里用的是固定常量 `PaddleHeight`
+- 虽然 `PingPangModel` 里有 `paddleHalfHeight`，但当前接球判定并没有使用它
+- 所以现在更接近“代码里写死的一条接球带”，而不是严格跟随球拍图片真实可视边缘
+
+### 8.4 命中后球的反弹逻辑
+
+命中后，球的反弹方向由球心相对球拍中心的横向偏移决定：
+
+```ts
+offset = ballX - paddleX
+ratio = clamp(offset / (PaddleWidth / 2), -1, 1)
+
+newVX = ratio * BallInitSpeed * BallVXRatio * vxMul
+newVY = BallInitSpeed * BallVYRatio
+```
+
+含义：
+
+- 打中间：`ratio` 接近 `0`，球基本垂直向上
+- 打左边：`ratio < 0`，球向左上
+- 打右边：`ratio > 0`，球向右上
+- 越靠边，横向速度越大
+
+其中：
+
+- `BallInitSpeed = 3200`
+- `BallVXRatio = 0.22`
+- `BallVYRatio = 0.66`
+- `vxMul` 在 `Phase1` 之后会乘上 `Phase1BallSpeedMul`
+
+### 8.5 当前手感层面的结论
+
+从实现上看，当前球拍接球区域应理解为：
+
+- 不是“球拍图片本身的形状”
+- 而是“球拍中心点 + 固定横向接球宽度 + 固定高度接球线”
+
+因此，如果后面觉得“明明看着碰到了却没接住”或“看着擦边也接住了”，优先检查的不是球拍图片，而是以下几项：
+
+- `PaddleWidth`
+- `PaddleHeight`
+- `BallRadius`
+- `paddleY`
+- `PADDLE_TOP` 的计算方式是否需要改成更贴近真实球拍上边缘

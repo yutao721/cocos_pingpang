@@ -14,7 +14,6 @@ import {
   ShoeFlowerHitHint,
   ShoeFlowerHitSwingAngle,
   ShoeFlowerHitSwingDuration,
-  ShoeFlowerHitSwingOffsetX,
 } from '../const/GameConst';
 import { IPingPangResult, IShoeFlower, IShoeFlowerHitEffectData } from '../const/Interface';
 import { UILayer } from '../../framework/ui/PageManager';
@@ -85,6 +84,12 @@ export class PingPangPage extends UiBase {
   /** 鞋花得分飘字 Prefab（可选，用于自定义字体/样式） */
   @property(Prefab)
   shoeFlowerScorePfb: Prefab = null;
+
+  @property
+  shoeFlowerScoreFloatDuration: number = 1.5;
+
+  @property
+  shoeFlowerScoreFloatEndOffsetY: number = 110;
 
   @property(Label)
   scoreLabel: Label = null;
@@ -476,16 +481,11 @@ export class PingPangPage extends UiBase {
     this._resetShoeFlowerVisual(state);
     this.shoeFlowerFxNodes.add(state.node);
 
-    const { x, y, z } = state.node.position;
     const baseScale = state.baseScale;
     const duration = Math.max(0.12, ShoeFlowerHitSwingDuration);
     const step = duration / 4;
-    const leftPos = new Vec3(x - ShoeFlowerHitSwingOffsetX, y, z);
-    const rightPos = new Vec3(x + ShoeFlowerHitSwingOffsetX * 0.85, y, z);
-    const settleLeftPos = new Vec3(x - ShoeFlowerHitSwingOffsetX * 0.45, y, z);
-    const originPos = new Vec3(x, y, z);
     const smallScale = new Vec3(baseScale.x * 0.97, baseScale.y * 0.97, baseScale.z);
-    const smallerScale = new Vec3(baseScale.x * 0.92, baseScale.y * 0.92, baseScale.z);
+    const mediumScale = new Vec3(baseScale.x * 0.95, baseScale.y * 0.95, baseScale.z);
     const finishScale = new Vec3(baseScale.x * 0.88, baseScale.y * 0.88, baseScale.z);
 
     Tween.stopAllByTarget(state.node);
@@ -493,22 +493,18 @@ export class PingPangPage extends UiBase {
 
     tween(state.node)
       .to(step, {
-        position: leftPos,
         angle: state.baseAngle - ShoeFlowerHitSwingAngle,
         scale: smallScale,
       })
       .to(step, {
-        position: rightPos,
         angle: state.baseAngle + ShoeFlowerHitSwingAngle,
         scale: new Vec3(baseScale.x, baseScale.y, baseScale.z),
       })
       .to(step, {
-        position: settleLeftPos,
-        angle: state.baseAngle - ShoeFlowerHitSwingAngle * 0.6,
-        scale: smallerScale,
+        angle: state.baseAngle - ShoeFlowerHitSwingAngle * 0.65,
+        scale: mediumScale,
       })
       .to(step, {
-        position: originPos,
         angle: state.baseAngle,
         scale: finishScale,
       })
@@ -601,6 +597,12 @@ export class PingPangPage extends UiBase {
   private _showShoeFlowerScore(hitData: IShoeFlowerHitEffectData): void {
     const parent = this.shoeFlowerLayer ?? this.node;
     if (!parent) return;
+    const totalDuration = Math.max(0.6, this.shoeFlowerScoreFloatDuration);
+    const popDuration = Math.min(0.16, totalDuration * 0.12);
+    const floatDuration = Math.max(0.3, totalDuration - popDuration);
+    const fadeDelay = Math.min(0.2, totalDuration * 0.14);
+    const fadeDuration = Math.max(0.3, totalDuration - fadeDelay);
+    const endOffsetY = this.shoeFlowerScoreFloatEndOffsetY;
 
     const usingCustomPrefab = !!this.shoeFlowerScorePfb;
     const node = usingCustomPrefab
@@ -623,14 +625,14 @@ export class PingPangPage extends UiBase {
     this.shoeFlowerScoreNodes.add(node);
 
     tween(node)
-      .to(0.12, { scale: new Vec3(1.06, 1.06, 1) })
-      .to(0.45, { position: new Vec3(hitData.x, hitData.y + 72, 0), scale: new Vec3(1, 1, 1) })
+      .to(popDuration, { scale: new Vec3(1.06, 1.06, 1) })
+      .to(floatDuration, { position: new Vec3(hitData.x, hitData.y + endOffsetY, 0), scale: new Vec3(1, 1, 1) })
       .call(() => this._disposeShoeFlowerScoreNode(node))
       .start();
 
     tween(opacity)
-      .delay(0.1)
-      .to(0.4, { opacity: 0 })
+      .delay(fadeDelay)
+      .to(fadeDuration, { opacity: 0 })
       .start();
   }
 

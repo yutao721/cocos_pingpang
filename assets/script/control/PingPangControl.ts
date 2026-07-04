@@ -26,6 +26,7 @@ import {
   ShoeFlowerLifetime,
   ShoeFlowerLifetimeMulPhase2,
   ShoeFlowerRadius,
+  ShoeFlowerRespawnDelayAfterDisappear,
   ShoeFlowerSpawnInterval,
   ShoeFlowerSpawnRangeX,
   ShoeFlowerSpawnRangeY,
@@ -388,11 +389,13 @@ export class PingPangControl {
       const delta = this.model.onHitShoeFlower(hitData.uid);
       if (delta <= 0) continue;
       hitData.score = delta;
+      this._resetShoeFlowerRespawnTimer();
       UiBase.emitUiEvent(PingPangEvent.scoreUpdate, this.model.score, delta);
       UiBase.emitUiEvent(PingPangEvent.shoeFlowerHit, hitData);
     }
     for (const uid of toRemove) {
       this.model.removeShoeFlower(uid);
+      this._resetShoeFlowerRespawnTimer();
       UiBase.emitUiEvent(PingPangEvent.shoeFlowerMiss, uid);
     }
   }
@@ -454,6 +457,10 @@ export class PingPangControl {
     const mul = this.model.difficultyPhase >= eDifficultyPhase.phase2
       ? Phase2SpawnIntervalMul : 1;
     return (min + Math.random() * (max - min)) * mul;
+  }
+
+  private _resetShoeFlowerRespawnTimer(): void {
+    this.spawnTimer = Math.max(this.spawnTimer, ShoeFlowerRespawnDelayAfterDisappear);
   }
 }
 

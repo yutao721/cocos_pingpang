@@ -17,17 +17,9 @@ export class RewardPage extends UiBase {
   public backNode: Node = null;
 
   @property(Node)
-  public ruleBtn: Node = null;
-
-  @property(Node)
   public startGameBtn: Node = null;
 
   protected onLoad(): void {
-
-
-    this.ruleBtn.on(Node.EventType.TOUCH_END, () => {
-      this.pageManager.showUI(UI_PATH.RULE, UILayer.TOP);
-    })
 
     this.startGameBtn.on(Node.EventType.TOUCH_END, this.onStartGame, this);
 

@@ -105,7 +105,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -152.5,
+      "y": -145,
       "z": 0
     },
     "_lrot": {
@@ -146,7 +146,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 750,
-      "height": 1639
+      "height": 1624
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -226,7 +226,7 @@
     "_left": 0,
     "_right": 0,
     "_top": 0,
-    "_bottom": -7.5,
+    "_bottom": 0,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
     "_isAbsLeft": true,
@@ -236,7 +236,7 @@
     "_isAbsHorizontalCenter": true,
     "_isAbsVerticalCenter": true,
     "_originalWidth": 0,
-    "_originalHeight": 1639,
+    "_originalHeight": 1621,
     "_alignMode": 2,
     "_lockFlags": 0,
     "_id": ""
@@ -463,7 +463,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -56.5,
+      "y": -57.5,
       "z": 0
     },
     "_lrot": {
@@ -519,7 +519,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -274,
+      "x": -278,
       "y": 0,
       "z": 0
     },
@@ -1006,7 +1006,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 273,
+      "x": 277,
       "y": 0,
       "z": 0
     },
@@ -1350,7 +1350,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -18,
+      "x": -22,
       "y": 0,
       "z": 0
     },
@@ -2129,8 +2129,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 676,
-      "height": 113
+      "width": 684,
+      "height": 115
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -2171,7 +2171,7 @@
     },
     "_type": 0,
     "_fillType": 0,
-    "_sizeMode": 0,
+    "_sizeMode": 1,
     "_fillCenter": {
       "__type__": "cc.Vec2",
       "x": 0,
@@ -2219,7 +2219,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 750,
-      "height": 243
+      "height": 245
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -2629,7 +2629,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -274,
+      "x": -278,
       "y": 0,
       "z": 0
     },
@@ -3116,7 +3116,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 273,
+      "x": 277,
       "y": 0,
       "z": 0
     },
@@ -3460,7 +3460,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -18,
+      "x": -22,
       "y": 0,
       "z": 0
     },
@@ -3582,9 +3582,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 6,
-      "g": 133,
-      "b": 250,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 255
     },
     "_string": "随身润着小金鱼",
@@ -3807,9 +3807,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 0,
-      "g": 0,
-      "b": 0,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 255
     },
     "_string": "111111",
@@ -4005,9 +4005,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 145,
-      "g": 144,
-      "b": 144,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 255
     },
     "_string": "得分",
@@ -4278,8 +4278,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 676,
-      "height": 113
+      "width": 684,
+      "height": 114
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -4320,7 +4320,7 @@
     },
     "_type": 0,
     "_fillType": 0,
-    "_sizeMode": 0,
+    "_sizeMode": 1,
     "_fillCenter": {
       "__type__": "cc.Vec2",
       "x": 0,
@@ -4357,7 +4357,7 @@
     "_left": 0,
     "_right": 0,
     "_top": 0,
-    "_bottom": 0,
+    "_bottom": -0.5,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
     "_isAbsLeft": true,

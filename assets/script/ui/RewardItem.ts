@@ -45,7 +45,7 @@ export class RewardItem extends UiBase {
       this.icon[0].active = true;
     });
     const node = this.icon[0];
-    node.getComponent(UITransform).setContentSize(70, 70);
+    node.getComponent(UITransform).setContentSize(60, 60);
     node.x = 0;
     const state = userControl.getRewardList()[key];
     this.setBtnState(2);

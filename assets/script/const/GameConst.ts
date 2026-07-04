@@ -104,7 +104,7 @@ export const EnablePaddleCheck = true;
  * true  → 球拍每帧自动移动到球正下方，方便测试得分/连颠/难度逻辑
  * false → 正常玩家手动控制
  */
-export const AutoPaddle = true;
+export const AutoPaddle = false;
 
 // ============================================================
 // 颠球游戏（PingPang）新玩法配置
@@ -178,6 +178,9 @@ export const MaxShoeFlowerOnStage = 1;
 // 鞋花生成间隔范围（秒）[min, max]
 export const ShoeFlowerSpawnInterval: [number, number] = [2.0, 5.0];
 
+// 鞋花消失后再次生成的最小间隔（秒），避免上一朵刚消失下一朵立刻出现
+export const ShoeFlowerRespawnDelayAfterDisappear: number = 2.0;
+
 // 鞋花随机出现的位置范围（设计分辨率 750x1334，Cocos 坐标系）
 export const ShoeFlowerSpawnRangeX: [number, number] = [-180, 180];
 export const ShoeFlowerSpawnRangeY: [number, number] = [-220, 20];
@@ -221,7 +224,7 @@ export const BallInitY = 200;
 export const PaddleMoveSpeed = 600;
 
 // 球拍宽度（像素），用于碰撞检测
-export const PaddleWidth = 190;
+export const PaddleWidth = 200;
 
 // 球拍高度（像素），用于碰撞检测
 export const PaddleHeight = 214;
@@ -230,7 +233,7 @@ export const PaddleHeight = 214;
 export const PaddleInitY = -580;
 
 // 球半径（像素），用于碰撞检测
-export const BallRadius = 53;
+export const BallRadius = 57;
 
 // 每日最高上榜分数（超过才上报排行榜）
 export const DailyRankMinScore = 0;

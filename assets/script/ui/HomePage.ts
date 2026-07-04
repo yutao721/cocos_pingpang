@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, resources, Sprite, SpriteAtlas, SpriteFrame } from 'cc';
+import { _decorator, Component, Node, Prefab, resources, Sprite, SpriteAtlas, SpriteFrame } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
 import { playFrameAnimation } from '../../framework/utils/CommonFun';
 import { UI_PATH } from '../const/UiConfig';
@@ -8,6 +8,7 @@ import { UiEvent } from '../const/EventDefine';
 import { tipControl } from '../control/TipControl';
 import { shareGame } from '../utils/utils';
 import { AudioManager } from '../../framework/audio/AudioManager';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('HomePage')
@@ -37,9 +38,16 @@ export class HomePage extends UiBase {
   @property(SpriteFrame)
   soundSprites: SpriteFrame[] = [];
 
+  @property(Node)
+  GuidePopup: Node = null;
+
+  @property(Node)
+  closeGuideBtn: Node = null;
+
   protected onLoad(): void {
     this.campBtn.on(Node.EventType.TOUCH_END, this.goCamp, this);
     this.startGameBtn.on(Node.EventType.TOUCH_END, this.onStartGame, this);
+    this.closeGuideBtn.on(Node.EventType.TOUCH_END, this.oncloseGuide, this);
 
     this.rewardBtn.on(Node.EventType.TOUCH_END, () => {
       this.pageManager.showUI(UI_PATH.REWARD);
@@ -51,6 +59,10 @@ export class HomePage extends UiBase {
     this.ruleBtn.on(Node.EventType.TOUCH_END, () => {
       this.pageManager.showUI(UI_PATH.RULE, UILayer.TOP);
     })
+
+    // this.scheduleOnce(() => {
+    //   this.showGuide();
+    // })
 
     this.updateSoundState();
   }
@@ -89,6 +101,14 @@ export class HomePage extends UiBase {
     this.pageManager.showUI(UI_PATH.RANK, UILayer.MIDDLE, () => {
       this.pageManager.removeUI(this.node);
     });
+  }
+
+  private showGuide() {
+    this.GuidePopup.active = true;
+  }
+
+  private oncloseGuide() {
+    this.GuidePopup.active = false;
   }
 }
 

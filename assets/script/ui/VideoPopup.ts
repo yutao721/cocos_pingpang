@@ -9,6 +9,9 @@ export class RankPopup extends UiBase {
   @property(VideoPlayer)
   videoPlayer: VideoPlayer = null;
 
+  @property(Node)
+  closeBtn: Node = null;
+
   protected start(): void {
     let canvas = find('Canvas');
     canvas.on(Node.EventType.TOUCH_START, this.playVideo, this);
@@ -16,6 +19,9 @@ export class RankPopup extends UiBase {
 
   protected onLoad(): void {
     super.onLoad();
+
+    this.closeBtn.on(Node.EventType.TOUCH_START, this.onClose, this);
+
     this.videoPlayer.node.on('completed', this.onVideoComplete, this);  // 视频播放完成
     this.videoPlayer.node.on('stopped', this.onVideoComplete, this); // 视频播放停止
     this.videoPlayer.node.on('playing', this.onVideoPlaying, this); // 视频播放中
@@ -55,6 +61,10 @@ export class RankPopup extends UiBase {
 
   private onVideoError() {
     console.log('video error');
+  }
+
+  private onClose() {
+    this.pageManager.removeUI(this.node);
   }
 }
 
