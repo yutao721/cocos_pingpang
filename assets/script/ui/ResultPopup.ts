@@ -1,4 +1,4 @@
-import { _decorator, Node, } from 'cc';
+import { _decorator, Label, Node, } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
 import { UI_PATH } from '../const/UiConfig';
 import { UILayer } from '../../framework/ui/PageManager';
@@ -14,6 +14,9 @@ export class ResultPopup extends UiBase {
 
   @property(Node)
   loseContent: Node = null;
+
+  @property(Label)
+  scoreLabel: Label = null;
 
   @property(Node)
   againBtn: Node = null;
@@ -33,7 +36,9 @@ export class ResultPopup extends UiBase {
   }
 
   public show(result: IPingPangResult): void {
+    console.log('ResultPopup show', result);
     this.resultData = result;
+    this.scoreLabel.string = result.score.toString();
   }
 
 

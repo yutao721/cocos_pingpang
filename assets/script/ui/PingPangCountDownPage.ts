@@ -70,8 +70,8 @@ export class PingPangCountDownPage extends UiBase {
   }
 
   private onCountDownFinish(): void {
-    // this.pageManager.showUI(UI_PATH.GAME, UILayer.MIDDLE, () => {
-    //   this.pageManager.removeUI(this.node);
-    // });
+    this.pageManager.showUI(UI_PATH.GAME, UILayer.MIDDLE, () => {
+      this.pageManager.removeUI(this.node);
+    });
   }
 }
