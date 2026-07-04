@@ -4,7 +4,7 @@ import { IPingPangResult } from '../const/Interface';
 import { IUserInfo } from '../model/UserInfoModel';
 
 const POSTER_W = 750;
-const POSTER_H = 1334;
+const POSTER_H = 1624;
 
 /**
  * H5 海报生成工具
@@ -39,45 +39,45 @@ export class PosterHelper {
     }
 
     // 2. 半透明卡片区域
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    this._roundRect(ctx, 60, 300, 630, 680, 28);
-    ctx.fill();
+    // ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    // this._roundRect(ctx, 60, 300, 630, 680, 28);
+    // ctx.fill();
 
     // 3. 圆形头像
     const avatarUrl = userInfo?.headimgurl ?? '';
-    await this._drawRoundAvatar(ctx, avatarUrl, POSTER_W / 2, 360, 72);
+    await this._drawRoundAvatar(ctx, avatarUrl, POSTER_W / 2, 510, 82);
 
     // 4. 昵称
-    const nickname = userInfo?.nickname ?? '匿名玩家';
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 38px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(this._ellipsis(nickname, 12), POSTER_W / 2, 530);
+    // const nickname = userInfo?.nickname ?? '匿名玩家';
+    // ctx.fillStyle = '#FFFFFF';
+    // ctx.font = 'bold 38px sans-serif';
+    // ctx.textAlign = 'center';
+    // ctx.textBaseline = 'middle';
+    // ctx.fillText(this._ellipsis(nickname, 12), POSTER_W / 2, 530);
 
-    // 5. 分数（主体）
-    ctx.fillStyle = '#FFD700';
-    ctx.font = 'bold 120px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(String(result.score), POSTER_W / 2, 670);
+    // // 5. 分数（主体）
+    // ctx.fillStyle = '#FFD700';
+    // ctx.font = 'bold 120px sans-serif';
+    // ctx.textAlign = 'center';
+    // ctx.textBaseline = 'middle';
+    // ctx.fillText(String(result.score), POSTER_W / 2, 670);
 
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.font = '30px sans-serif';
-    ctx.fillText('我的得分', POSTER_W / 2, 755);
+    // ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    // ctx.font = '30px sans-serif';
+    // ctx.fillText('我的得分', POSTER_W / 2, 755);
 
-    // 6. 连颠 / 命中次数
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.font = '28px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(`最高连颠：${result.maxCombo} 次`, 140, 830);
-    ctx.fillText(`总颠球数：${result.hitCount} 次`, 140, 878);
+    // // 6. 连颠 / 命中次数
+    // ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    // ctx.font = '28px sans-serif';
+    // ctx.textAlign = 'left';
+    // ctx.fillText(`最高连颠：${result.maxCombo} 次`, 140, 830);
+    // ctx.fillText(`总颠球数：${result.hitCount} 次`, 140, 878);
 
-    // 7. 底部邀请文案
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    ctx.font = '26px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('快来挑战我吧！', POSTER_W / 2, 1180);
+    // // 7. 底部邀请文案
+    // ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    // ctx.font = '26px sans-serif';
+    // ctx.textAlign = 'center';
+    // ctx.fillText('快来挑战我吧！', POSTER_W / 2, 1180);
 
     // 8. 导出
     const dataUrl = canvas.toDataURL('image/png');
@@ -185,17 +185,16 @@ export class PosterHelper {
     tip.textContent = '长按图片保存到相册';
     Object.assign(tip.style, {
       color: '#fff',
-      fontSize: '28px',
+      fontSize: '18px',
       margin: '0 0 20px',
       letterSpacing: '2px',
+      fontFamily: 'KarlST',
     });
 
     const img = document.createElement('img');
     img.src = dataUrl;
     Object.assign(img.style, {
-      maxWidth: '80vw',
-      maxHeight: '65vh',
-      borderRadius: '16px',
+      maxWidth: '75vw',
       display: 'block',
     });
 
@@ -203,7 +202,7 @@ export class PosterHelper {
     closeBtn.textContent = '关闭';
     Object.assign(closeBtn.style, {
       color: 'rgba(255,255,255,0.5)',
-      fontSize: '26px',
+      fontSize: '14px',
       marginTop: '24px',
       cursor: 'pointer',
     });
