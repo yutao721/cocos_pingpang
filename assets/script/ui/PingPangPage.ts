@@ -19,6 +19,7 @@ import { IPingPangResult, IShoeFlower, IShoeFlowerHitEffectData } from '../const
 import { UILayer } from '../../framework/ui/PageManager';
 import { UI_PATH } from '../const/UiConfig';
 import { ResultPopup } from './ResultPopup';
+import { ScoreMilestoneBar } from './ScoreMilestoneBar';
 import { getShoeFlowerSpritePool } from '../utils/utils';
 const { ccclass, property } = _decorator;
 
@@ -107,6 +108,9 @@ export class PingPangPage extends UiBase {
   /** 连颠 Buff 飘字（"+30" 之类） */
   @property(Label)
   comboBuffHintLabel: Label = null;
+
+  @property(ScoreMilestoneBar)
+  scoreMilestoneBar: ScoreMilestoneBar = null;
 
   /** 普通鞋花 SpriteFrame，在编辑器中拖入 */
   @property(SpriteFrame)
@@ -248,6 +252,7 @@ export class PingPangPage extends UiBase {
     // 重置提示状态
     this._hintPriority = 0;
     this._randomHintCounter = 0;
+    this.scoreMilestoneBar?.reset();
 
     // 将球/球拍初始化到对应位置
     if (this.ballNode) this.ballNode.setPosition(0, 200, 0);
@@ -337,6 +342,7 @@ export class PingPangPage extends UiBase {
 
   private onScoreUpdate(score: number, _delta: number): void {
     if (this.scoreLabel) this.scoreLabel.string = `${score}`;
+    this.scoreMilestoneBar?.setScore(score);
   }
 
   private onComboUpdate(combo: number): void {
