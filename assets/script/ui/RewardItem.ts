@@ -66,6 +66,7 @@ export class RewardItem extends UiBase {
     this.text.string = text;
     this.source = source;
     this.rewardKey = key;
+    this.applySourceStyle();
 
     this.getRewardIcon(types[0]).then(spriteFrame => {
       this.icon[0].getComponent(Sprite).spriteFrame = spriteFrame;
@@ -84,6 +85,15 @@ export class RewardItem extends UiBase {
     this.setBtnState(state);
   }
 
+  private applySourceStyle(): void {
+    if (this.source !== 1) {
+      return;
+    }
+
+    this.setNodeSpriteFrame(this.unfinished, 'image/reward/check_disabled');
+    this.setNodeSpriteFrame(this.receivedBtn, 'image/reward/check');
+  }
+
   public getRewardIcon(type: number): Promise<SpriteFrame> {
     return new Promise((resolve, reject) => {
       resources.load(`image/reward/reward_${type}/spriteFrame`, SpriteFrame, (err, spriteFrame) => {
@@ -93,6 +103,20 @@ export class RewardItem extends UiBase {
         }
         resolve(spriteFrame);
       });
+    });
+  }
+
+  private setNodeSpriteFrame(node: Node | null, path: string): void {
+    const sprite = node?.getComponent(Sprite);
+    if (!sprite) {
+      return;
+    }
+
+    resources.load(`${path}/spriteFrame`, SpriteFrame, (err, spriteFrame) => {
+      if (err || !spriteFrame || !sprite.isValid) {
+        return;
+      }
+      sprite.spriteFrame = spriteFrame;
     });
   }
 
