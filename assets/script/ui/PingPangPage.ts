@@ -112,6 +112,9 @@ export class PingPangPage extends UiBase {
   @property(Label)
   comboBuffHintLabel: Label = null;
 
+  @property(Label)
+  comboBuffTitleLabel: Label = null;
+
   @property(ScoreMilestoneBar)
   scoreMilestoneBar: ScoreMilestoneBar = null;
 
@@ -201,7 +204,11 @@ export class PingPangPage extends UiBase {
 
     // 初始隐藏提示文字
     if (this.difficultyHintLabel) this.difficultyHintLabel.node.active = false;
-    if (this.comboBuffHintLabel) this.comboBuffHintLabel.node.active = false;
+    if (this.comboBuffHintLabel) {
+      Tween.stopAllByTarget(this.comboBuffHintLabel.node);
+      this.comboBuffHintLabel.node.active = false;
+    }
+    if (this.comboBuffTitleLabel) this.comboBuffTitleLabel.node.active = false;
     if (this.comboLabel) this.comboLabel.node.active = false;
 
     this._paddleSprite = this._findSprite(this.paddleNode);
@@ -249,6 +256,11 @@ export class PingPangPage extends UiBase {
     // 重置分数/连颠/时间显示
     if (this.scoreLabel) this.scoreLabel.string = '0';
     this._refreshBestScoreLabel();
+    if (this.comboBuffHintLabel) {
+      Tween.stopAllByTarget(this.comboBuffHintLabel.node);
+      this.comboBuffHintLabel.node.active = false;
+    }
+    this._hideComboBuffTitle();
     if (this.comboLabel) this.comboLabel.node.active = false;
     if (this.timerLabel) this.timerLabel.string = this._formatElapsedTime(0);
 
@@ -386,8 +398,13 @@ export class PingPangPage extends UiBase {
    * 低优先级不打断高优先级正在播放的提示
    */
   private _showHint(text: string, priority: number): void {
-    if (!this.comboBuffHintLabel) return;
     if (priority < this._hintPriority) return;
+
+    if (priority !== 2) {
+      this._hideComboBuffTitle();
+    }
+
+    if (!this.comboBuffHintLabel) return;
 
     const label = this.comboBuffHintLabel;
     Tween.stopAllByTarget(label.node);
@@ -408,10 +425,34 @@ export class PingPangPage extends UiBase {
       .start();
   }
 
-  /**
-   * 连颠 Buff 触发，播放飘字动画
-   */
-  private onComboBuff(_bonus: number, desc: string): void {
+  /** 显示连击标题，例如“10连击！” */
+  private _showComboBuffTitle(text: string): void {
+    if (!this.comboBuffTitleLabel) return;
+
+    const label = this.comboBuffTitleLabel;
+    Tween.stopAllByTarget(label.node);
+    label.string = text;
+    label.node.active = !!text;
+    if (!text) return;
+
+    tween(label.node)
+      .to(1.5, { scale: new Vec3(1.1, 1.1, 1) })
+      .call(() => {
+        label.node.active = false;
+      })
+      .start();
+  }
+
+  private _hideComboBuffTitle(): void {
+    if (!this.comboBuffTitleLabel) return;
+
+    Tween.stopAllByTarget(this.comboBuffTitleLabel.node);
+    this.comboBuffTitleLabel.node.active = false;
+  }
+
+  /** 连颠 Buff 触发时，同时显示标题和提示文案 */
+  private onComboBuff(_bonus: number, title: string, desc: string): void {
+    this._showComboBuffTitle(title);
     this._showHint(desc, 2);
   }
 

@@ -281,12 +281,12 @@ export class PingPangControl {
    * 球命中球拍后的得分/连颠处理
    */
   private _onBallHitPaddle(): void {
-    const { delta, buffBonus, buffDesc } = this.model.onHitPaddle();
+    const { delta, buffBonus, buffTitle, buffDesc } = this.model.onHitPaddle();
 
     UiBase.emitUiEvent(PingPangEvent.scoreUpdate, this.model.score, delta);
     UiBase.emitUiEvent(PingPangEvent.comboUpdate, this.model.combo);
     if (buffBonus > 0) {
-      UiBase.emitUiEvent(PingPangEvent.comboBuff, buffBonus, buffDesc);
+      UiBase.emitUiEvent(PingPangEvent.comboBuff, buffBonus, buffTitle, buffDesc);
     }
     UiBase.emitUiEvent(PingPangEvent.ballHitPaddle);
     this._checkDifficulty();

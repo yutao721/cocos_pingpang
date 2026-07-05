@@ -37,7 +37,7 @@ export enum PingPangEvent {
     // --- 得分 ---
     scoreUpdate     = 'pp_scoreUpdate',     // 分数变化：参数 score:number, delta:number
     comboUpdate     = 'pp_comboUpdate',     // 连颠次数变化：参数 combo:number
-    comboBuff       = 'pp_comboBuff',       // 触发连颠阶梯奖励：参数 bonus:number, desc:string
+    comboBuff       = 'pp_comboBuff',       // 触发连颠阶梯奖励：参数 bonus:number, title:string, desc:string
 
     // --- 鞋花 ---
     shoeFlowerSpawn = 'pp_shoeFlowerSpawn', // 鞋花出现：参数 IShoeFlower

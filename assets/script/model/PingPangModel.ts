@@ -230,12 +230,13 @@ export class PingPangModel {
 
     /**
      * 球命中球拍，更新连颠/分数
-     * @returns { delta: number, buffBonus: number, buffDesc: string }
+     * @returns { delta: number, buffBonus: number, buffTitle: string, buffDesc: string }
      *          delta      = 本次得分增量（BaseHitScore）
      *          buffBonus  = 连颠阶梯奖励（0 表示未触发）
+     *          buffTitle  = 连击标题
      *          buffDesc   = Buff 提示文案
      */
-    public onHitPaddle(): { delta: number; buffBonus: number; buffDesc: string } {
+    public onHitPaddle(): { delta: number; buffBonus: number; buffTitle: string; buffDesc: string } {
         this._hitCount++;
         this._combo++;
         if (this._combo > this._maxCombo) {
@@ -247,16 +248,18 @@ export class PingPangModel {
 
         // 检查连颠 Buff
         let buffBonus = 0;
+        let buffTitle = '';
         let buffDesc  = '';
         const buffResult = this._checkComboBuff();
         if (buffResult) {
             buffBonus = buffResult.bonus;
+            buffTitle = buffResult.title;
             buffDesc  = buffResult.desc;
             this._score += buffBonus;
             this._lastBuffCombo = this._combo;
         }
 
-        return { delta, buffBonus, buffDesc };
+        return { delta, buffBonus, buffTitle, buffDesc };
     }
 
     /**
@@ -344,14 +347,14 @@ export class PingPangModel {
      * 检查是否触发连颠 Buff 阶梯奖励
      * 规则：每次 combo 越过一个 "检查点" 触发一次
      */
-    private _checkComboBuff(): { bonus: number; desc: string } | null {
+    private _checkComboBuff(): { bonus: number; title: string; desc: string } | null {
         const combo = this._combo;
         const last  = this._lastBuffCombo;
 
         // 遍历配置表，找出第一个 "本次 combo 越过 且 上次未越过" 的档位
         for (const cfg of ComboBuffConfig) {
             if (combo >= cfg.count && last < cfg.count) {
-                return { bonus: cfg.bonus, desc: cfg.desc };
+                return { bonus: cfg.bonus, title: cfg.title, desc: cfg.desc };
             }
         }
 
@@ -363,7 +366,7 @@ export class PingPangModel {
             const threshold  = maxCfg.count + extraSteps * ComboBuffStep;
             if (combo >= threshold && last < threshold) {
                 const bonus = maxCfg.bonus + extraSteps * ComboBuffStepBonus;
-                return { bonus, desc: `连颠${threshold}次！+${bonus}` };
+                return { bonus, title: `${threshold}连击！`, desc: `额外+${bonus}` };
             }
         }
 

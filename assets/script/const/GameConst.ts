@@ -126,21 +126,22 @@ export const ShoeFlowerScoreConfig: Record<eShoeFlowerType, number> = {
 export interface IComboBuffConfig {
   count: number; // 触发所需连颠次数（累计，非增量）
   bonus: number; // 触发时额外得分
-  desc: string; // 描述，用于 UI 提示
+  title: string; // 连击标题
+  desc: string; // 提示文案，用于现有 UI 提示
 }
 
 export const ComboBuffConfig: IComboBuffConfig[] = [
-  { count: 5, bonus: 10, desc: '5连击！\n洞门buff拉满！' },
-  { count: 10, bonus: 20, desc: '10连击！\n稳住节奏，继续努力！' },
-  { count: 20, bonus: 40, desc: '20连击！\n洞门高手，尽显实力！' },
-  { count: 30, bonus: 60, desc: '30连击封神！\n无人能挡，持续领跑！' },
-  { count: 40, bonus: 80, desc: '40连击！\n洞感全开，持续领跑！' },
-  { count: 50, bonus: 100, desc: '50连击！\n节奏拉满，自在发力！' },
-  { count: 60, bonus: 120, desc: '60连击！\n稳控全场，洞感狂飙！' },
-  { count: 70, bonus: 140, desc: '70连击！\n实力爆表，锁定洞门高分！' },
-  { count: 80, bonus: 160, desc: '80连击！\n巅峰状态，自在拿捏！' },
-  { count: 90, bonus: 180, desc: '90连击！\n步步进阶，冲刺洞门榜首！' },
-  { count: 100, bonus: 200, desc: '100连击！\n满级操作，洞门封神' },
+  { count: 5, bonus: 10, title: '5连击！', desc: '洞门buff拉满！' },
+  { count: 10, bonus: 20, title: '10连击！', desc: '稳住节奏，继续努力！' },
+  { count: 20, bonus: 40, title: '20连击！', desc: '洞门高手，尽显实力！' },
+  { count: 30, bonus: 60, title: '30连击封神！', desc: '无人能挡，持续领跑！' },
+  { count: 40, bonus: 80, title: '40连击！', desc: '洞感全开，持续领跑！' },
+  { count: 50, bonus: 100, title: '50连击！', desc: '节奏拉满，自在发力！' },
+  { count: 60, bonus: 120, title: '60连击！', desc: '稳控全场，洞感狂飙！' },
+  { count: 70, bonus: 140, title: '70连击！', desc: '实力爆表，锁定洞门高分！' },
+  { count: 80, bonus: 160, title: '80连击！', desc: '巅峰状态，自在拿捏！' },
+  { count: 90, bonus: 180, title: '90连击！', desc: '步步进阶，冲刺洞门榜首！' },
+  { count: 100, bonus: 200, title: '100连击！', desc: '满级操作，洞门封神' },
 ];
 
 // 连颠步长（每隔多少次触发一次，超出上表后按此步长递增）
