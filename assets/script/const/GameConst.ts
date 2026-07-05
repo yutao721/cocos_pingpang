@@ -162,8 +162,8 @@ export const RandomHintTexts: string[] = [
 
 // 击中鞋花提示文案（优先级最高）
 export const ShoeFlowerHitHint: Record<number, string> = {
-  [eShoeFlowerType.normal]: '颠得漂亮\n鞋花接住',
-  [eShoeFlowerType.limited]: '接住限量鞋花\n分数飙升',
+  [eShoeFlowerType.normal]: '颠得漂亮鞋花接住',
+  [eShoeFlowerType.limited]: '接住限量鞋花分数飙升',
 };
 
 // 基础颠球得分（每颠一次 +1）

@@ -2426,7 +2426,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 320.54,
+      "y": 281.8,
       "z": 0
     },
     "_lrot": {
@@ -2466,8 +2466,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 550,
-      "height": 52.92
+      "width": 338,
+      "height": 50.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -2505,11 +2505,11 @@
     "_string": "稳控全场  洞感狂飙",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 42,
-    "_fontSize": 42,
+    "_actualFontSize": 40,
+    "_fontSize": 40,
     "_fontFamily": "Arial",
-    "_lineHeight": 42,
-    "_overflow": 2,
+    "_lineHeight": 40,
+    "_overflow": 0,
     "_enableWrapText": false,
     "_font": {
       "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
@@ -2563,11 +2563,11 @@
     "__prefab": {
       "__id__": 106
     },
-    "_alignFlags": 41,
+    "_alignFlags": 17,
     "_target": null,
-    "_left": 100,
-    "_right": 100,
-    "_top": 320,
+    "_left": 649.558295249939,
+    "_right": 1266.4398736953735,
+    "_top": 360,
     "_bottom": 0,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
@@ -2698,9 +2698,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 123,
-      "g": 168,
-      "b": 244,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 255
     },
     "_spriteFrame": {
