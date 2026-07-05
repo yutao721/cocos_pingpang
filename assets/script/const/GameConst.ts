@@ -182,7 +182,7 @@ export const ShoeFlowerSpawnInterval: [number, number] = [2.0, 5.0];
 export const ShoeFlowerRespawnDelayAfterDisappear: number = 2.0;
 
 // 鞋花随机出现的位置范围（设计分辨率 750x1334，Cocos 坐标系）
-export const ShoeFlowerSpawnRangeX: [number, number] = [-180, 180];
+export const ShoeFlowerSpawnRangeX: [number, number] = [-180, 40];
 export const ShoeFlowerSpawnRangeY: [number, number] = [-220, 20];
 
 // 鞋花存活时间范围（秒）[min, max]，倒计时到 0 后消失
@@ -224,7 +224,7 @@ export const BallInitY = 200;
 export const PaddleMoveSpeed = 600;
 
 // 球拍宽度（像素），用于碰撞检测
-export const PaddleWidth = 200;
+export const PaddleWidth = 210;
 
 // 球拍高度（像素），用于碰撞检测
 export const PaddleHeight = 214;

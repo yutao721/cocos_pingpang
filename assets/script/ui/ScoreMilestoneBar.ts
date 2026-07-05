@@ -7,73 +7,61 @@ import {
 
 const { ccclass, property } = _decorator;
 
-/**
- * 极简版分数进度条。
- *
- * 编辑器里只需要拖这些引用：
- * 1. progressBar：进度条本体
- * 2. markerNode：鞋子节点
- * 3. markerStart / markerEnd：鞋子移动轨道的起点和终点
- * 4. milestoneNodes：3 个里程碑节点，顺序和配置里的分数一致
- * 5. videoBtn：第一个档位达到后显示的按钮，默认隐藏
- *
- * 这份脚本只做四件事：
- * 1. 根据分数更新进度条
- * 2. 根据进度条移动鞋子
- * 3. 未达到的里程碑 sprite 显示且置灰
- * 4. 达到里程碑后隐藏对应 sprite；达到第一个里程碑后显示 videoBtn
- *
- * 里程碑的位置完全由编辑器摆放，这里不参与布局。
- */
 @ccclass('ScoreMilestoneBar')
 export class ScoreMilestoneBar extends Component {
-  /** 进度条组件，脚本只会改它的 progress。 */
   @property(ProgressBar)
   progressBar: ProgressBar = null;
 
-  /** 跟随进度移动的鞋子节点。 */
   @property(Node)
   markerNode: Node = null;
 
-  /** 鞋子移动轨道的起点。 */
   @property(Node)
   markerStart: Node = null;
 
-  /** 鞋子移动轨道的终点。 */
   @property(Node)
   markerEnd: Node = null;
 
-  /** 第一个里程碑达成后显示的按钮，默认隐藏。 */
+  /** 到第一个节点时短暂出现的视频按钮。 */
   @property(Node)
   videoBtn: Node = null;
 
   /**
-   * 3 个里程碑节点。
-   * 顺序需要和 PingPangProgressMilestones 一致，比如 100 / 300 / 500。
-   * 节点位置你在编辑器里手动摆，这里只负责控制 sprite 显隐和灰度。
+   * 里程碑节点，顺序需要和配置一致：
+   * 100 / 300 / 500
    */
   @property([Node])
   milestoneNodes: Node[] = [];
 
   private readonly _milestones: ReadonlyArray<IPingPangProgressMilestone> = PingPangProgressMilestones;
   private _lastScore = 0;
+  private _videoTriggerHandler: (() => void) | null = null;
+  private _firstMilestoneClickNode: Node | null = null;
 
   protected onLoad(): void {
+    this._bindVideoClickTargets();
     this.reset();
   }
 
-  /** 开局重置到 0 分。 */
+  protected onDestroy(): void {
+    this._unbindVideoClickTargets();
+  }
+
+  /** 由页面层注入“打开视频弹窗”的动作。 */
+  public setVideoTriggerHandler(handler: (() => void) | null): void {
+    this._videoTriggerHandler = handler;
+  }
+
   public reset(): void {
+    this._lastScore = 0;
     this.setScore(0);
   }
 
-  /** 外部只要传当前分数进来就行。 */
   public setScore(score: number): void {
     const previousScore = this._lastScore;
     const safeScore = Math.max(0, score);
     this._lastScore = safeScore;
-    const progress = this._getProgress(safeScore);
 
+    const progress = this._getProgress(safeScore);
     if (this.progressBar) {
       this.progressBar.progress = progress;
     }
@@ -83,7 +71,67 @@ export class ScoreMilestoneBar extends Component {
     this._updateVideoBtn(previousScore, safeScore);
   }
 
-  /** 用分数换算出 0~1 的进度值。 */
+  private _bindVideoClickTargets(): void {
+    if (this.videoBtn) {
+      this.videoBtn.on(Node.EventType.TOUCH_END, this._onVideoBtnClick, this);
+    }
+
+    this._firstMilestoneClickNode = this._getFirstMilestoneClickNode();
+    if (this._firstMilestoneClickNode) {
+      this._firstMilestoneClickNode.on(
+        Node.EventType.TOUCH_END,
+        this._onFirstMilestoneClick,
+        this,
+      );
+    }
+  }
+
+  private _unbindVideoClickTargets(): void {
+    if (this.videoBtn) {
+      this.videoBtn.off(Node.EventType.TOUCH_END, this._onVideoBtnClick, this);
+    }
+
+    if (this._firstMilestoneClickNode) {
+      this._firstMilestoneClickNode.off(
+        Node.EventType.TOUCH_END,
+        this._onFirstMilestoneClick,
+        this,
+      );
+      this._firstMilestoneClickNode = null;
+    }
+  }
+
+  private _onVideoBtnClick(): void {
+    if (!this.videoBtn || !this.videoBtn.activeInHierarchy) {
+      return;
+    }
+
+    this._videoTriggerHandler?.();
+  }
+
+  private _onFirstMilestoneClick(): void {
+    const firstSprite = this._findSprite(this.milestoneNodes[0]);
+    if (
+      !firstSprite ||
+      !firstSprite.enabled ||
+      firstSprite.grayscale ||
+      !firstSprite.node.activeInHierarchy
+    ) {
+      return;
+    }
+
+    this._videoTriggerHandler?.();
+  }
+
+  private _getFirstMilestoneClickNode(): Node | null {
+    const firstMilestoneNode = this.milestoneNodes[0];
+    if (!firstMilestoneNode) {
+      return null;
+    }
+
+    return this._findSprite(firstMilestoneNode)?.node ?? firstMilestoneNode;
+  }
+
   private _getProgress(score: number): number {
     const maxScore = this._getMaxScore();
     if (maxScore <= 0) {
@@ -93,7 +141,6 @@ export class ScoreMilestoneBar extends Component {
     return this._clamp01(score / maxScore);
   }
 
-  /** 优先用固定最大分值，没有的话退回最后一个里程碑分值。 */
   private _getMaxScore(): number {
     if (PingPangProgressMaxScore > 0) {
       return PingPangProgressMaxScore;
@@ -103,7 +150,6 @@ export class ScoreMilestoneBar extends Component {
     return lastMilestone?.score ?? 0;
   }
 
-  /** 按当前进度把鞋子移动到起点和终点之间。 */
   private _updateMarker(progress: number): void {
     if (!this.markerNode || !this.markerStart || !this.markerEnd) {
       return;
@@ -112,11 +158,6 @@ export class ScoreMilestoneBar extends Component {
     this.markerNode.setPosition(this._getMarkerPosition(progress));
   }
 
-  /**
-   * 用起点/终点做线性插值。
-   * 这里用世界坐标算，再转回鞋子父节点的本地坐标，
-   * 这样起点、终点、鞋子不一定非要挂在同一层级。
-   */
   private _getMarkerPosition(progress: number): Vec3 {
     const startWorld = this.markerStart.worldPosition.clone();
     const endWorld = this.markerEnd.worldPosition.clone();
@@ -135,12 +176,9 @@ export class ScoreMilestoneBar extends Component {
   }
 
   /**
-   * 未达到时：
-   * - sprite 显示
-   * - grayscale = true
-   *
-   * 达到后：
-   * - 隐藏对应 sprite 渲染
+   * 未达到：显示并置灰
+   * 刚跨过：隐藏一次对应 sprite
+   * 继续往后得分：sprite 再显示出来
    */
   private _updateMilestones(previousScore: number, score: number): void {
     const count = Math.min(this._milestones.length, this.milestoneNodes.length);
@@ -157,7 +195,10 @@ export class ScoreMilestoneBar extends Component {
     }
   }
 
-  /** 第一个里程碑达到后，显示 videoBtn；默认隐藏。 */
+  /**
+   * videoBtn 只在第一次跨过第一个节点时显示，
+   * 分数继续往后走就隐藏。
+   */
   private _updateVideoBtn(previousScore: number, score: number): void {
     if (!this.videoBtn) {
       return;
@@ -168,10 +209,6 @@ export class ScoreMilestoneBar extends Component {
       previousScore < firstMilestoneScore && score >= firstMilestoneScore;
   }
 
-  /**
-   * 如果你拖进来的不是 Sprite 自己，而是外层节点，
-   * 这里会往下找第一个 Sprite 来控制显隐和灰度。
-   */
   private _findSprite(node: Node | null): Sprite | null {
     if (!node) {
       return null;

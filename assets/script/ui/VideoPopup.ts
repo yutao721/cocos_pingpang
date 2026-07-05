@@ -1,71 +1,96 @@
-import { _decorator, find, instantiate, Label, Node, ProgressBar, VideoPlayer } from 'cc';
+import { _decorator, find, Node, VideoPlayer } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
-import { MaxGeneralNum } from '../const/GameConst';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('VideoPopup')
-export class RankPopup extends UiBase {
-
+export class VideoPopup extends UiBase {
   @property(VideoPlayer)
   videoPlayer: VideoPlayer = null;
 
   @property(Node)
   closeBtn: Node = null;
 
+  private _canvas: Node | null = null;
+  private _closeCallback: (() => void) | null = null;
+
   protected start(): void {
-    let canvas = find('Canvas');
-    canvas.on(Node.EventType.TOUCH_START, this.playVideo, this);
+    this._canvas = find('Canvas');
+    this._canvas?.on(Node.EventType.TOUCH_START, this._playVideo, this);
   }
 
   protected onLoad(): void {
     super.onLoad();
 
-    this.closeBtn.on(Node.EventType.TOUCH_START, this.onClose, this);
-
-    this.videoPlayer.node.on('completed', this.onVideoComplete, this);  // 视频播放完成
-    this.videoPlayer.node.on('stopped', this.onVideoComplete, this); // 视频播放停止
-    this.videoPlayer.node.on('playing', this.onVideoPlaying, this); // 视频播放中
-    this.videoPlayer.node.on('stopped', this.onVideoStopped, this); // 视频播放停止
-    this.videoPlayer.node.on('paused', this.onVideoPaused, this); // 视频播放暂停
-    this.videoPlayer.node.on('error', this.onVideoError, this); // 视频播放错误
+    this.closeBtn?.on(Node.EventType.TOUCH_START, this._onClose, this);
+    this.videoPlayer?.node.on('completed', this._onVideoComplete, this);
+    this.videoPlayer?.node.on('stopped', this._onVideoStopped, this);
+    this.videoPlayer?.node.on('playing', this._onVideoPlaying, this);
+    this.videoPlayer?.node.on('paused', this._onVideoPaused, this);
+    this.videoPlayer?.node.on('error', this._onVideoError, this);
   }
 
   protected onEnable(): void {
     super.onEnable();
-    this.videoPlayer.play();
+    this.videoPlayer?.play();
   }
 
   protected onDisable(): void {
     super.onDisable();
-    this.videoPlayer.stop();
+    this.videoPlayer?.stop();
   }
 
-  private playVideo() {
-    this.videoPlayer.play();
+  protected onDestroy(): void {
+    if (this.closeBtn?.isValid) {
+      this.closeBtn.off(Node.EventType.TOUCH_START, this._onClose, this);
+    }
+    if (this._canvas?.isValid) {
+      this._canvas.off(Node.EventType.TOUCH_START, this._playVideo, this);
+    }
+    if (this.videoPlayer?.node?.isValid) {
+      this.videoPlayer.node.off('completed', this._onVideoComplete, this);
+      this.videoPlayer.node.off('stopped', this._onVideoStopped, this);
+      this.videoPlayer.node.off('playing', this._onVideoPlaying, this);
+      this.videoPlayer.node.off('paused', this._onVideoPaused, this);
+      this.videoPlayer.node.off('error', this._onVideoError, this);
+    }
+
+    const closeCallback = this._closeCallback;
+    this._closeCallback = null;
+    closeCallback?.();
+
+    super.onDestroy();
   }
 
-  private onVideoComplete() {
+  public setCloseCallback(callback: (() => void) | null): void {
+    this._closeCallback = callback;
+  }
+
+  private _playVideo(): void {
+    this.videoPlayer?.play();
+  }
+
+  private _onVideoComplete(): void {
     console.log('video complete');
   }
-  private onVideoPlaying() {
+
+  private _onVideoPlaying(): void {
     console.log('video playing');
   }
 
-  private onVideoStopped() {
+  private _onVideoStopped(): void {
     console.log('video stopped');
   }
 
-  private onVideoPaused() {
+  private _onVideoPaused(): void {
     console.log('video paused');
   }
 
-  private onVideoError() {
+  private _onVideoError(): void {
     console.log('video error');
   }
 
-  private onClose() {
+  private _onClose(): void {
     this.pageManager.removeUI(this.node);
   }
 }
-
-

@@ -74,6 +74,7 @@ export class PingPangControl {
   private lastSecond: number = -1;
   /** AutoPaddle 模式下球拍相对球的固定偏移，每次接球后重新随机 */
   private _autoPaddleOffset: number = 0;
+  private _isPaused = false;
 
   // 调试统计
   private _debugNormalCount: number = 0;
@@ -93,6 +94,7 @@ export class PingPangControl {
    */
   public startGame(): void {
     this.model.init();
+    this._isPaused = false;
     this.spawnTimer = this._randomSpawnInterval();
     this.lastSecond = 0;
     this._debugNormalCount = 0;
@@ -109,7 +111,7 @@ export class PingPangControl {
    * @param dt 帧时间（秒）
    */
   public update(dt: number): void {
-    if (!this.model.isPlaying) return;
+    if (!this.model.isPlaying || this._isPaused) return;
 
     if (AutoPaddle) {
       const autoX = this.model.ballX + this._autoPaddleOffset;
@@ -134,7 +136,7 @@ export class PingPangControl {
    * @param clamp 球拍可移动的 X 边界 [minX, maxX]
    */
   public movePaddle(dir: number, dt: number, clamp: [number, number]): void {
-    if (!this.model.isPlaying) return;
+    if (!this.model.isPlaying || this._isPaused) return;
     const dx = dir * PaddleMoveSpeed * dt;
     const newX = Math.min(clamp[1], Math.max(clamp[0], this.model.paddleX + dx));
     this.model.setPaddleX(newX);
@@ -142,7 +144,7 @@ export class PingPangControl {
   }
 
   public dragPaddleTo(x: number, clamp: [number, number]): void {
-    if (!this.model.isPlaying) return;
+    if (!this.model.isPlaying || this._isPaused) return;
     const newX = Math.min(clamp[1], Math.max(clamp[0], x));
     this.model.setPaddleX(newX);
     UiBase.emitUiEvent(PingPangEvent.paddleMove, newX);
@@ -153,6 +155,7 @@ export class PingPangControl {
   // ----------------------------------------------------------------
 
   public getScore(): number { return this.model.score; }
+  public get isPaused(): boolean { return this._isPaused; }
   public syncPaddleY(y: number, halfH?: number): void {
     this.model.setPaddleY(y);
     if (halfH !== undefined) this.model.setPaddleHalfHeight(halfH);
@@ -163,6 +166,16 @@ export class PingPangControl {
   public getPaddleX(): number { return this.model.paddleX; }
   public getDifficultyPhase(): eDifficultyPhase { return this.model.difficultyPhase; }
   public getShoeFlowers(): ReadonlyArray<IShoeFlower> { return this.model.shoeFlowers; }
+
+  public pauseGame(): void {
+    if (!this.model.isPlaying || this.model.isGameOver) return;
+    this._isPaused = true;
+  }
+
+  public resumeGame(): void {
+    if (!this.model.isPlaying || this.model.isGameOver) return;
+    this._isPaused = false;
+  }
 
   // ----------------------------------------------------------------
   // 私有：球运动（手动模拟，方案B）
@@ -431,6 +444,7 @@ export class PingPangControl {
 
   private _endGame(): void {
     if (this.model.isGameOver) return;
+    this._isPaused = false;
     this.model.setGameOver();
     const result = this.model.buildResult();
     void this._submitResult(result);

@@ -20,6 +20,7 @@ import { UILayer } from '../../framework/ui/PageManager';
 import { UI_PATH } from '../const/UiConfig';
 import { ResultPopup } from './ResultPopup';
 import { ScoreMilestoneBar } from './ScoreMilestoneBar';
+import { VideoPopup } from './VideoPopup';
 import { getShoeFlowerSpritePool } from '../utils/utils';
 const { ccclass, property } = _decorator;
 
@@ -205,6 +206,7 @@ export class PingPangPage extends UiBase {
     this._restorePaddleSprite();
 
     this._loadShoeFlowerSpritePools();
+    this.scoreMilestoneBar?.setVideoTriggerHandler(() => this._openMilestoneVideoPopup());
   }
 
   protected start(): void {
@@ -213,6 +215,7 @@ export class PingPangPage extends UiBase {
 
   protected update(dt: number): void {
     pingPangControl.update(dt);
+    if (pingPangControl.isPaused) return;
 
     // 颠球动画：拍面沿 Y 轴向上弹起再落回
     this._tickPaddleHitFrame(dt);
@@ -345,14 +348,23 @@ export class PingPangPage extends UiBase {
     this.scoreMilestoneBar?.setScore(score);
   }
 
+  private _openMilestoneVideoPopup(): void {
+    pingPangControl.pauseGame();
+    this.pageManager.showUI(UI_PATH.VIDEO, UILayer.TOP, (node: Node) => {
+      node.getComponent(VideoPopup)?.setCloseCallback(() => {
+        pingPangControl.resumeGame();
+      });
+    });
+  }
+
   private onComboUpdate(combo: number): void {
     if (!this.comboLabel) return;
-    if (combo <= 1) {
-      this.comboLabel.node.active = false;
-    } else {
-      this.comboLabel.node.active = true;
-      this.comboLabel.string = `x${combo}`;
-    }
+    // if (combo <= 1) {
+    //   this.comboLabel.node.active = false;
+    // } else {
+    //   this.comboLabel.node.active = true;
+    //   this.comboLabel.string = `x${combo}`;
+    // }
   }
 
   /**
