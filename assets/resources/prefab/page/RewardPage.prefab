@@ -345,7 +345,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -92.94,
+      "y": -63.94,
       "z": 0
     },
     "_lrot": {
@@ -385,8 +385,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 304,
-      "height": 85.88
+      "width": 280,
+      "height": 47.88
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -421,14 +421,14 @@
       "b": 189,
       "a": 255
     },
-    "_string": "太棒啦！您已解锁\n",
+    "_string": "太棒啦！您已解锁",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 35,
     "_fontSize": 35,
     "_fontFamily": "Arial",
     "_lineHeight": 38,
-    "_overflow": 3,
+    "_overflow": 0,
     "_enableWrapText": true,
     "_font": {
       "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
@@ -486,7 +486,7 @@
     "_target": null,
     "_left": 0,
     "_right": 0,
-    "_top": 50,
+    "_top": 40,
     "_bottom": 0,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
@@ -553,7 +553,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -156,
+      "y": -170,
       "z": 0
     },
     "_lrot": {
@@ -985,7 +985,7 @@
     "_target": null,
     "_left": 0,
     "_right": 0,
-    "_top": 106,
+    "_top": 120,
     "_bottom": 0,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
@@ -3792,6 +3792,15 @@
     },
     "backNode": {
       "__id__": 149
+    },
+    "titlelabel": {
+      "__id__": 14
+    },
+    "countlabel": {
+      "__id__": 23
+    },
+    "tipslabel": {
+      "__id__": 29
     },
     "startGameBtn": {
       "__id__": 128

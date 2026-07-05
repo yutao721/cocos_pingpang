@@ -8,6 +8,7 @@ import { UiEvent } from '../const/EventDefine';
 import { tipControl } from '../control/TipControl';
 import { shareGame } from '../utils/utils';
 import { AudioManager } from '../../framework/audio/AudioManager';
+import { Api } from '../api/api';
 
 const { ccclass, property } = _decorator;
 
@@ -70,7 +71,7 @@ export class HomePage extends UiBase {
   protected onEnable(): void {
     // userControl.initConfigData();
     if (userControl.isLoginVal) {
-      userControl.initUserData();
+      void userControl.initUserData();
     }
   }
 
@@ -109,6 +110,13 @@ export class HomePage extends UiBase {
 
   private oncloseGuide() {
     this.GuidePopup.active = false;
+  }
+
+  // 清理数据
+  private cleanAllData(): void {
+    Api.clearData().then(() => {
+      console.log('清理数据成功');
+    })
   }
 }
 

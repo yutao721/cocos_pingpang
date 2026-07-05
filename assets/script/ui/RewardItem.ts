@@ -1,14 +1,14 @@
-import { _decorator, Button, Component, Node, resources, RichText, Sprite, SpriteFrame, UITransform } from 'cc';
+import { _decorator, Button, Node, resources, RichText, Sprite, SpriteFrame, UITransform } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
-import { userControl } from '../control/UserControl';
-import { Api } from '../api/api';
-import { UI_PATH } from '../const/UiConfig';
 import { UILayer } from '../../framework/ui/PageManager';
+import { RewardState } from '../const/RewardConst';
+import { userControl } from '../control/UserControl';
+import { UI_PATH } from '../const/UiConfig';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('RewardItem')
 export class RewardItem extends UiBase {
-
   @property(Node)
   receiveBtn: Node = null;
 
@@ -25,6 +25,7 @@ export class RewardItem extends UiBase {
   icon: Node[] = [];
 
   private source: number;
+  private rewardKey = '';
 
   protected onLoad(): void {
     this.receiveBtn.on(Button.EventType.CLICK, this.onReceive, this);
@@ -32,23 +33,29 @@ export class RewardItem extends UiBase {
 
   private onReceive() {
     console.log(this.source);
-    // this.setBtnState(1);
     this.pageManager.showUI(UI_PATH.VIDEO, UILayer.TOP);
   }
 
   public initRewardItem(text: string, types: number[], source: number, key: string) {
     this.text.string = text;
-    console.log(types, source, key, text)
     this.source = source;
+    this.rewardKey = key;
+
     this.getRewardIcon(types[0]).then(spriteFrame => {
       this.icon[0].getComponent(Sprite).spriteFrame = spriteFrame;
       this.icon[0].active = true;
     });
+
     const node = this.icon[0];
     node.getComponent(UITransform).setContentSize(60, 60);
     node.x = 0;
-    const state = userControl.getRewardList()[key];
-    this.setBtnState(2);
+
+    this.refreshState();
+  }
+
+  public refreshState(): void {
+    const state = userControl.getRewardState(this.rewardKey);
+    this.setBtnState(state);
   }
 
   public getRewardIcon(type: number): Promise<SpriteFrame> {
@@ -63,18 +70,19 @@ export class RewardItem extends UiBase {
     });
   }
 
-  public setBtnState(state: number = 0) {
+  public setBtnState(state: RewardState = RewardState.unfinished) {
     this.unfinished.active = false;
     this.receiveBtn.active = false;
     this.receivedBtn.active = false;
+
     switch (state) {
-      case 0: //未完成
+      case RewardState.unfinished:
         this.unfinished.active = true;
         break;
-      case 1: //已领取
+      case RewardState.received:
         this.receivedBtn.active = true;
         break;
-      case 2: //可领取
+      case RewardState.claimable:
         this.receiveBtn.active = true;
         break;
       default:
@@ -82,7 +90,5 @@ export class RewardItem extends UiBase {
         break;
     }
   }
-
 }
-
 

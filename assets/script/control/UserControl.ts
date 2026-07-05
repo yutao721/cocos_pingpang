@@ -1,4 +1,5 @@
 import { AudioManager } from "../../framework/audio/AudioManager";
+import { IRewardApiData, RewardState } from "../const/RewardConst";
 import { IUserInfo, UserInfoModel } from "../model/UserInfoModel";
 
 
@@ -32,11 +33,35 @@ export class UserControl {
   }
 
   public async initUserData() {
-    this.userInfoModel.initUserInfo();
+    await this.userInfoModel.initUserInfo();
+  }
+
+  public async refreshRewardData() {
+    await this.userInfoModel.updateRewardInfo();
   }
 
   public getRewardList() {
     return this.userInfoModel.rewardList;
+  }
+
+  public getRewardState(key: string): RewardState {
+    return this.userInfoModel.getRewardState(key);
+  }
+
+  public getRewardInfo(): IRewardApiData {
+    return this.userInfoModel.rewardInfoVal;
+  }
+
+  public getRewardCompletedCount(): number {
+    return this.userInfoModel.rewardCompletedCountVal;
+  }
+
+  public getRecordMaxScore(): number {
+    return this.userInfoModel.recordMaxScoreVal;
+  }
+
+  public updateRecordMaxScore(score: number): void {
+    this.userInfoModel.updateRecordMaxScore(score);
   }
 
   public getUserInfo(): IUserInfo | null {

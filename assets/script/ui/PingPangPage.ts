@@ -2,6 +2,7 @@ import { _decorator, Color, Label, Node, Prefab, Sprite, SpriteFrame, Tween, UIO
 import { UiBase } from '../../framework/ui/UiBase';
 import { pingPangControl } from '../control/PingPangControl';
 import { PingPangEvent } from '../const/EventDefine';
+import { RewardInfoUpdateEvent } from '../const/RewardConst';
 import {
   eDifficultyPhase,
   eShoeFlowerType,
@@ -21,6 +22,7 @@ import { UI_PATH } from '../const/UiConfig';
 import { ResultPopup } from './ResultPopup';
 import { ScoreMilestoneBar } from './ScoreMilestoneBar';
 import { VideoPopup } from './VideoPopup';
+import { userControl } from '../control/UserControl';
 import { getShoeFlowerSpritePool } from '../utils/utils';
 const { ccclass, property } = _decorator;
 
@@ -165,6 +167,8 @@ export class PingPangPage extends UiBase {
   /** 限量鞋花候选图集（运行时从目录加载） */
   private _limitedShoeFlowerPool: SpriteFrame[] = [];
 
+  private bestScoreLabel: Label | null = null;
+
 
   // ----------------------------------------------------------------
   // 生命周期
@@ -187,6 +191,7 @@ export class PingPangPage extends UiBase {
     this.onUiEvent(PingPangEvent.shoeFlowerHit, this.onShoeFlowerHit);
     this.onUiEvent(PingPangEvent.shoeFlowerMiss, this.onShoeFlowerMiss);
     this.onUiEvent(PingPangEvent.difficultyPhaseChange, this.onDifficultyPhaseChange);
+    this.onUiEvent(RewardInfoUpdateEvent, this._refreshBestScoreLabel);
 
     // 拖拽输入：触摸跟随手指 X 位置
     this.node.on(Node.EventType.TOUCH_START, this.onTouchMove, this);
@@ -204,6 +209,8 @@ export class PingPangPage extends UiBase {
       this.paddleNormalSF = this._paddleSprite?.spriteFrame ?? null;
     }
     this._restorePaddleSprite();
+    this.bestScoreLabel = this.node.getChildByPath('best/score/num')?.getComponent(Label) ?? null;
+    this._refreshBestScoreLabel();
 
     this._loadShoeFlowerSpritePools();
     this.scoreMilestoneBar?.setVideoTriggerHandler(() => this._openMilestoneVideoPopup());
@@ -241,6 +248,7 @@ export class PingPangPage extends UiBase {
   private onGameStart(): void {
     // 重置分数/连颠/时间显示
     if (this.scoreLabel) this.scoreLabel.string = '0';
+    this._refreshBestScoreLabel();
     if (this.comboLabel) this.comboLabel.node.active = false;
     if (this.timerLabel) this.timerLabel.string = this._formatElapsedTime(0);
 
@@ -270,6 +278,8 @@ export class PingPangPage extends UiBase {
   }
 
   private onGameOver(result: IPingPangResult): void {
+    userControl.updateRecordMaxScore(result.score);
+    this._refreshBestScoreLabel(result.score);
     this.pageManager.showUI(UI_PATH.RESULT, UILayer.TOP, (node: Node) => {
       node.getComponent(ResultPopup)?.show(result);
     });
@@ -293,6 +303,9 @@ export class PingPangPage extends UiBase {
         this._showHint(text, 1);
       }
     }
+
+    // 播放颠球音效
+    userControl.playSFX('audio/hit')
 
     // 颠球动作：拍面向上抬起，手柄位置不动
     this._playPaddleHitFrame();
@@ -345,6 +358,7 @@ export class PingPangPage extends UiBase {
 
   private onScoreUpdate(score: number, _delta: number): void {
     if (this.scoreLabel) this.scoreLabel.string = `${score}`;
+    this._refreshBestScoreLabel(score);
     this.scoreMilestoneBar?.setScore(score);
   }
 
@@ -454,6 +468,7 @@ export class PingPangPage extends UiBase {
     this._playShoeFlowerHitEffect(hitData.uid);
     this._showShoeFlowerScore(hitData);
     // TODO: 播放消除特效/音效
+    userControl.playSFX('audio/hitFlower');
   }
 
   private onShoeFlowerMiss(uid: number): void {
@@ -709,5 +724,11 @@ export class PingPangPage extends UiBase {
     const minuteText = minutes < 10 ? `0${minutes}` : `${minutes}`;
     const secondText = seconds < 10 ? `0${seconds}` : `${seconds}`;
     return `${minuteText}:${secondText}`;
+  }
+
+  private _refreshBestScoreLabel(currentScore?: number): void {
+    if (!this.bestScoreLabel) return;
+    const bestScore = Math.max(userControl.getRecordMaxScore(), currentScore ?? 0);
+    this.bestScoreLabel.string = `${bestScore}`;
   }
 }

@@ -77,7 +77,7 @@ export class Api {
    * @returns 
    */
   public static async getReward() {
-    return HttpClient.get<any>(ApiPath.REWARD);
+    return HttpClient.post<any>(ApiPath.REWARD);
   }
 
   /**
@@ -86,6 +86,14 @@ export class Api {
    */
   public static async getRankList() {
     return HttpClient.post<any>(ApiPath.RANK);
+  }
+
+  /**
+   * 清除数据
+   * @returns 
+   */
+  public static async clearData() {
+    return HttpClient.post<any>(ApiPath.CLEAR);
   }
 
 }
