@@ -1,8 +1,9 @@
-import { _decorator, Button, Node, resources, RichText, Sprite, SpriteFrame, UITransform } from 'cc';
+import { _decorator, Node, resources, RichText, Sprite, SpriteFrame, UITransform } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
 import { UILayer } from '../../framework/ui/PageManager';
 import { RewardState } from '../const/RewardConst';
 import { userControl } from '../control/UserControl';
+import { tipControl } from '../control/TipControl';
 import { UI_PATH } from '../const/UiConfig';
 
 const { ccclass, property } = _decorator;
@@ -28,12 +29,37 @@ export class RewardItem extends UiBase {
   private rewardKey = '';
 
   protected onLoad(): void {
-    this.receiveBtn.on(Button.EventType.CLICK, this.onReceive, this);
+    this.receiveBtn?.on(Node.EventType.TOUCH_END, this.onReceive, this);
+    this.receivedBtn?.on(Node.EventType.TOUCH_END, this.onReceived, this);
   }
 
-  private onReceive() {
-    console.log(this.source);
-    this.pageManager.showUI(UI_PATH.VIDEO, UILayer.TOP);
+  protected onDestroy(): void {
+    this.receiveBtn?.off(Node.EventType.TOUCH_END, this.onReceive, this);
+    this.receivedBtn?.off(Node.EventType.TOUCH_END, this.onReceived, this);
+    super.onDestroy();
+  }
+
+  private onReceive(): void {
+    this.handleRewardClick();
+  }
+
+  private onReceived(): void {
+    this.handleRewardClick();
+  }
+
+  private handleRewardClick(): void {
+    switch (this.source) {
+      case 1:
+        this.pageManager.showUI(UI_PATH.VIDEO, UILayer.TOP);
+        break;
+      case 2:
+        // TODO: 接入 100/500 洞力值奖励的点击处理逻辑
+        tipControl.showTip('功能开发中');
+        break;
+      default:
+        console.warn(`[RewardItem] unknown reward source: ${this.source}`);
+        break;
+    }
   }
 
   public initRewardItem(text: string, types: number[], source: number, key: string) {

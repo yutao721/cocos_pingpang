@@ -64,13 +64,19 @@ export class ResultPopup extends UiBase {
   }
 
   public share(): void {
-    const result = this.resultData;
+    const result = this.resultData ?? {
+      score: 0,
+      maxCombo: 0,
+      hitCount: 12,
+      shoeFlowerHit: 1,
+      duration: 12,
+    }
     if (!result) return;
 
     const userInfo = userControl.getUserInfo() ?? {
-      nickname: '',
-      openid: '',
-      headimgurl: '',
+      nickname: '齐天大圣',
+      openid: '12344',
+      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png',
     };
 
     this.pageManager.showUI(UI_PATH.SHARE, UILayer.MIDDLE, (node: Node) => {
