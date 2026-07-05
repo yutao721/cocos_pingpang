@@ -33,12 +33,6 @@ export class RewardItem extends UiBase {
     this.receivedBtn?.on(Node.EventType.TOUCH_END, this.onReceived, this);
   }
 
-  protected onDestroy(): void {
-    this.receiveBtn?.off(Node.EventType.TOUCH_END, this.onReceive, this);
-    this.receivedBtn?.off(Node.EventType.TOUCH_END, this.onReceived, this);
-    super.onDestroy();
-  }
-
   private onReceive(): void {
     this.handleRewardClick();
   }

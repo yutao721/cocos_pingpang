@@ -35,9 +35,7 @@ export class RewardPage extends UiBase {
     this.onUiEvent(RewardInfoUpdateEvent, this.refreshRewardItems);
 
     this.startGameBtn.on(Node.EventType.TOUCH_END, this.onStartGame, this);
-    this.backNode.on(Node.EventType.TOUCH_END, () => {
-      this.pageManager.removeUI(this.node);
-    });
+    this.backNode.on(Node.EventType.TOUCH_END, this.onBack, this);
 
     this.buildRewardItems();
     this.refreshRewardItems();
@@ -92,10 +90,15 @@ export class RewardPage extends UiBase {
     this.rewardItemList.forEach((item) => item.refreshState());
   }
 
+  private onBack(): void {
+    this.pageManager.showUI(UI_PATH.HOME, UILayer.MIDDLE, () => {
+      this.pageManager.removeUI(this.node);
+    });
+  }
+
   private onStartGame() {
     this.pageManager.showUI(UI_PATH.GAME, UILayer.MIDDLE, () => {
       this.pageManager.removeUI(this.node);
     });
   }
 }
-
