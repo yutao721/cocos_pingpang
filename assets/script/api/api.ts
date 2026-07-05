@@ -42,10 +42,10 @@ const DEFAULT_MOCK_USER_INFO: IApiUserInfo = {
 };
 
 const DEFAULT_MOCK_REWARD_DATA: IRewardApiData = {
-  video: 0,
-  point100: 0,
-  point500: 0,
-  recordmaxscore: 0,
+  video: 1,
+  point100: 1,
+  point500: 1,
+  recordmaxscore: 100,
 };
 
 const DEFAULT_MOCK_RANK_ITEMS: Omit<IApiRankItem, 'rank'>[] = [

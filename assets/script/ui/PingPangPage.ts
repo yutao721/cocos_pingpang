@@ -4,6 +4,8 @@ import { pingPangControl } from '../control/PingPangControl';
 import { PingPangEvent } from '../const/EventDefine';
 import { RewardInfoUpdateEvent } from '../const/RewardConst';
 import {
+  BallInitX,
+  BallInitY,
   eDifficultyPhase,
   eShoeFlowerType,
   RandomHintHitInterval,
@@ -278,7 +280,7 @@ export class PingPangPage extends UiBase {
     this.scoreMilestoneBar?.reset();
 
     // 将球/球拍初始化到对应位置
-    if (this.ballNode) this.ballNode.setPosition(0, 200, 0);
+    if (this.ballNode) this.ballNode.setPosition(BallInitX, BallInitY, 0);
     if (this.paddleNode) {
       this.paddleNode.getComponent(Widget)?.updateAlignment();
       this.paddleNode.setPosition(pingPangControl.getPaddleX(), this.paddleNode.position.y, 0);

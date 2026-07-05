@@ -1,6 +1,7 @@
 import { IShoeFlower, IPingPangResult } from '../const/Interface';
 import {
     BaseHitScore,
+    BallInitX,
     BallInitSpeed,
     BallInitY,
     ComboBuffConfig,
@@ -149,7 +150,7 @@ export class PingPangModel {
         this._shoeFlowerHitCount = 0;
         this._paddleX       = 0;
         // _paddleY 不在此重置，由 View 层在 start() 里同步节点真实坐标
-        this._ballX         = 0;
+        this._ballX         = BallInitX;
         this._ballY         = BallInitY;
         this._ballVX        = 0;
         this._ballVY        = -BallInitSpeed; // 初始向下

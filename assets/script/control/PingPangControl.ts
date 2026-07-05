@@ -100,7 +100,7 @@ export class PingPangControl {
     this._debugNormalCount = 0;
     this._debugLimitedCount = 0;
     // 初始直线下落，速度放缓让玩家有准备时间；接到第一球后才有横向速度
-    this.model.setBall(0, this.model.ballY, 0, -600);
+    this.model.setBall(this.model.ballX, this.model.ballY, 0, -600);
     this.model.setPlaying(true);
     UiBase.emitUiEvent(PingPangEvent.gameStart);
     UiBase.emitUiEvent(PingPangEvent.timeUpdate, 0);

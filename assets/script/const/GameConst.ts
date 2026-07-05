@@ -226,8 +226,9 @@ export const BallVXRatio = 0.22;
 // 重力加速度（像素/秒²），每帧对 vy 施加向下加速，模拟真实乒乓球弧线
 export const BallGravity = 4700;
 
-// 球初始生成位置 Y 坐标
-export const BallInitY = 200;
+// 球初始生成位置坐标
+export const BallInitX = -50;
+export const BallInitY = 600;
 
 // 球拍移动速度（像素/秒），长按后的最大移动速度
 export const PaddleMoveSpeed = 600;
