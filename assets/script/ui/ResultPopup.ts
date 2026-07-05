@@ -1,17 +1,16 @@
-import { _decorator, Label, Node, } from 'cc';
+import { _decorator, Label, Node } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
 import { UI_PATH } from '../const/UiConfig';
 import { UILayer } from '../../framework/ui/PageManager';
 import { IPingPangResult } from '../const/Interface';
 import { pingPangControl } from '../control/PingPangControl';
 import { userControl } from '../control/UserControl';
-import { PosterHelper } from '../utils/PosterHelper';
+import { SharePopup } from './SharePopup';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('ResultPopup')
 export class ResultPopup extends UiBase {
-
-
   @property(Node)
   loseContent: Node = null;
 
@@ -41,13 +40,9 @@ export class ResultPopup extends UiBase {
     this.scoreLabel.string = result.score.toString();
   }
 
-
-
   public showLose(): void {
     this.loseContent.active = true;
   }
-
-
 
   public goHome(): void {
     this.pageManager.removeUI(this.node);
@@ -58,41 +53,36 @@ export class ResultPopup extends UiBase {
 
   public restart(): void {
     this.pageManager.removeUI(this.node);
-    // gameControl.initGameMap();
-    // 重新开始：通知 PingPangPage 重启游戏
     pingPangControl.startGame();
   }
 
   public goRank(): void {
-    this.pageManager.showUI(UI_PATH.RANK, UILayer.MIDDLE, (node: Node) => {
+    this.pageManager.showUI(UI_PATH.RANK, UILayer.MIDDLE, () => {
       this.pageManager.removeUI(this.node);
       this.pageManager.removeUI(UI_PATH.GAME);
     });
   }
 
   public share(): void {
-    const userInfo = {
-      rank: 1,
-      nickname: 'NuMen',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
-      score: 10000,
-      openid: '112111'
-    }
-    const result = {
-      score: 1000,
-      maxCombo: 12,
-      hitCount: 145,
-      shoeFlowerHit: 123,
-      duration: 1234,
-    }
-    // const userInfo = userControl.getUserInfo();
-    // const result = this.resultData;
+    const result = this.resultData;
     if (!result) return;
-    PosterHelper.generate(result, userInfo).catch(err => {
-      console.warn('[ResultPopup] generate poster failed', err);
+
+    const userInfo = userControl.getUserInfo() ?? {
+      nickname: '',
+      openid: '',
+      headimgurl: '',
+    };
+
+    this.pageManager.showUI(UI_PATH.SHARE, UILayer.MIDDLE, (node: Node) => {
+      console.log('share ui show');
+
+      const sharePopup = node.getComponent(SharePopup);
+      if (!sharePopup) {
+        console.warn('[ResultPopup] SharePopup component not found');
+        return;
+      }
+
+      sharePopup.show({ result, userInfo });
     });
   }
-
-
-
 }

@@ -439,6 +439,8 @@ export class PingPangPage extends UiBase {
 
     // 根据类型切换 SpriteFrame（在编辑器拖入资源后生效）
     const sprite = node.getComponent(Sprite);
+    sprite.sizeMode = Sprite.SizeMode.TRIMMED;
+    sprite.trim = false;
     if (sprite) {
       const sf = this._pickShoeFlowerSpriteFrame(flower.type);
       sprite.spriteFrame = sf;

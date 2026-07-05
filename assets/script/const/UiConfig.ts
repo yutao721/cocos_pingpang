@@ -12,6 +12,7 @@ export const UI_PATH = {
   RESULT: basePrefabPath + 'popup/ResultPopup', // 游戏结算
   RULE: basePrefabPath + 'popup/RulePopup', // 规则
   VIDEO: basePrefabPath + 'popup/VideoPopup', // 视频
+  SHARE: basePrefabPath + 'popup/SharePopup', // 分享
 
   TIP: basePrefabPath + 'common/Tip' // 提示
 } as const;
