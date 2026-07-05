@@ -106,6 +106,14 @@ export const EnablePaddleCheck = true;
  */
 export const AutoPaddle = false;
 
+/**
+ * Test switch: skip real API requests and use local mock data instead.
+ * Runtime override:
+ * - localStorage.setItem('pp_mock_api', '1')
+ * - ?mockApi=1
+ */
+export const EnableMockApi = true;
+
 // ============================================================
 // 颠球游戏（PingPang）新玩法配置
 // ============================================================
