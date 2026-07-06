@@ -1,4 +1,4 @@
-import { _decorator, Color, Label, Node, Prefab, Sprite, SpriteFrame, Tween, UIOpacity, UITransform, Vec3, Widget, instantiate, tween } from 'cc';
+import { _decorator, Color, Graphics, Label, Node, Prefab, Sprite, SpriteFrame, Tween, UIOpacity, UITransform, Vec3, Widget, instantiate, tween } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
 import { pingPangControl } from '../control/PingPangControl';
 import { PingPangEvent } from '../const/EventDefine';
@@ -8,6 +8,8 @@ import {
   BallInitY,
   eDifficultyPhase,
   eShoeFlowerType,
+  PaddleHeight,
+  PaddleWidth,
   RandomHintHitInterval,
   RandomHintTexts,
   ShoeFlowerExpireBlinkInterval,
@@ -17,6 +19,7 @@ import {
   ShoeFlowerHitHint,
   ShoeFlowerHitSwingAngle,
   ShoeFlowerHitSwingDuration,
+  ShowPaddleHitBox,
 } from '../const/GameConst';
 import { IPingPangResult, IShoeFlower, IShoeFlowerHitEffectData } from '../const/Interface';
 import { UILayer } from '../../framework/ui/PageManager';
@@ -173,6 +176,8 @@ export class PingPangPage extends UiBase {
   private _limitedShoeFlowerPool: SpriteFrame[] = [];
 
   private bestScoreLabel: Label | null = null;
+  /** 调试：球拍碰撞盒绘制组件（ShowPaddleHitBox=true 时创建） */
+  private _hitBoxGraphics: Graphics | null = null;
 
 
   // ----------------------------------------------------------------
@@ -223,6 +228,13 @@ export class PingPangPage extends UiBase {
 
     this._loadShoeFlowerSpritePools();
     this.scoreMilestoneBar?.setVideoTriggerHandler(() => this._openMilestoneVideoPopup());
+
+    // 调试：初始化碰撞盒绘制节点
+    if (ShowPaddleHitBox) {
+      const dbgNode = new Node('_PaddleHitBox');
+      dbgNode.parent = this.node;
+      this._hitBoxGraphics = dbgNode.addComponent(Graphics);
+    }
   }
 
   protected start(): void {
@@ -236,6 +248,7 @@ export class PingPangPage extends UiBase {
     // 颠球动画：拍面沿 Y 轴向上弹起再落回
     this._tickPaddleHitFrame(dt);
     this._tickShoeFlowerEffects(dt);
+    this._drawPaddleHitBox();
   }
 
   // ----------------------------------------------------------------
@@ -743,6 +756,32 @@ export class PingPangPage extends UiBase {
    * @param amplitude 震幅（像素），默认 4
    * @param duration  总时长（秒），默认 0.16
    */
+  /** 调试：每帧重绘球拍碰撞盒（红色半透明矩形 + 顶边线） */
+  private _drawPaddleHitBox(): void {
+    if (!this._hitBoxGraphics || !this.paddleNode) return;
+    const g = this._hitBoxGraphics;
+    const px = this.paddleNode.position.x;
+    const py = this._paddleBaseY;
+    const hw = PaddleWidth / 2;
+    const hh = PaddleHeight / 2;
+    g.clear();
+    // 填充半透明红
+    g.fillColor = new Color(255, 0, 0, 60);
+    g.rect(px - hw, py - hh, PaddleWidth, PaddleHeight);
+    g.fill();
+    // 描边
+    g.strokeColor = new Color(255, 0, 0, 200);
+    g.lineWidth = 2;
+    g.rect(px - hw, py - hh, PaddleWidth, PaddleHeight);
+    g.stroke();
+    // 顶边加粗显示命中判定线
+    g.strokeColor = new Color(255, 220, 0, 255);
+    g.lineWidth = 3;
+    g.moveTo(px - hw, py + hh);
+    g.lineTo(px + hw, py + hh);
+    g.stroke();
+  }
+
   private _playScreenShake(amplitude: number = 4, duration: number = 0.16): void {
     Tween.stopAllByTarget(this.node);
     this.node.setPosition(0, 0, 0);

@@ -107,6 +107,13 @@ export const EnablePaddleCheck = true;
 export const AutoPaddle = false;
 
 /**
+ * 调试：绘制球拍碰撞检测范围
+ * true  → 在球拍节点上叠加一个半透明红色矩形，显示 PaddleWidth × PaddleHeight 的碰撞盒
+ * false → 不绘制，正式发布时关闭
+ */
+export const ShowPaddleHitBox = false;
+
+/**
  * Test switch: skip real API requests and use local mock data instead.
  * Runtime override:
  * - localStorage.setItem('pp_mock_api', '1')
@@ -234,7 +241,7 @@ export const BallInitY = 600;
 export const PaddleMoveSpeed = 600;
 
 // 球拍宽度（像素），用于碰撞检测
-export const PaddleWidth = 230;
+export const PaddleWidth = 260;
 
 // 球拍高度（像素），用于碰撞检测
 export const PaddleHeight = 214;
