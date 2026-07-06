@@ -61,9 +61,9 @@ export class HomePage extends UiBase {
       this.pageManager.showUI(UI_PATH.RULE, UILayer.TOP);
     })
 
-    // this.scheduleOnce(() => {
-    //   this.showGuide();
-    // })
+    this.scheduleOnce(() => {
+      this.showGuide();
+    })
 
     this.updateSoundState();
   }
@@ -112,12 +112,6 @@ export class HomePage extends UiBase {
     this.GuidePopup.active = false;
   }
 
-  // 清理数据
-  private cleanAllData(): void {
-    Api.clearData().then(() => {
-      console.log('清理数据成功');
-    })
-  }
 }
 
 
