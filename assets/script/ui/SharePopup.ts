@@ -303,7 +303,7 @@ export class SharePopup extends UiBase {
       img.style.position = "absolute";
       img.style.top = "50%";
       img.style.left = "50%";
-      img.style.width = "300px";
+      img.style.width = "320px";
       img.style.height = "auto";
       img.style.zIndex = "100";
       img.style.transform = "translate(-50%, -50%)";

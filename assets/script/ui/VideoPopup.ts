@@ -41,20 +41,6 @@ export class VideoPopup extends UiBase {
   }
 
   protected onDestroy(): void {
-    if (this.closeBtn?.isValid) {
-      this.closeBtn.off(Node.EventType.TOUCH_START, this._onClose, this);
-    }
-    if (this._canvas?.isValid) {
-      this._canvas.off(Node.EventType.TOUCH_START, this._playVideo, this);
-    }
-    if (this.videoPlayer?.node?.isValid) {
-      this.videoPlayer.node.off('completed', this._onVideoComplete, this);
-      this.videoPlayer.node.off('stopped', this._onVideoStopped, this);
-      this.videoPlayer.node.off('playing', this._onVideoPlaying, this);
-      this.videoPlayer.node.off('paused', this._onVideoPaused, this);
-      this.videoPlayer.node.off('error', this._onVideoError, this);
-    }
-
     const closeCallback = this._closeCallback;
     this._closeCallback = null;
     closeCallback?.();

@@ -482,7 +482,8 @@ export class PingPangPage extends UiBase {
 
     // 根据类型切换 SpriteFrame（在编辑器拖入资源后生效）
     const sprite = node.getComponent(Sprite);
-    // sprite.sizeMode = Sprite.SizeMode.TRIMMED;
+    sprite.sizeMode = Sprite.SizeMode.CUSTOM;
+    sprite.trim = false;
     if (sprite) {
       const sf = this._pickShoeFlowerSpriteFrame(flower.type);
       sprite.spriteFrame = sf;
@@ -568,7 +569,9 @@ export class PingPangPage extends UiBase {
     Tween.stopAllByTarget(state.node);
     Tween.stopAllByTarget(state.opacity);
 
+    const popScale = new Vec3(baseScale.x * 1.35, baseScale.y * 1.35, baseScale.z);
     tween(state.node)
+      .to(0.08, { scale: popScale, angle: state.baseAngle })
       .to(step, {
         angle: state.baseAngle - ShoeFlowerHitSwingAngle,
         scale: smallScale,
@@ -589,6 +592,7 @@ export class PingPangPage extends UiBase {
       .start();
 
     tween(state.opacity)
+      .delay(0.08)
       .to(duration, { opacity: 0 })
       .start();
   }

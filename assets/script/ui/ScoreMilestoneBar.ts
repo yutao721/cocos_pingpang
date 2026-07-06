@@ -43,7 +43,7 @@ export class ScoreMilestoneBar extends Component {
   }
 
   protected onDestroy(): void {
-    this._unbindVideoClickTargets();
+
   }
 
   /** 由页面层注入“打开视频弹窗”的动作。 */
@@ -83,21 +83,6 @@ export class ScoreMilestoneBar extends Component {
         this._onFirstMilestoneClick,
         this,
       );
-    }
-  }
-
-  private _unbindVideoClickTargets(): void {
-    if (this.videoBtn) {
-      this.videoBtn.off(Node.EventType.TOUCH_END, this._onVideoBtnClick, this);
-    }
-
-    if (this._firstMilestoneClickNode) {
-      this._firstMilestoneClickNode.off(
-        Node.EventType.TOUCH_END,
-        this._onFirstMilestoneClick,
-        this,
-      );
-      this._firstMilestoneClickNode = null;
     }
   }
 

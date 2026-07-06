@@ -47,7 +47,6 @@ export class ResultPopup extends UiBase {
   public goHome(): void {
     this.pageManager.removeUI(this.node);
     this.pageManager.showUI(UI_PATH.HOME, UILayer.MIDDLE, () => {
-      this.pageManager.removeUI(UI_PATH.GAME);
     });
   }
 

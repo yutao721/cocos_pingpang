@@ -9,11 +9,12 @@ import { tipControl } from '../control/TipControl';
 import { shareGame } from '../utils/utils';
 import { AudioManager } from '../../framework/audio/AudioManager';
 import { Api } from '../api/api';
-
 const { ccclass, property } = _decorator;
 
 @ccclass('HomePage')
 export class HomePage extends UiBase {
+
+  private static guideShown = false;
 
   @property(Sprite)
   bgSprite: Sprite = null;
@@ -105,10 +106,12 @@ export class HomePage extends UiBase {
   }
 
   private showGuide() {
+    if (HomePage.guideShown) return;
     this.GuidePopup.active = true;
   }
 
   private oncloseGuide() {
+    HomePage.guideShown = true;
     this.GuidePopup.active = false;
   }
 

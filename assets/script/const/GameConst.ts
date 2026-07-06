@@ -158,7 +158,7 @@ export const ComboBuffStep = 10;
 export const ComboBuffStepBonus = 10;
 
 // 随机激励提示触发间隔（每颠多少次出现 1 条，<= 0 表示关闭）
-export const RandomHintHitInterval = 8;
+export const RandomHintHitInterval = 10;
 
 // 随机提示文案（每次颠球低概率触发，优先级最低）
 export const RandomHintTexts: string[] = [
@@ -212,7 +212,7 @@ export const ShoeFlowerHitSwingAngle: number = 10;
 export const ShoeFlowerHitSwingDuration: number = 0.22;
 
 // 鞋花碰撞半径（像素），球与鞋花中心距离 ≤ BallRadius + ShoeFlowerRadius 时触发击中
-export const ShoeFlowerRadius: number = 50;
+export const ShoeFlowerRadius: number = 70;
 
 // 球初始速度（像素/秒），决定碰拍后弹起的初速度
 export const BallInitSpeed = 3200;
@@ -221,7 +221,7 @@ export const BallInitSpeed = 3200;
 export const BallVYRatio = 0.66;
 
 // 球反弹时水平速度占总速度的比例（0~1），控制横向速度上限
-export const BallVXRatio = 0.22;
+export const BallVXRatio = 0.12;
 
 // 重力加速度（像素/秒²），每帧对 vy 施加向下加速，模拟真实乒乓球弧线
 export const BallGravity = 4700;
@@ -249,7 +249,7 @@ export const BallRadius = 57;
 export const DailyRankMinScore = 0;
 
 // 游戏结束判定：球落地（低于此 Y 坐标，设计分辨率 750x1334 底部）
-export const GroundY = -667;
+export const GroundY = -867;
 
 // ============================================================
 // 难度提升配置
