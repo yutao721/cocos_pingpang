@@ -904,6 +904,8 @@
       "__id__": 0
     },
     "fileId": "6cXsSxJ/NFFp//uQ+jMJzL",
+    "instance": null,
+    "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {
@@ -3345,6 +3347,10 @@
     },
     "normalShoeFlowerDir": "image/game/normal",
     "limitedShoeFlowerDir": "image/game/limited",
+    "boomSF": {
+      "__uuid__": "047428ec-309f-4f3d-8eee-d2c9bec221cc@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
     "_id": ""
   },
   {

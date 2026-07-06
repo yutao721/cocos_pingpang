@@ -139,6 +139,10 @@ export class PingPangPage extends UiBase {
   @property
   limitedShoeFlowerDir: string = 'image/game/limited';
 
+  /** 爆炸特效 SpriteFrame（拖入 boom.png/spriteFrame） */
+  @property(SpriteFrame)
+  boomSF: SpriteFrame = null;
+
   // ----------------------------------------------------------------
   // 内部状态
   // ----------------------------------------------------------------
@@ -529,6 +533,7 @@ export class PingPangPage extends UiBase {
     this._playScreenShake(9, 0.22);
     this._playShoeFlowerHitEffect(hitData.uid);
     this._showShoeFlowerScore(hitData);
+    this._playBoomEffect(hitData.x, hitData.y);
     // TODO: 播放消除特效/音效
     userControl.playSFX('audio/hitFlower');
   }
@@ -741,6 +746,29 @@ export class PingPangPage extends UiBase {
     label.fontSize = 34;
     label.lineHeight = 36;
     return node;
+  }
+
+  private _playBoomEffect(x: number, y: number): void {
+    if (!this.boomSF) return;
+    const parent = this.shoeFlowerLayer ?? this.node;
+    const node = new Node('BoomFx');
+    node.parent = parent;
+    node.setPosition(x, y, 0);
+    node.setScale(0.5, 0.5, 1);
+    node.addComponent(UITransform);
+    const sprite = node.addComponent(Sprite);
+    sprite.spriteFrame = this.boomSF;
+    sprite.sizeMode = Sprite.SizeMode.TRIMMED;
+    const opacity = node.addComponent(UIOpacity);
+    opacity.opacity = 255;
+
+    tween(node)
+      .to(0.35, { scale: new Vec3(1.5, 1.5, 1) })
+      .call(() => { if (node.isValid) node.destroy(); })
+      .start();
+    tween(opacity)
+      .to(0.35, { opacity: 0 })
+      .start();
   }
 
   private _disposeShoeFlowerScoreNode(node: Node): void {

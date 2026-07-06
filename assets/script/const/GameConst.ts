@@ -219,7 +219,7 @@ export const ShoeFlowerHitSwingAngle: number = 10;
 export const ShoeFlowerHitSwingDuration: number = 0.22;
 
 // 鞋花碰撞半径（像素），球与鞋花中心距离 ≤ BallRadius + ShoeFlowerRadius 时触发击中
-export const ShoeFlowerRadius: number = 70;
+export const ShoeFlowerRadius: number = 60;
 
 // 球初始速度（像素/秒），决定碰拍后弹起的初速度
 export const BallInitSpeed = 3200;
