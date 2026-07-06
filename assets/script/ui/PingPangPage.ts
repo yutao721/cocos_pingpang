@@ -321,6 +321,9 @@ export class PingPangPage extends UiBase {
     // 播放颠球音效
     userControl.playSFX('audio/hit')
 
+    // 震屏反馈
+    this._playScreenShake(4, 0.16);
+
     // 颠球动作：拍面向上抬起，手柄位置不动
     this._playPaddleHitFrame();
   }
@@ -510,6 +513,7 @@ export class PingPangPage extends UiBase {
   private onShoeFlowerHit(hitData: IShoeFlowerHitEffectData): void {
     const type = (hitData.type as eShoeFlowerType) ?? eShoeFlowerType.normal;
     this._showHint(ShoeFlowerHitHint[type], 3);
+    this._playScreenShake(9, 0.22);
     this._playShoeFlowerHitEffect(hitData.uid);
     this._showShoeFlowerScore(hitData);
     // TODO: 播放消除特效/音效
@@ -732,6 +736,24 @@ export class PingPangPage extends UiBase {
     if (opacity) Tween.stopAllByTarget(opacity);
     this.shoeFlowerScoreNodes.delete(node);
     node.destroy();
+  }
+
+  /**
+   * 屏幕震动（垂直抖动）
+   * @param amplitude 震幅（像素），默认 4
+   * @param duration  总时长（秒），默认 0.16
+   */
+  private _playScreenShake(amplitude: number = 4, duration: number = 0.16): void {
+    Tween.stopAllByTarget(this.node);
+    this.node.setPosition(0, 0, 0);
+    const s = duration / 5;
+    tween(this.node)
+      .to(s, { position: new Vec3(0, amplitude, 0) })
+      .to(s, { position: new Vec3(0, -amplitude, 0) })
+      .to(s, { position: new Vec3(0, amplitude * 0.5, 0) })
+      .to(s, { position: new Vec3(0, -amplitude * 0.5, 0) })
+      .to(s, { position: new Vec3(0, 0, 0) })
+      .start();
   }
 
   private _findSprite(node: Node | null): Sprite | null {

@@ -234,7 +234,7 @@ export const BallInitY = 600;
 export const PaddleMoveSpeed = 600;
 
 // 球拍宽度（像素），用于碰撞检测
-export const PaddleWidth = 210;
+export const PaddleWidth = 230;
 
 // 球拍高度（像素），用于碰撞检测
 export const PaddleHeight = 214;
