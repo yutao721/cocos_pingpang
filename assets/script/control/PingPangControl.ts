@@ -75,6 +75,8 @@ export class PingPangControl {
   /** AutoPaddle 模式下球拍相对球的固定偏移，每次接球后重新随机 */
   private _autoPaddleOffset: number = 0;
   private _isPaused = false;
+  /** 球已漏拍，等待落出屏幕后再判定失败 */
+  private _ballMissed = false;
 
   // 调试统计
   private _debugNormalCount: number = 0;
@@ -99,6 +101,7 @@ export class PingPangControl {
     this.lastSecond = 0;
     this._debugNormalCount = 0;
     this._debugLimitedCount = 0;
+    this._ballMissed = false;
     // 初始直线下落，速度放缓让玩家有准备时间；接到第一球后才有横向速度
     this.model.setBall(this.model.ballX, this.model.ballY, 0, -600);
     this.model.setPlaying(true);
@@ -223,7 +226,7 @@ export class PingPangControl {
     } else {
       // 正式模式：到达球拍顶面高度时判断命中/落地
       const PADDLE_TOP = this.model.paddleY + PaddleHeight + (PaddleHeight / 2);
-      if (vy < 0 && y - BallRadius <= PADDLE_TOP) {
+      if (!this._ballMissed && vy < 0 && y - BallRadius <= PADDLE_TOP) {
         const halfW = PaddleWidth / 2;
         if (Math.abs(x - this.model.paddleX) <= halfW + BallRadius) {
           // 命中球拍，重新计算反弹速度，先修正视觉位置再通知 View
@@ -236,11 +239,15 @@ export class PingPangControl {
           this._onBallHitPaddle();
           return;
         } else {
-          // 未命中球拍，落地游戏结束
-          this.model.setBall(x, y, vx, vy);
-          this._onBallFall();
-          return;
+          // 漏拍：标记已漏拍，让球继续下落到屏幕外再判定失败
+          this._ballMissed = true;
         }
+      }
+      // 球落出屏幕下边界，正式判定失败
+      if (this._ballMissed && y + BallRadius <= GroundY) {
+        this.model.setBall(x, y, vx, vy);
+        this._onBallFall();
+        return;
       }
     }
 
