@@ -47,6 +47,7 @@ export class HomePage extends UiBase {
   closeGuideBtn: Node = null;
 
   protected onLoad(): void {
+    this.GuidePopup.active = false;
     this.campBtn.on(Node.EventType.TOUCH_END, this.goCamp, this);
     this.startGameBtn.on(Node.EventType.TOUCH_END, this.onStartGame, this);
     this.closeGuideBtn.on(Node.EventType.TOUCH_END, this.oncloseGuide, this);

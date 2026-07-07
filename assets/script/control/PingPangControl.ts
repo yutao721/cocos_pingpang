@@ -188,7 +188,8 @@ export class PingPangControl {
   /**
    * 每帧更新球的位置，处理墙壁反弹、球拍碰撞、落地判定
    *
-   * 运动模型（无重力，匀速）：
+   * 运动模型（有重力，抛物线）：
+   *   vy   -= BallGravity * dt   （重力加速：上升减速、下落加速）
    *   ballX += vx * dt
    *   ballY += vy * dt
    *

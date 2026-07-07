@@ -119,7 +119,7 @@ export const ShowPaddleHitBox = false;
  * - localStorage.setItem('pp_mock_api', '1')
  * - ?mockApi=1
  */
-export const EnableMockApi = false;
+export const EnableMockApi = true;
 
 // ============================================================
 // 颠球游戏（PingPang）新玩法配置
@@ -133,8 +133,8 @@ export enum eShoeFlowerType {
 
 // 鞋花得分配置
 export const ShoeFlowerScoreConfig: Record<eShoeFlowerType, number> = {
-  [eShoeFlowerType.normal]: 5,
-  [eShoeFlowerType.limited]: 10,
+  [eShoeFlowerType.normal]: 2,
+  [eShoeFlowerType.limited]: 5,
 };
 
 // 连颠 Buff 阶段配置（达到 count 次连颠时额外加 bonus 分）
@@ -146,23 +146,17 @@ export interface IComboBuffConfig {
 }
 
 export const ComboBuffConfig: IComboBuffConfig[] = [
-  { count: 5, bonus: 10, title: '5连击！', desc: '洞门buff拉满！' },
-  { count: 10, bonus: 20, title: '10连击！', desc: '稳住节奏，继续努力！' },
-  { count: 20, bonus: 40, title: '20连击！', desc: '洞门高手，尽显实力！' },
-  { count: 30, bonus: 60, title: '30连击封神！', desc: '无人能挡，持续领跑！' },
-  { count: 40, bonus: 80, title: '40连击！', desc: '洞感全开，持续领跑！' },
-  { count: 50, bonus: 100, title: '50连击！', desc: '节奏拉满，自在发力！' },
-  { count: 60, bonus: 120, title: '60连击！', desc: '稳控全场，洞感狂飙！' },
-  { count: 70, bonus: 140, title: '70连击！', desc: '实力爆表，锁定洞门高分！' },
-  { count: 80, bonus: 160, title: '80连击！', desc: '巅峰状态，自在拿捏！' },
-  { count: 90, bonus: 180, title: '90连击！', desc: '步步进阶，冲刺洞门榜首！' },
-  { count: 100, bonus: 200, title: '100连击！', desc: '满级操作，洞门封神' },
+  { count: 5,   bonus: 1,  title: '5连击！',   desc: '洞门buff拉满！' },
+  { count: 20,  bonus: 5,  title: '20连击！',  desc: '洞门高手，尽显实力！' },
+  { count: 50,  bonus: 10, title: '50连击！',  desc: '节奏拉满，自在发力！' },
+  { count: 100, bonus: 20, title: '100连击！', desc: '满级操作，洞门封神！' },
+  { count: 150, bonus: 30, title: '150连击！', desc: '无敌状态，传说级选手！' },
 ];
 
-// 连颠步长（每隔多少次触发一次，超出上表后按此步长递增）
-export const ComboBuffStep = 10;
-// 超出表格最大次数后，每步额外加分的基础值（最后一档 bonus + (超出段数 * ComboBuffStepBonus)）
-export const ComboBuffStepBonus = 10;
+// 连颠步长（超出上表后按此步长递增；设为极大值表示不再额外触发）
+export const ComboBuffStep = 999999;
+// 超出表格最大次数后，每步额外加分的基础值
+export const ComboBuffStepBonus = 0;
 
 // 随机激励提示触发间隔（每颠多少次出现 1 条，<= 0 表示关闭）
 export const RandomHintHitInterval = 10;
@@ -225,13 +219,15 @@ export const ShoeFlowerRadius: number = 40;
 export const BallInitSpeed = 3200;
 
 // 球反弹时垂直速度占总速度的比例（0~1），值越大弹起越高
-export const BallVYRatio = 0.66;
+// 配合 BallGravity 调整：弹起高度 ≈ (BallInitSpeed*BallVYRatio)² / (2*BallGravity)
+export const BallVYRatio = 0.94;
 
 // 球反弹时水平速度占总速度的比例（0~1），控制横向速度上限
 export const BallVXRatio = 0.12;
 
-// 重力加速度（像素/秒²），每帧对 vy 施加向下加速，模拟真实乒乓球弧线
-export const BallGravity = 4700;
+// 重力加速度（像素/秒²），每帧对 vy 施加向下加速，模拟弹起减速/下落加速效果
+// 值越大：上升减速越明显、下落加速越快；同步调高 BallVYRatio 可维持弹起高度
+export const BallGravity = 9000;
 
 // 球初始生成位置坐标
 export const BallInitX = -50;
@@ -250,7 +246,7 @@ export const PaddleHeight = 214;
 export const PaddleInitY = -580;
 
 // 球半径（像素），用于碰撞检测
-export const BallRadius = 57;
+export const BallRadius = 40;
 
 // 每日最高上榜分数（超过才上报排行榜）
 export const DailyRankMinScore = 0;
