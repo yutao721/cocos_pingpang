@@ -1,4 +1,5 @@
 import { _decorator, Node, resources, RichText, Sprite, SpriteFrame, UITransform } from 'cc';
+declare const wx: any;
 import { UiBase } from '../../framework/ui/UiBase';
 import { UILayer } from '../../framework/ui/PageManager';
 import { RewardState } from '../const/RewardConst';
@@ -47,8 +48,10 @@ export class RewardItem extends UiBase {
         this.pageManager.showUI(UI_PATH.VIDEO, UILayer.TOP);
         break;
       case 2:
-        // TODO: 接入 100/500 洞力值奖励的点击处理逻辑
-        tipControl.showTip('功能开发中');
+        // 跳转到小程序首页
+        wx.miniProgram.reLaunch({
+          url: '/pages/index/index',
+        })
         break;
       default:
         console.warn(`[RewardItem] unknown reward source: ${this.source}`);

@@ -3,6 +3,10 @@
   "splash-setting": {
     "logo": {
       "type": "none"
+    },
+    "background": {
+      "image": "project://settings/bg.png",
+      "type": "custom"
     }
   }
 }

@@ -36,7 +36,7 @@ export class LoadingPage extends UiBase {
         const progress = finished / total;
         this.progressBar.progress = progress;
         // 根据进度计算 x 坐标：从-105到105的线性映射
-        const x = -255 + progress * (258 - (-255));
+        const x = -325 + progress * (223 - (-325));
         this.tagNode.x = x;
       }
     }, (err: Error, assets: any[]) => {
