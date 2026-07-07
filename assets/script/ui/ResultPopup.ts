@@ -3,7 +3,6 @@ import { UiBase } from '../../framework/ui/UiBase';
 import { UI_PATH } from '../const/UiConfig';
 import { UILayer } from '../../framework/ui/PageManager';
 import { IPingPangResult } from '../const/Interface';
-import { pingPangControl } from '../control/PingPangControl';
 import { userControl } from '../control/UserControl';
 import { SharePopup } from './SharePopup';
 
@@ -52,7 +51,8 @@ export class ResultPopup extends UiBase {
 
   public restart(): void {
     this.pageManager.removeUI(this.node);
-    pingPangControl.startGame();
+    this.pageManager.removeUI(UI_PATH.GAME);
+    this.pageManager.showUI(UI_PATH.PINGPANG_COUNTDOWN, UILayer.MIDDLE);
   }
 
   public goRank(): void {

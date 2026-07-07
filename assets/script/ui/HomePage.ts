@@ -83,7 +83,7 @@ export class HomePage extends UiBase {
   }
 
   private onStartGame() {
-    this.pageManager.showUI(UI_PATH.GAME, UILayer.MIDDLE, () => {
+    this.pageManager.showUI(UI_PATH.PINGPANG_COUNTDOWN, UILayer.MIDDLE, () => {
       this.pageManager.removeUI(this.node);
     });
   }
