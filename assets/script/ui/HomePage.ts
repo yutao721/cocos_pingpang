@@ -62,9 +62,10 @@ export class HomePage extends UiBase {
       this.pageManager.showUI(UI_PATH.RULE, UILayer.TOP);
     })
 
-    this.scheduleOnce(() => {
-      this.showGuide();
-    })
+    // 暂时不显示引导图了
+    // this.scheduleOnce(() => {
+    //   this.showGuide();
+    // })
 
     this.updateSoundState();
   }

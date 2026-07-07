@@ -119,7 +119,7 @@ export const ShowPaddleHitBox = false;
  * - localStorage.setItem('pp_mock_api', '1')
  * - ?mockApi=1
  */
-export const EnableMockApi = true;
+export const EnableMockApi = false;
 
 // ============================================================
 // 颠球游戏（PingPang）新玩法配置
@@ -202,7 +202,7 @@ export const ShoeFlowerSpawnRangeX: [number, number] = [-180, 40];
 export const ShoeFlowerSpawnRangeY: [number, number] = [-220, 20];
 
 // 鞋花存活时间范围（秒）[min, max]，倒计时到 0 后消失
-export const ShoeFlowerLifetime: [number, number] = [5, 8];
+export const ShoeFlowerLifetime: [number, number] = [3, 4];
 
 // Phase2 时鞋花存活时间倍率（< 1 使鞋花消失更快）
 export const ShoeFlowerLifetimeMulPhase2: number = 0.6;
@@ -219,7 +219,7 @@ export const ShoeFlowerHitSwingAngle: number = 10;
 export const ShoeFlowerHitSwingDuration: number = 0.22;
 
 // 鞋花碰撞半径（像素），球与鞋花中心距离 ≤ BallRadius + ShoeFlowerRadius 时触发击中
-export const ShoeFlowerRadius: number = 60;
+export const ShoeFlowerRadius: number = 40;
 
 // 球初始速度（像素/秒），决定碰拍后弹起的初速度
 export const BallInitSpeed = 3200;

@@ -3,159 +3,22 @@ import { UiBase } from '../../framework/ui/UiBase';
 import { loadRemoteSpriteFrame } from '../../framework/utils/CommonFun';
 import { UI_PATH } from '../const/UiConfig';
 import { UILayer } from '../../framework/ui/PageManager';
+import { Api } from '../api/api';
 
 const { ccclass, property } = _decorator;
 
-const RANK_DATA = {
-  myrank: {
-    rank: 1,
-    nickname: 'NuMen',
-    headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
-    score: 10000,
-  },
-  datas: [
-    {
-      rank: 1,
-      openid: 'oQol45ehzK1YandpPERyoCYBUB8Q',
-      nickname: 'NuMen',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png',
-      score: 1000,
-    },
-    {
-      rank: 2,
-      openid: 'oQol45R6YStDp-i3R9YVlbotZsiQ',
-      nickname: 'User2',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202403/171159961960775.png',
-      score: 999,
-    },
-    {
-      rank: 3,
-      openid: 'oQol45fv2odvF-YLEDdEgkjifKOQ',
-      nickname: 'User3',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
-      score: 56,
-    },
-    {
-      rank: 4,
-      openid: 'oQol45ehzK1YandpPERyoCYBUB8Q',
-      nickname: 'NuMen1',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png',
-      score: 132114,
-    },
-    {
-      rank: 5,
-      openid: 'oQol45R6YStDp-i3R9YVlbotZsiQ',
-      nickname: 'User5',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202403/171159961960775.png',
-      score: 231,
-    },
-    {
-      rank: 6,
-      openid: 'oQol45fv2odvF-YLEDdEgkjifKOQ',
-      nickname: 'User6',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
-      score: 99,
-    },
-    {
-      rank: 7,
-      openid: 'oQol45ehzK1YandpPERyoCYBUB8Q',
-      nickname: 'NuMen1',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png',
-      score: 1324,
-    },
-    {
-      rank: 8,
-      openid: 'oQol45R6YStDp-i3R9YVlbotZsiQ',
-      nickname: 'User5',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202403/171159961960775.png',
-      score: 231,
-    },
-    {
-      rank: 9,
-      openid: 'oQol45fv2odvF-YLEDdEgkjifKOQ',
-      nickname: 'User6',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
-      score: 99,
-    },
-    {
-      rank: 10,
-      openid: 'oQol45ehzK1YandpPERyoCYBUB8Q',
-      nickname: 'User10',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png',
-      score: 88,
-    },
-    {
-      rank: 11,
-      openid: 'oQol45R6YStDp-i3R9YVlbotZsiQ',
-      nickname: 'User11',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202403/171159961960775.png',
-      score: 77,
-    },
-    {
-      rank: 12,
-      openid: 'oQol45fv2odvF-YLEDdEgkjifKOQ',
-      nickname: 'User12',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
-      score: 66,
-    },
-    {
-      rank: 13,
-      openid: 'oQol45ehzK1YandpPERyoCYBUB8Q',
-      nickname: 'User13',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png',
-      score: 55,
-    },
-    {
-      rank: 14,
-      openid: 'oQol45R6YStDp-i3R9YVlbotZsiQ',
-      nickname: 'User14',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202403/171159961960775.png',
-      score: 44,
-    },
-    {
-      rank: 15,
-      openid: 'oQol45fv2odvF-YLEDdEgkjifKOQ',
-      nickname: 'User15',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
-      score: 33,
-    },
-    {
-      rank: 16,
-      openid: 'oQol45ehzK1YandpPERyoCYBUB8Q',
-      nickname: 'User16',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png',
-      score: 22,
-    },
-    {
-      rank: 17,
-      openid: 'oQol45R6YStDp-i3R9YVlbotZsiQ',
-      nickname: 'User17',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202403/171159961960775.png',
-      score: 18,
-    },
-    {
-      rank: 18,
-      openid: 'oQol45fv2odvF-YLEDdEgkjifKOQ',
-      nickname: 'User18',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202504/6/174391468672043.png',
-      score: 15,
-    },
-    {
-      rank: 19,
-      openid: 'oQol45ehzK1YandpPERyoCYBUB8Q',
-      nickname: 'User19',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png',
-      score: 10,
-    },
-    {
-      rank: 20,
-      openid: 'oQol45R6YStDp-i3R9YVlbotZsiQ',
-      nickname: 'User20',
-      headimgurl: 'https://usersstatic.solomochina.com/crocs/dm/avatar/202403/171159961960775.png',
-      score: 5,
-    },
-  ],
-};
+interface IRankItem {
+  rank: number;
+  openid: string;
+  nickname: string;
+  headimgurl: string;
+  score: number;
+}
+
+interface IRankData {
+  myrank: IRankItem;
+  datas: IRankItem[];
+}
 
 @ccclass('RankPage')
 export class RankPage extends UiBase {
@@ -177,62 +40,72 @@ export class RankPage extends UiBase {
     this.getRank();
   }
 
-  public getRank() {
-    const data = RANK_DATA;
-    this.handleRank(data);
+  public async getRank() {
+    try {
+      const res = await Api.getRankList();
+      console.log('[RankPage] getRank success', res);
+      const list: IRankItem[] = res?.data?.list ?? [];
+      const myrank: IRankItem = res?.data?.myrank ?? list[0];
+      this.handleRank({ myrank, datas: list });
+    } catch (err) {
+      console.warn('[RankPage] getRank failed', err);
+    }
   }
 
-  public handleRank(data: typeof RANK_DATA) {
+  public handleRank(data: IRankData) {
     const datas = data?.datas ?? [];
-    const myrank = data?.myrank ?? {};
+    const myrank = data?.myrank;
 
     // 处理我的排行榜数据
-    this.handleMyRank(myrank as typeof RANK_DATA['myrank']);
+    if (myrank) {
+      this.handleMyRank(myrank);
+    }
 
     // 处理前3名
     this.handleTop3(datas.slice(0, 3));
 
     // 处理剩余排行榜数据
     this.handleRestRank(datas.slice(3));
-
-
   }
 
-  public handleTop3(datas: typeof RANK_DATA['datas']) {
+  public handleTop3(datas: IRankItem[]) {
     const rankNode = this.node.getChildByName('rank');
-    // 获取所有子节点
     const children = rankNode.children;
-    console.log('children', children);
     for (let i = 0; i < children.length; i++) {
       const item = children[i];
+      const itemData = datas[i];
+
+      // 数据不足时隐藏该名次节点
+      if (!itemData) {
+        item.active = false;
+        continue;
+      }
+
+      item.active = true;
       const rankLabel = item.getChildByPath('rank/num')?.getComponent(Label);
       const headNode = item.getChildByPath('avatarBg/Mask/avatar');
       const nameLabel = item.getChildByPath('nickname')?.getComponent(Label);
       const scoreLabel = item.getChildByPath('scoreRow/score')?.getComponent(Label);
-      console.log('rankLabel', rankLabel);
-      console.log('headNode', headNode);
-      console.log('nameLabel', nameLabel);
-      console.log('scoreLabel', scoreLabel)
 
       if (rankLabel) {
-        rankLabel.string = String(datas[i].rank ?? '');
+        rankLabel.string = String(itemData.rank ?? '');
       }
 
       if (nameLabel) {
-        nameLabel.string = String(datas[i].nickname ?? '');
+        nameLabel.string = String(itemData.nickname ?? '');
       }
 
       if (scoreLabel) {
-        scoreLabel.string = String(datas[i].score ?? '');
+        scoreLabel.string = String(itemData.score ?? '');
       }
 
       if (headNode) {
-        void this.loadHeadImg(headNode, String(datas[i].headimgurl ?? ''));
+        void this.loadHeadImg(headNode, String(itemData.headimgurl ?? ''));
       }
     }
   }
 
-  public handleRestRank(datas: typeof RANK_DATA['datas']) {
+  public handleRestRank(datas: IRankItem[]) {
     for (let i = 0; i < datas.length; i++) {
       const item = instantiate(this.item);
       item.parent = this.item.parent;
@@ -262,7 +135,7 @@ export class RankPage extends UiBase {
   }
 
   // 处理我的排名
-  public handleMyRank(data: typeof RANK_DATA['myrank']) {
+  public handleMyRank(data: IRankItem) {
     const item = this.node.getChildByName('mine');
     const rankLabel = item.getChildByPath('rank/num')?.getComponent(Label);
     const headNode = item.getChildByPath('head/Mask/avatar');

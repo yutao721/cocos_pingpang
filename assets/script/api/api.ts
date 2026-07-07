@@ -1,6 +1,7 @@
 import { HttpClient } from "../../framework/http/HttpClient";
 import { HttpMethod, HttpResponse } from "../../framework/http/HttpRequester";
 import { md5 } from '../../framework/utils/MD5';
+import { getUrlParam } from '../../framework/utils/CommonFun';
 import { EnableMockApi } from "../const/GameConst";
 import { IRewardApiData } from "../const/RewardConst";
 
@@ -87,7 +88,7 @@ export class Api {
     HttpClient.init(baseUrl);
 
     HttpClient.addRequestInterceptor((request) => {
-      const openid = localStorage.getItem('openid') || DEFAULT_MOCK_USER_INFO.openid;
+      const openid = getUrlParam('openid') || DEFAULT_MOCK_USER_INFO.openid;
       const timestamp = String(Math.floor(Date.now() / 1000));
       const signature = md5(API_KEY + openid + timestamp + API_KEY);
 
@@ -148,9 +149,7 @@ export class Api {
 
   public static async getRankList() {
     if (this.shouldUseMockApi()) {
-      return this.mockResponse(ApiPath.RANK, {
-        list: this.buildMockRankList(),
-      });
+      return this.mockResponse(ApiPath.RANK, this.buildMockRankData());
     }
 
     return HttpClient.post<any>(ApiPath.RANK);
@@ -262,10 +261,10 @@ export class Api {
     this.saveJsonToStorage(MOCK_REWARD_INFO_CACHE_KEY, rewardData);
   }
 
-  private static buildMockRankList(): IApiRankItem[] {
+  private static buildMockRankData(): { list: IApiRankItem[]; myrank: IApiRankItem } {
     const userInfo = this.getMockUserInfo();
     const rewardData = this.getMockRewardData();
-    const rankItems: Omit<IApiRankItem, 'rank'>[] = [
+    const rawItems: Omit<IApiRankItem, 'rank'>[] = [
       {
         openid: userInfo.openid,
         nickname: userInfo.nickname,
@@ -276,12 +275,12 @@ export class Api {
       ...DEFAULT_MOCK_RANK_ITEMS,
     ];
 
-    return rankItems
+    const list = rawItems
       .sort((left, right) => right.score - left.score)
-      .map((item, index) => ({
-        ...item,
-        rank: index + 1,
-      }));
+      .map((item, index) => ({ ...item, rank: index + 1 }));
+
+    const myrank = list.find(item => item.openid === userInfo.openid) ?? list[0];
+    return { list, myrank };
   }
 
   private static readStorageValue(key: string): string | null {

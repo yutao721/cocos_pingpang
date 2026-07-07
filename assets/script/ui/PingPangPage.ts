@@ -533,9 +533,15 @@ export class PingPangPage extends UiBase {
     this._playScreenShake(9, 0.22);
     this._playShoeFlowerHitEffect(hitData.uid);
     this._showShoeFlowerScore(hitData);
-    this._playBoomEffect(hitData.x, hitData.y);
+    if (type === eShoeFlowerType.limited) {
+      this._playBoomEffect(hitData.x, hitData.y);
+    }
     // TODO: 播放消除特效/音效
-    userControl.playSFX('audio/hitFlower');
+    if (type === eShoeFlowerType.limited) {
+      userControl.playSFX('audio/hitLimt');
+    } else {
+      userControl.playSFX('audio/hitFlower');
+    }
   }
 
   private onShoeFlowerMiss(uid: number): void {
