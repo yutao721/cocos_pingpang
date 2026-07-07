@@ -126,7 +126,7 @@ export const ShowShoeFlowerHitBox = false;
  * - localStorage.setItem('pp_mock_api', '1')
  * - ?mockApi=1
  */
-export const EnableMockApi = true;
+export const EnableMockApi = false;
 
 // ============================================================
 // 颠球游戏（PingPang）新玩法配置

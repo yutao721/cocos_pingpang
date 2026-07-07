@@ -5,6 +5,7 @@ import { UI_PATH } from '../const/UiConfig';
 import { userControl, UserControl } from '../control/UserControl';
 import { gameControl } from '../control/GameControl';
 import { BundleManager } from '../../framework/bundle/BundleManager';
+import { loadWxScript } from '../../framework/utils/CommonFun';
 const { ccclass, property } = _decorator;
 
 @ccclass('LoadingPage')
@@ -20,24 +21,36 @@ export class LoadingPage extends UiBase {
   tipLab: Label = null;
 
   protected onLoad(): void {
+    loadWxScript();
     this.loadResources();
   }
 
-  private loadResources(): void {
+  private setProgress(progress: number): void {
+    this.progressBar.progress = progress;
+    this.tagNode.x = -325 + progress * (223 - (-325));
+  }
 
+  private loadResources(): void {
     this.progressBar.progress = 0;
     this.tagNode.active = true;
-    // this.onLoadComplete();
-    // return;
+
+    // 假进度：慢慢爬到 0.3，等真实进度超过它再切换
+    let fakeProgress = 0;
+    this.schedule(() => {
+      if (fakeProgress < 0.3 && this.progressBar.progress <= fakeProgress) {
+        fakeProgress += 0.002;
+        this.setProgress(fakeProgress);
+      }
+    }, 0.05);
+
     // 加载 resources 文件夹资源
-    BundleManager.getBundle().loadDir("/", (finished: number, total: number, item: any) => {
+    BundleManager.getBundle().loadDir("/", (finished: number, total: number, _item: any) => {
       // 更新进度条
       if (total > 0) {
         const progress = finished / total;
-        this.progressBar.progress = progress;
-        // 根据进度计算 x 坐标：从-105到105的线性映射
-        const x = -325 + progress * (223 - (-325));
-        this.tagNode.x = x;
+        if (progress > this.progressBar.progress) {
+          this.setProgress(progress);
+        }
       }
     }, (err: Error, assets: any[]) => {
       if (err) {

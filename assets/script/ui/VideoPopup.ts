@@ -1,5 +1,6 @@
 import { _decorator, find, Node, VideoPlayer } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
+import { AudioManager } from '../../framework/audio/AudioManager';
 
 const { ccclass, property } = _decorator;
 
@@ -32,12 +33,14 @@ export class VideoPopup extends UiBase {
 
   protected onEnable(): void {
     super.onEnable();
+    AudioManager.Instance.pauseBGM();
     this.videoPlayer?.play();
   }
 
   protected onDisable(): void {
     super.onDisable();
     this.videoPlayer?.stop();
+    AudioManager.Instance.resumeBGM();
   }
 
   protected onDestroy(): void {
