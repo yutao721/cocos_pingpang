@@ -13,7 +13,7 @@ export class RankPopup extends UiBase {
   protected onLoad(): void {
     this.itemNode.active = false;
     Api.getRankList().then((res) => {
-      res.data.list.forEach((data) => {
+      res.data.datas.forEach((data: any) => {
         const node = instantiate(this.itemNode);
         node.parent = this.itemNode.parent;
         node.active = true

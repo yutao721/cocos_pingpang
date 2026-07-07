@@ -44,7 +44,7 @@ export class RankPage extends UiBase {
     try {
       const res = await Api.getRankList();
       console.log('[RankPage] getRank success', res);
-      const list: IRankItem[] = res?.data?.list ?? [];
+      const list: IRankItem[] = res?.data?.datas ?? [];
       const myrank: IRankItem = res?.data?.myrank ?? list[0];
       this.handleRank({ myrank, datas: list });
     } catch (err) {

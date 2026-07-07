@@ -261,7 +261,7 @@ export class Api {
     this.saveJsonToStorage(MOCK_REWARD_INFO_CACHE_KEY, rewardData);
   }
 
-  private static buildMockRankData(): { list: IApiRankItem[]; myrank: IApiRankItem } {
+  private static buildMockRankData(): { datas: IApiRankItem[]; myrank: IApiRankItem } {
     const userInfo = this.getMockUserInfo();
     const rewardData = this.getMockRewardData();
     const rawItems: Omit<IApiRankItem, 'rank'>[] = [
@@ -275,12 +275,12 @@ export class Api {
       ...DEFAULT_MOCK_RANK_ITEMS,
     ];
 
-    const list = rawItems
+    const datas = rawItems
       .sort((left, right) => right.score - left.score)
       .map((item, index) => ({ ...item, rank: index + 1 }));
 
-    const myrank = list.find(item => item.openid === userInfo.openid) ?? list[0];
-    return { list, myrank };
+    const myrank = datas.find(item => item.openid === userInfo.openid) ?? datas[0];
+    return { datas, myrank };
   }
 
   private static readStorageValue(key: string): string | null {
