@@ -325,7 +325,7 @@ export class Api {
 }
 
 const LOCAL_PROXY_BASE_URL = 'http://127.0.0.1:3001';
-const PROD_BASE_URL = 'https://dm.crocs.cn';
+const PROD_BASE_URL = 'http://dm.crocs.cn';
 
 const isLocalHost = typeof window !== 'undefined'
   && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
