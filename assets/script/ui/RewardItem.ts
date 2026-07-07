@@ -50,7 +50,7 @@ export class RewardItem extends UiBase {
       case 2:
         // 跳转到小程序首页
         wx.miniProgram.reLaunch({
-          url: '/pages/index/index',
+          url: '/pages/pointcollection/pointcenter',
         })
         break;
       default:

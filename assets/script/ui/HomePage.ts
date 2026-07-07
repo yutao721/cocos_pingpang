@@ -10,6 +10,7 @@ import { shareGame } from '../utils/utils';
 import { AudioManager } from '../../framework/audio/AudioManager';
 import { Api } from '../api/api';
 const { ccclass, property } = _decorator;
+declare const wx: any;
 
 @ccclass('HomePage')
 export class HomePage extends UiBase {
@@ -46,6 +47,9 @@ export class HomePage extends UiBase {
   @property(Node)
   closeGuideBtn: Node = null;
 
+  @property(Node)
+  backNode: Node = null;
+
   protected onLoad(): void {
     this.GuidePopup.active = false;
     this.campBtn.on(Node.EventType.TOUCH_END, this.goCamp, this);
@@ -55,6 +59,13 @@ export class HomePage extends UiBase {
     this.rewardBtn.on(Node.EventType.TOUCH_END, () => {
       this.pageManager.showUI(UI_PATH.REWARD);
     });
+
+
+    this.backNode.on(Node.EventType.TOUCH_END, ()=> {
+      wx.miniProgram.reLaunch({
+        url: '/pages/index/index',
+      })
+    }, this);
 
     // this.shareBtn.on(Node.EventType.TOUCH_END, shareGame);
     // this.soundBtn.on(Node.EventType.TOUCH_END, this.onClickSound, this);

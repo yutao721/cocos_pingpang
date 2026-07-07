@@ -486,7 +486,7 @@
     },
     "_playOnAwake": true,
     "_volume": 1,
-    "_mute": true,
+    "_mute": false,
     "_playbackRate": 1,
     "_loop": false,
     "_fullScreenOnAwake": false,

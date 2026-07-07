@@ -71,6 +71,9 @@ export class PingPangPage extends UiBase {
   // ----------------------------------------------------------------
 
   @property(Node)
+  backNode: Node = null;
+
+  @property(Node)
   ballNode: Node = null;
 
   @property(Node)
@@ -216,6 +219,7 @@ export class PingPangPage extends UiBase {
     this.node.on(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
     this.node.on(Node.EventType.TOUCH_END, this.onTouchEnd, this);
     this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
+    this.backNode.on(Node.EventType.TOUCH_END, this.goHome, this);
 
     // 初始隐藏提示文字
     if (this.difficultyHintLabel) this.difficultyHintLabel.node.active = false;
@@ -903,5 +907,11 @@ export class PingPangPage extends UiBase {
     if (!this.bestScoreLabel) return;
     const bestScore = Math.max(userControl.getRecordMaxScore(), currentScore ?? 0);
     this.bestScoreLabel.string = `${bestScore}`;
+  }
+
+  public goHome() {
+    this.pageManager.showUI(UI_PATH.HOME, UILayer.MIDDLE, () => {
+      this.pageManager.removeUI(this.node);
+    });
   }
 }
