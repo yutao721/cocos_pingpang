@@ -19,7 +19,9 @@ import {
   ShoeFlowerHitHint,
   ShoeFlowerHitSwingAngle,
   ShoeFlowerHitSwingDuration,
+  ShoeFlowerRadius,
   ShowPaddleHitBox,
+  ShowShoeFlowerHitBox,
 } from '../const/GameConst';
 import { IPingPangResult, IShoeFlower, IShoeFlowerHitEffectData } from '../const/Interface';
 import { UILayer } from '../../framework/ui/PageManager';
@@ -182,6 +184,8 @@ export class PingPangPage extends UiBase {
   private bestScoreLabel: Label | null = null;
   /** 调试：球拍碰撞盒绘制组件（ShowPaddleHitBox=true 时创建） */
   private _hitBoxGraphics: Graphics | null = null;
+  /** 调试：鞋花碰撞圆绘制组件（ShowShoeFlowerHitBox=true 时创建） */
+  private _shoeFlowerHitBoxGraphics: Graphics | null = null;
 
 
   // ----------------------------------------------------------------
@@ -239,6 +243,11 @@ export class PingPangPage extends UiBase {
       dbgNode.parent = this.node;
       this._hitBoxGraphics = dbgNode.addComponent(Graphics);
     }
+    if (ShowShoeFlowerHitBox) {
+      const dbgNode = new Node('_ShoeFlowerHitBox');
+      dbgNode.parent = this.node;
+      this._shoeFlowerHitBoxGraphics = dbgNode.addComponent(Graphics);
+    }
   }
 
   protected start(): void {
@@ -253,6 +262,7 @@ export class PingPangPage extends UiBase {
     this._tickPaddleHitFrame(dt);
     this._tickShoeFlowerEffects(dt);
     this._drawPaddleHitBox();
+    this._drawShoeFlowerHitBoxes();
   }
 
   // ----------------------------------------------------------------
@@ -497,13 +507,18 @@ export class PingPangPage extends UiBase {
 
     const node = instantiate(this.shoeFlowerPfb);
     node.parent = this.shoeFlowerLayer;
-    node.setPosition(flower.x, flower.y, 0);
+    // flower.x/y 是游戏逻辑坐标（与 ballNode 同一空间：this.node 本地坐标系）
+    // shoeFlowerLayer 运行时可能因 Widget/父节点产生偏移，需转换到其本地空间
+    const worldPos = new Vec3(flower.x, flower.y, 0);
+    Vec3.transformMat4(worldPos, worldPos, this.node.worldMatrix);
+    this.shoeFlowerLayer.inverseTransformPoint(worldPos, worldPos);
+    node.setPosition(worldPos);
     node.angle = 0;
 
     // 根据类型切换 SpriteFrame（在编辑器拖入资源后生效）
     const sprite = node.getComponent(Sprite);
-    sprite.sizeMode = Sprite.SizeMode.CUSTOM;
-    sprite.trim = false;
+    sprite.sizeMode = Sprite.SizeMode.TRIMMED;
+    sprite.trim = true;
     if (sprite) {
       const sf = this._pickShoeFlowerSpriteFrame(flower.type);
       sprite.spriteFrame = sf;
@@ -704,7 +719,7 @@ export class PingPangPage extends UiBase {
   }
 
   private _showShoeFlowerScore(hitData: IShoeFlowerHitEffectData): void {
-    const parent = this.shoeFlowerLayer ?? this.node;
+    const parent = this.node;
     if (!parent) return;
     const totalDuration = Math.max(0.6, this.shoeFlowerScoreFloatDuration);
     const popDuration = Math.min(0.16, totalDuration * 0.12);
@@ -756,7 +771,7 @@ export class PingPangPage extends UiBase {
 
   private _playBoomEffect(x: number, y: number): void {
     if (!this.boomSF) return;
-    const parent = this.shoeFlowerLayer ?? this.node;
+    const parent = this.node;
     const node = new Node('BoomFx');
     node.parent = parent;
     node.setPosition(x, y, 0);
@@ -814,6 +829,21 @@ export class PingPangPage extends UiBase {
     g.moveTo(px - hw, py + hh);
     g.lineTo(px + hw, py + hh);
     g.stroke();
+  }
+
+  private _drawShoeFlowerHitBoxes(): void {
+    if (!this._shoeFlowerHitBoxGraphics) return;
+    const g = this._shoeFlowerHitBoxGraphics;
+    g.clear();
+    for (const flower of pingPangControl.getShoeFlowers()) {
+      g.fillColor = new Color(0, 220, 255, 50);
+      g.circle(flower.x, flower.y, ShoeFlowerRadius);
+      g.fill();
+      g.strokeColor = new Color(0, 220, 255, 210);
+      g.lineWidth = 2;
+      g.circle(flower.x, flower.y, ShoeFlowerRadius);
+      g.stroke();
+    }
   }
 
   private _playScreenShake(amplitude: number = 4, duration: number = 0.16): void {

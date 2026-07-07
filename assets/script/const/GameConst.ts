@@ -114,12 +114,19 @@ export const AutoPaddle = false;
 export const ShowPaddleHitBox = false;
 
 /**
+ * 调试：绘制鞋花碰撞检测范围
+ * true  → 在每个鞋花位置绘制半透明青色圆圈，圆半径 = ShoeFlowerRadius
+ * false → 不绘制，正式发布时关闭
+ */
+export const ShowShoeFlowerHitBox = false;
+
+/**
  * Test switch: skip real API requests and use local mock data instead.
  * Runtime override:
  * - localStorage.setItem('pp_mock_api', '1')
  * - ?mockApi=1
  */
-export const EnableMockApi = true;
+export const EnableMockApi = false;
 
 // ============================================================
 // 颠球游戏（PingPang）新玩法配置
@@ -193,7 +200,7 @@ export const ShoeFlowerRespawnDelayAfterDisappear: number = 2.0;
 
 // 鞋花随机出现的位置范围（设计分辨率 750x1334，Cocos 坐标系）
 export const ShoeFlowerSpawnRangeX: [number, number] = [-180, 40];
-export const ShoeFlowerSpawnRangeY: [number, number] = [-220, 20];
+export const ShoeFlowerSpawnRangeY: [number, number] = [-40, 200];
 
 // 鞋花存活时间范围（秒）[min, max]，倒计时到 0 后消失
 export const ShoeFlowerLifetime: [number, number] = [3, 4];
@@ -213,21 +220,21 @@ export const ShoeFlowerHitSwingAngle: number = 10;
 export const ShoeFlowerHitSwingDuration: number = 0.22;
 
 // 鞋花碰撞半径（像素），球与鞋花中心距离 ≤ BallRadius + ShoeFlowerRadius 时触发击中
-export const ShoeFlowerRadius: number = 40;
+export const ShoeFlowerRadius: number = 38;
 
 // 球初始速度（像素/秒），决定碰拍后弹起的初速度
 export const BallInitSpeed = 3200;
 
 // 球反弹时垂直速度占总速度的比例（0~1），值越大弹起越高
 // 配合 BallGravity 调整：弹起高度 ≈ (BallInitSpeed*BallVYRatio)² / (2*BallGravity)
-export const BallVYRatio = 0.94;
+export const BallVYRatio = 0.88;
 
 // 球反弹时水平速度占总速度的比例（0~1），控制横向速度上限
 export const BallVXRatio = 0.12;
 
 // 重力加速度（像素/秒²），每帧对 vy 施加向下加速，模拟弹起减速/下落加速效果
 // 值越大：上升减速越明显、下落加速越快；同步调高 BallVYRatio 可维持弹起高度
-export const BallGravity = 9000;
+export const BallGravity = 7000;
 
 // 球初始生成位置坐标
 export const BallInitX = -50;
