@@ -13,7 +13,8 @@ export const ApiPath = {
   GAME_END: 'webapi/pingpong/result',
   REWARD: 'webapi/pingpong/record',
   RANK: 'webapi/pingpong/rank',
-  CLEAR: 'webapi/pingpong/clear'
+  CLEAR: 'webapi/pingpong/clear',
+  VISITEVENT: 'webapi/pingpong/visitevent'
 };
 
 const API_KEY = 'crocsdm.2026';
@@ -164,6 +165,17 @@ export class Api {
     }
 
     return HttpClient.post<any>(ApiPath.CLEAR);
+  }
+
+  public static async visitEvent(param: Record<string, any>) {
+    if (this.shouldUseMockApi()) {
+      return this.mockResponse(ApiPath.VISITEVENT, {
+        success: true,
+        ...param,
+      });
+    }
+
+    return HttpClient.post<any>(ApiPath.VISITEVENT, param);
   }
 
   private static shouldUseMockApi(): boolean {

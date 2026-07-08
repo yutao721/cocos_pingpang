@@ -146,11 +146,13 @@ export class PingPangControl {
     UiBase.emitUiEvent(PingPangEvent.paddleMove, newX);
   }
 
-  public dragPaddleTo(x: number, clamp: [number, number]): void {
+  public dragPaddleTo(x: number, y: number, clampX: [number, number], clampY: [number, number]): void {
     if (!this.model.isPlaying || this._isPaused) return;
-    const newX = Math.min(clamp[1], Math.max(clamp[0], x));
+    const newX = Math.min(clampX[1], Math.max(clampX[0], x));
+    const newY = Math.min(clampY[1], Math.max(clampY[0], y));
     this.model.setPaddleX(newX);
-    UiBase.emitUiEvent(PingPangEvent.paddleMove, newX);
+    this.model.setPaddleY(newY);
+    UiBase.emitUiEvent(PingPangEvent.paddleMove, newX, newY);
   }
 
   // ----------------------------------------------------------------
@@ -212,9 +214,12 @@ export class PingPangControl {
     if (x < this.WALL_LEFT) {
       x = this.WALL_LEFT;
       vx = Math.abs(vx);
+      // 效果图贴墙面（球心 - 球半径 = 墙面 X）
+      UiBase.emitUiEvent(PingPangEvent.ballHitWallLeft, x - BallRadius, y);
     } else if (x > this.WALL_RIGHT) {
       x = this.WALL_RIGHT;
       vx = -Math.abs(vx);
+      UiBase.emitUiEvent(PingPangEvent.ballHitWallRight, x + BallRadius, y);
     }
 
 
@@ -296,7 +301,7 @@ export class PingPangControl {
     if (buffBonus > 0) {
       UiBase.emitUiEvent(PingPangEvent.comboBuff, buffBonus, buffTitle, buffDesc);
     }
-    UiBase.emitUiEvent(PingPangEvent.ballHitPaddle);
+    UiBase.emitUiEvent(PingPangEvent.ballHitPaddle, this.model.ballX, this.model.ballY);
     this._checkDifficulty();
   }
 

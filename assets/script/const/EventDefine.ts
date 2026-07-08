@@ -31,7 +31,9 @@ export enum PingPangEvent {
 
     // --- 球 ---
     ballUpdate      = 'pp_ballUpdate',      // 球位置/速度更新（每帧，由物理层发出）：参数 x,y,vx,vy
-    ballHitPaddle   = 'pp_ballHitPaddle',   // 球命中球拍：无额外参数（控制层内部处理）
+    ballHitPaddle   = 'pp_ballHitPaddle',   // 球命中球拍：参数 x:number, y:number
+    ballHitWallLeft = 'pp_ballHitWallLeft', // 球碰左墙：参数 x:number, y:number
+    ballHitWallRight= 'pp_ballHitWallRight',// 球碰右墙：参数 x:number, y:number
     ballFall        = 'pp_ballFall',        // 球落地：触发 gameOver
 
     // --- 得分 ---

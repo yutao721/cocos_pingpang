@@ -5,6 +5,7 @@ import { UILayer } from '../../framework/ui/PageManager';
 import { IPingPangResult } from '../const/Interface';
 import { userControl } from '../control/UserControl';
 import { SharePopup } from './SharePopup';
+import { Api } from '../api/api';
 
 const { ccclass, property } = _decorator;
 
@@ -80,6 +81,7 @@ export class ResultPopup extends UiBase {
 
     this.pageManager.showUI(UI_PATH.SHARE, UILayer.MIDDLE, (node: Node) => {
       console.log('share ui show');
+      Api.visitEvent({ name: 'share' });
 
       const sharePopup = node.getComponent(SharePopup);
       if (!sharePopup) {

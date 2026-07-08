@@ -23,7 +23,7 @@ export const RewardConfig: {
   source: number
 }[] = [
     { key: 'point100', desc: '明星视频', count: 1, type: [11], source: 1 },
-    { key: 'point300', desc: '300洞力值', count: 3, type: [12], source: 2 },
+    { key: 'point300', desc: '100洞力值', count: 3, type: [12], source: 2 },
     { key: 'point500', desc: '500洞力值', count: 5, type: [13], source: 2 },
   ];
 
@@ -230,11 +230,11 @@ export const BallInitSpeed = 3200;
 export const BallVYRatio = 0.88;
 
 // 球反弹时水平速度占总速度的比例（0~1），控制横向速度上限
-export const BallVXRatio = 0.12;
+export const BallVXRatio = 0.22;
 
 // 重力加速度（像素/秒²），每帧对 vy 施加向下加速，模拟弹起减速/下落加速效果
 // 值越大：上升减速越明显、下落加速越快；同步调高 BallVYRatio 可维持弹起高度
-export const BallGravity = 7000;
+export const BallGravity = 6000;
 
 // 球初始生成位置坐标
 export const BallInitX = -50;
@@ -251,6 +251,11 @@ export const PaddleHeight = 214;
 
 // 球拍默认 Y 坐标（距屏幕底部的位置）
 export const PaddleInitY = -580;
+
+// 球拍 Y 轴可拖拽范围（上下移动限制）
+// 设计分辨率 750x1334，屏幕底部约 -667
+export const PaddleMoveMinY = -650; // 最低可移动位置（接近底部）
+export const PaddleMoveMaxY = -460; // 最高可移动位置（向上约 120px）
 
 // 球半径（像素），用于碰撞检测
 export const BallRadius = 40;

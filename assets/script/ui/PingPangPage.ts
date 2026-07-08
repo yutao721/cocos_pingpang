@@ -1,4 +1,4 @@
-import { _decorator, Color, Graphics, Label, Node, Prefab, Sprite, SpriteFrame, Tween, UIOpacity, UITransform, Vec3, Widget, instantiate, tween } from 'cc';
+import { _decorator, Color, Graphics, Label, Node, Prefab, Sprite, SpriteFrame, Tween, UIOpacity, UITransform, Vec3, instantiate, tween } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
 import { pingPangControl } from '../control/PingPangControl';
 import { PingPangEvent } from '../const/EventDefine';
@@ -9,6 +9,9 @@ import {
   eDifficultyPhase,
   eShoeFlowerType,
   PaddleHeight,
+  PaddleInitY,
+  PaddleMoveMinY,
+  PaddleMoveMaxY,
   PaddleWidth,
   RandomHintHitInterval,
   RandomHintTexts,
@@ -148,6 +151,30 @@ export class PingPangPage extends UiBase {
   @property(SpriteFrame)
   boomSF: SpriteFrame = null;
 
+  /** 球碰左墙动效图（hitLeft.png） */
+  @property(SpriteFrame)
+  hitLeftSF: SpriteFrame = null;
+
+  /** 球碰右墙动效图（hitRight.png） */
+  @property(SpriteFrame)
+  hitRightSF: SpriteFrame = null;
+
+  /** 球碰球拍动效图（hitPaddle.png） */
+  @property(SpriteFrame)
+  hitPaddleSF: SpriteFrame = null;
+
+  /** 暂停/继续 按钮节点（编辑器拖入） */
+  @property(Node)
+  pauseBtn: Node = null;
+
+  /** 暂停状态下显示的图标（"▶" 继续图标），游戏运行时隐藏 */
+  @property(Node)
+  resumeIcon: Node = null;
+
+  /** 游戏运行时显示的图标（"II" 暂停图标），暂停时隐藏 */
+  @property(Node)
+  pauseIcon: Node = null;
+
   // ----------------------------------------------------------------
   // 内部状态
   // ----------------------------------------------------------------
@@ -169,6 +196,11 @@ export class PingPangPage extends UiBase {
 
   /** 球拍基础 Y 坐标（由 prefab 决定，不随动画变化） */
   private _paddleBaseY: number = 0;
+
+  /** 触摸开始时手指的世界 Y 坐标（用于计算相对位移） */
+  private _touchStartWorldY: number = 0;
+  /** 触摸开始时球拍的 Y 坐标 */
+  private _touchStartPaddleY: number = 0;
 
   /** 颠球动画当前 Y 偏移（正弦曲线，0→峰值→0） */
   private _paddleSprite: Sprite = null;
@@ -201,6 +233,8 @@ export class PingPangPage extends UiBase {
     this.onUiEvent(PingPangEvent.gameOver, this.onGameOver);
     this.onUiEvent(PingPangEvent.ballUpdate, this.onBallUpdate);
     this.onUiEvent(PingPangEvent.ballHitPaddle, this.onBallHitPaddle);
+    this.onUiEvent(PingPangEvent.ballHitWallLeft, this.onBallHitWallLeft);
+    this.onUiEvent(PingPangEvent.ballHitWallRight, this.onBallHitWallRight);
     this.onUiEvent(PingPangEvent.ballFall, this.onBallFall);
     this.onUiEvent(PingPangEvent.paddleMove, this.onPaddleMove);
     this.onUiEvent(PingPangEvent.scoreUpdate, this.onScoreUpdate);
@@ -215,11 +249,18 @@ export class PingPangPage extends UiBase {
     this.onUiEvent(RewardInfoUpdateEvent, this._refreshBestScoreLabel);
 
     // 拖拽输入：触摸跟随手指 X 位置
-    this.node.on(Node.EventType.TOUCH_START, this.onTouchMove, this);
+    this.node.on(Node.EventType.TOUCH_START, this.onTouchStart, this);
     this.node.on(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
     this.node.on(Node.EventType.TOUCH_END, this.onTouchEnd, this);
     this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
     this.backNode.on(Node.EventType.TOUCH_END, this.goHome, this);
+
+    // 暂停按钮：阻止事件冒泡到游戏区域
+    if (this.pauseBtn) {
+      this.pauseBtn.on(Node.EventType.TOUCH_END, this._onPauseBtnClick, this);
+      this.pauseBtn.on(Node.EventType.TOUCH_START, (e: any) => e.propagationStopped = true, this);
+      this.pauseBtn.on(Node.EventType.TOUCH_MOVE, (e: any) => e.propagationStopped = true, this);
+    }
 
     // 初始隐藏提示文字
     if (this.difficultyHintLabel) this.difficultyHintLabel.node.active = false;
@@ -273,13 +314,39 @@ export class PingPangPage extends UiBase {
   // 触摸输入
   // ----------------------------------------------------------------
 
-  private onTouchMove(e: any): void {
-    // 手指 X 映射到游戏坐标（设计分辨率 750，中心为 0）
+  private onTouchStart(e: any): void {
+    if (pingPangControl.isPaused) return;
+    this._touchStartWorldY = e.getUILocation().y - 667;
+    this._touchStartPaddleY = this._paddleBaseY;
     const worldX = e.getUILocation().x - 375;
-    pingPangControl.dragPaddleTo(worldX, [-280, 280]);
+    pingPangControl.dragPaddleTo(worldX, this._paddleBaseY, [-280, 280], [PaddleMoveMinY, PaddleMoveMaxY]);
+  }
+
+  private onTouchMove(e: any): void {
+    const loc = e.getUILocation();
+    const worldX = loc.x - 375;
+    const deltaY = (loc.y - 667) - this._touchStartWorldY;
+    const newPaddleY = this._touchStartPaddleY + deltaY;
+    pingPangControl.dragPaddleTo(worldX, newPaddleY, [-280, 280], [PaddleMoveMinY, PaddleMoveMaxY]);
   }
 
   private onTouchEnd(): void { }
+
+  private _onPauseBtnClick(e: any): void {
+    e.propagationStopped = true;
+    if (!pingPangControl.isPaused) {
+      pingPangControl.pauseGame();
+    } else {
+      pingPangControl.resumeGame();
+    }
+    this._updatePauseBtn();
+  }
+
+  private _updatePauseBtn(): void {
+    const paused = pingPangControl.isPaused;
+    if (this.pauseIcon) this.pauseIcon.active = !paused;
+    if (this.resumeIcon) this.resumeIcon.active = paused;
+  }
 
   // ----------------------------------------------------------------
   // 游戏流程事件
@@ -313,13 +380,13 @@ export class PingPangPage extends UiBase {
     // 将球/球拍初始化到对应位置
     if (this.ballNode) this.ballNode.setPosition(BallInitX, BallInitY, 0);
     if (this.paddleNode) {
-      this.paddleNode.getComponent(Widget)?.updateAlignment();
-      this.paddleNode.setPosition(pingPangControl.getPaddleX(), this.paddleNode.position.y, 0);
-      this._paddleBaseY = this.paddleNode.position.y;
+      this.paddleNode.setPosition(pingPangControl.getPaddleX(), PaddleInitY, 0);
+      this._paddleBaseY = PaddleInitY;
       this._paddleHitFrameTimer = -1;
       this._restorePaddleSprite();
       pingPangControl.syncPaddleY(this._paddleBaseY);
     }
+    this._updatePauseBtn();
   }
 
   private onGameOver(result: IPingPangResult): void {
@@ -338,7 +405,7 @@ export class PingPangPage extends UiBase {
     this.ballNode?.setPosition(x, y, 0);
   }
 
-  private onBallHitPaddle(): void {
+  private onBallHitPaddle(x: number, y: number): void {
     // 按配置间隔显示随机激励提示（最低优先级）
     if (RandomHintHitInterval > 0) {
       this._randomHintCounter++;
@@ -357,6 +424,44 @@ export class PingPangPage extends UiBase {
 
     // 颠球动作：拍面向上抬起，手柄位置不动
     this._playPaddleHitFrame();
+
+    // 碰拍动效
+    this._playHitEffect(this.hitPaddleSF, x, y);
+  }
+
+  private onBallHitWallLeft(x: number, y: number): void {
+    this._playHitEffect(this.hitLeftSF, x, y);
+  }
+
+  private onBallHitWallRight(x: number, y: number): void {
+    this._playHitEffect(this.hitRightSF, x, y);
+  }
+
+  /**
+   * 在碰撞点播放一次性动效图：弹出 → 淡出消失
+   */
+  private _playHitEffect(sf: SpriteFrame, x: number, y: number): void {
+    if (!sf) return;
+    const node = new Node('HitFx');
+    node.parent = this.node;
+    node.setPosition(x, y, 0);
+    node.addComponent(UITransform);
+    const sprite = node.addComponent(Sprite);
+    sprite.spriteFrame = sf;
+    sprite.sizeMode = Sprite.SizeMode.TRIMMED;
+    const opacity = node.addComponent(UIOpacity);
+    opacity.opacity = 255;
+    node.setScale(0.5, 0.5, 1);
+
+    tween(node)
+      .to(0.08, { scale: new Vec3(0.9, 0.9, 1) })
+      .to(0.18, { scale: new Vec3(0.8, 0.8, 1) })
+      .call(() => { if (node.isValid) node.destroy(); })
+      .start();
+    tween(opacity)
+      .delay(0.06)
+      .to(0.2, { opacity: 0 })
+      .start();
   }
 
   private onBallFall(): void {
@@ -367,8 +472,11 @@ export class PingPangPage extends UiBase {
   // 球拍事件
   // ----------------------------------------------------------------
 
-  private onPaddleMove(x: number): void {
-    this.paddleNode?.setPosition(x, this._paddleBaseY, 0);
+  private onPaddleMove(x: number, y?: number): void {
+    if (!this.paddleNode) return;
+    const newY = y !== undefined ? y : this._paddleBaseY;
+    this._paddleBaseY = newY;
+    this.paddleNode.setPosition(x, newY, 0);
   }
 
   private _tickPaddleHitFrame(dt: number): void {
