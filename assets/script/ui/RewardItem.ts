@@ -26,7 +26,6 @@ export class RewardItem extends UiBase {
   @property(Node)
   icon: Node[] = [];
 
-  private source: number;
   private rewardKey = '';
 
   protected onLoad(): void {
@@ -43,25 +42,25 @@ export class RewardItem extends UiBase {
   }
 
   private handleRewardClick(): void {
-    switch (this.source) {
-      case 1:
+    switch (this.rewardKey) {
+      case 'point100':
         this.pageManager.showUI(UI_PATH.VIDEO, UILayer.TOP);
         break;
-      case 2:
+      case 'point300':
+      case 'point500':
         // 跳转到小程序首页
         wx.miniProgram.reLaunch({
           url: '/pages/pointcollection/pointcenter',
         })
         break;
       default:
-        console.warn(`[RewardItem] unknown reward source: ${this.source}`);
+        console.warn(`[RewardItem] unknown reward key: ${this.rewardKey}`);
         break;
     }
   }
 
-  public initRewardItem(text: string, types: number[], source: number, key: string) {
+  public initRewardItem(text: string, types: number[], _source: number, key: string) {
     this.text.string = text;
-    this.source = source;
     this.rewardKey = key;
     this.applySourceStyle();
 
@@ -83,7 +82,7 @@ export class RewardItem extends UiBase {
   }
 
   private applySourceStyle(): void {
-    if (this.source !== 1) {
+    if (this.rewardKey !== 'point100') {
       return;
     }
 
