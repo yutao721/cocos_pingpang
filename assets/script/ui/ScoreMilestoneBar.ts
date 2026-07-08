@@ -34,6 +34,7 @@ export class ScoreMilestoneBar extends Component {
 
   private readonly _milestones: ReadonlyArray<IPingPangProgressMilestone> = PingPangProgressMilestones;
   private _lastScore = 0;
+  private _initialScore = 0;
   private _videoTriggerHandler: (() => void) | null = null;
   private _firstMilestoneClickNode: Node | null = null;
 
@@ -51,14 +52,15 @@ export class ScoreMilestoneBar extends Component {
     this._videoTriggerHandler = handler;
   }
 
-  public reset(): void {
-    this._lastScore = 0;
+  public reset(initialScore: number = 0): void {
+    this._initialScore = initialScore;
+    this._lastScore = initialScore;
     this.setScore(0);
   }
 
-  public setScore(score: number): void {
+  public setScore(rawScore: number): void {
     const previousScore = this._lastScore;
-    const safeScore = Math.max(0, score);
+    const safeScore = Math.max(0, this._initialScore + rawScore);
     this._lastScore = safeScore;
 
     const progress = this._getProgress(safeScore);

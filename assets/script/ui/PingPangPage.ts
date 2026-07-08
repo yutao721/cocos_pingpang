@@ -34,6 +34,7 @@ import { ScoreMilestoneBar } from './ScoreMilestoneBar';
 import { VideoPopup } from './VideoPopup';
 import { userControl } from '../control/UserControl';
 import { getShoeFlowerSpritePool } from '../utils/utils';
+import { PingPangProgressMaxScore } from '../const/PingPangProgressConfig';
 const { ccclass, property } = _decorator;
 
 interface IShoeFlowerViewState {
@@ -375,7 +376,8 @@ export class PingPangPage extends UiBase {
     // 重置提示状态
     this._hintPriority = 0;
     this._randomHintCounter = 0;
-    this.scoreMilestoneBar?.reset();
+    const initialScore = Math.min(userControl.getRecordMaxScore(), PingPangProgressMaxScore);
+    this.scoreMilestoneBar?.reset(initialScore);
 
     // 将球/球拍初始化到对应位置
     if (this.ballNode) this.ballNode.setPosition(BallInitX, BallInitY, 0);
