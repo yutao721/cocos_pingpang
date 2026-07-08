@@ -108,7 +108,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -85,
+      "y": -145,
       "z": 0
     },
     "_lrot": {
@@ -245,7 +245,7 @@
     "_target": null,
     "_left": 0,
     "_right": 0,
-    "_top": -60,
+    "_top": 0,
     "_bottom": 0,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
@@ -263,7 +263,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "71yh4vpB5ACLt/UTmyNDYF"
+    "fileId": "d2yVZp9pRG7pqI5jCy1Q3h"
   },
   {
     "__type__": "cc.PrefabInfo",

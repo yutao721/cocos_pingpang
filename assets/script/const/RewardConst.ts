@@ -7,26 +7,26 @@ export enum RewardState {
 }
 
 export interface IRewardApiData {
-  video: number;
   point100: number;
+  point300: number;
   point500: number;
   recordmaxscore: number;
 }
 
-export type RewardStatusKey = keyof Pick<IRewardApiData, 'video' | 'point100' | 'point500'>;
+export type RewardStatusKey = keyof Pick<IRewardApiData, 'point100' | 'point300' | 'point500'>;
 
 export const RewardInfoUpdateEvent = 'rewardInfoUpdate';
 
 export const RewardStatusFieldByKey: Record<string, RewardStatusKey> = {
-  video: 'video',
-  '100_hole': 'point100',
-  '500_hole': 'point500',
+  'point100': 'point100',
+  'point300': 'point300',
+  'point500': 'point500',
 };
 
 export const DefaultRewardStateByKey: Record<string, RewardState> = {
-  video: RewardState.unfinished,
-  '100_hole': RewardState.unfinished,
-  '500_hole': RewardState.unfinished,
+  'point100': RewardState.unfinished,
+  'point300': RewardState.unfinished,
+  'point500': RewardState.unfinished,
 };
 
 export const RewardUnlockScoreByKey: Record<string, number> = PingPangProgressMilestones.reduce(

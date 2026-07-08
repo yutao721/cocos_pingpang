@@ -22,9 +22,9 @@ export const RewardConfig: {
   type: number[],
   source: number
 }[] = [
-    { key: 'video', desc: '明星视频', count: 1, type: [11], source: 1 },
-    { key: '100_hole', desc: '100洞力值', count: 3, type: [12], source: 2 },
-    { key: '500_hole', desc: '500洞力值', count: 5, type: [13], source: 2 },
+    { key: 'point100', desc: '明星视频', count: 1, type: [11], source: 1 },
+    { key: 'point300', desc: '300洞力值', count: 3, type: [12], source: 2 },
+    { key: 'point500', desc: '500洞力值', count: 5, type: [13], source: 2 },
   ];
 
 export enum eItemType {
