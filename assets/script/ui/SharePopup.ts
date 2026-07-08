@@ -26,6 +26,8 @@ export class SharePopup extends UiBase {
   @property(Node)
   maskNode: Node = null;
 
+  @property(Node)
+  closeNode: Node = null;
 
   share_bg: string = 'https://sgssj-hdimg.oss-cn-hangzhou.aliyuncs.com/icons/h5game_jump/share_bg.jpg';
   _canvas: HTMLCanvasElement = null!;
@@ -56,6 +58,7 @@ export class SharePopup extends UiBase {
 
   onLoad() {
     this.maskNode.on(Node.EventType.TOUCH_END, this.onBtnCloseClick, this);
+    this.closeNode.on(Node.EventType.TOUCH_END, this.onBtnCloseClick, this);
     // this.generateImage({}, { nickname: this.nickname, headimgurl: this.headimgurl });
   }
 
@@ -303,7 +306,7 @@ export class SharePopup extends UiBase {
       img.style.position = "absolute";
       img.style.top = "50%";
       img.style.left = "50%";
-      img.style.width = "85vw";
+      img.style.width = "280px";
       img.style.height = "auto";
       img.style.zIndex = "100";
       img.style.transform = "translate(-50%, -50%)";

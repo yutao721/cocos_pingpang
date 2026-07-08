@@ -325,7 +325,7 @@ export class PingPangPage extends UiBase {
   private onGameOver(result: IPingPangResult): void {
     userControl.updateRecordMaxScore(result.score);
     this._refreshBestScoreLabel(result.score);
-    this.pageManager.showUI(UI_PATH.RESULT, UILayer.TOP, (node: Node) => {
+    this.pageManager.showUI(UI_PATH.RESULT, UILayer.MIDDLE, (node: Node) => {
       node.getComponent(ResultPopup)?.show(result);
     });
   }

@@ -18,8 +18,8 @@ export interface IUserInfo {
 type RewardStateMap = Record<string, RewardState>;
 
 const DEFAULT_REWARD_DATA: IRewardApiData = {
-  video: 0,
-  point100: 0,
+  point100: 1,
+  point300: 0,
   point500: 0,
   recordmaxscore: 0,
 };
@@ -102,13 +102,14 @@ export class UserInfoModel {
     try {
       const res = await Api.getReward();
       const info = res?.data?.data ?? res?.data;
+      console.log('updateRewardInfo', info);
       if (!info) {
         return;
       }
 
       this.applyRewardData({
-        video: this.toSafeInt(info.video),
         point100: this.toSafeInt(info.point100),
+        point300: this.toSafeInt(info.point300),
         point500: this.toSafeInt(info.point500),
         recordmaxscore: this.toSafeInt(info.recordmaxscore),
       });
@@ -174,8 +175,8 @@ export class UserInfoModel {
       const info = JSON.parse(raw);
       this.applyRewardData(
         {
-          video: info.video,
           point100: info.point100,
+          point300: info.point300,
           point500: info.point500,
           recordmaxscore: info.recordmaxscore,
         },
@@ -190,8 +191,8 @@ export class UserInfoModel {
 
   private applyRewardData(data: Partial<IRewardApiData>, shouldEmit = true): void {
     this.rewardData = {
-      video: this.toSafeInt(data.video),
       point100: this.toSafeInt(data.point100),
+      point300: this.toSafeInt(data.point300),
       point500: this.toSafeInt(data.point500),
       recordmaxscore: this.toSafeInt(data.recordmaxscore),
     };

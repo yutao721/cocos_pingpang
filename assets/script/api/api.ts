@@ -43,8 +43,8 @@ const DEFAULT_MOCK_USER_INFO: IApiUserInfo = {
 };
 
 const DEFAULT_MOCK_REWARD_DATA: IRewardApiData = {
-  video: 1,
   point100: 1,
+  point300: 1,
   point500: 1,
   recordmaxscore: 100,
 };
@@ -236,11 +236,11 @@ export class Api {
   }
 
   private static getMockRewardData(): IRewardApiData {
-    const cachedReward = this.readJsonFromStorage<Partial<IRewardApiData>>(MOCK_REWARD_INFO_CACHE_KEY) ?? {};
+    const cachedReward = this.readJsonFromStorage<Partial<IRewardApiData>>(MOCK_REWARD_INFO_CACHE_KEY) ?? { ...DEFAULT_MOCK_REWARD_DATA };
 
     return {
-      video: this.toSafeInt(cachedReward.video),
       point100: this.toSafeInt(cachedReward.point100),
+      point300: this.toSafeInt(cachedReward.point300),
       point500: this.toSafeInt(cachedReward.point500),
       recordmaxscore: this.toSafeInt(cachedReward.recordmaxscore),
     };
