@@ -11,7 +11,7 @@ const { ccclass, property } = _decorator;
 export class GameCanvas extends UiBase {
 
   protected onLoad(): void {
-    document.title = '乒乓接球大挑战';
+    document.title = '乒乓控场挑战';
     // 页面管理初始化
     this.pageManager.init(this.node);
     this.pageManager.showUI(UI_PATH.LOADING);
