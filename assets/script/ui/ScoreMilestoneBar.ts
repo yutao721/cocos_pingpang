@@ -60,7 +60,7 @@ export class ScoreMilestoneBar extends Component {
 
   public setScore(rawScore: number): void {
     const previousScore = this._lastScore;
-    const safeScore = Math.max(0, this._initialScore + rawScore);
+    const safeScore = Math.max(this._initialScore, rawScore);
     this._lastScore = safeScore;
 
     const progress = this._getProgress(safeScore);
