@@ -3051,7 +3051,7 @@
       "__id__": 124
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 126
@@ -3143,11 +3143,11 @@
       "a": 255
     },
     "_preview": true,
-    "_fadeTime": 0.1,
-    "_minSeg": 80,
-    "_stroke": 80,
+    "_fadeTime": 0.3,
+    "_minSeg": 30,
+    "_stroke": 30,
     "_texture": {
-      "__uuid__": "6e8d90a1-2c60-4bb6-8a07-d435e09888f8@6c48a",
+      "__uuid__": "bf79b42f-733d-40da-aa2d-5c53b63676aa@6c48a",
       "__expectedType__": "cc.Texture2D"
     },
     "_fastMode": false,
@@ -3959,7 +3959,6 @@
       "__uuid__": "808035bc-5816-4019-9e41-91110fbacffe@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
-    "sweepSF": null,
     "pauseBtn": {
       "__id__": 144
     },

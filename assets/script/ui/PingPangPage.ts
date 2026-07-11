@@ -44,7 +44,6 @@ interface IShoeFlowerViewState {
   totalLifetime: number;
   baseScale: Vec3;
   baseAngle: number;
-  sweepActive: boolean;
 }
 
 /**
@@ -649,9 +648,7 @@ export class PingPangPage extends UiBase {
       totalLifetime: flower.lifetime,
       baseScale: new Vec3(node.scale.x, node.scale.y, node.scale.z),
       baseAngle: node.angle,
-      sweepActive: true,
     });
-    this._createSweepNode(node);
   }
 
   private onShoeFlowerUpdate(uid: number, y: number): void {
@@ -705,19 +702,6 @@ export class PingPangPage extends UiBase {
       const amount = pulse * strength;
       const opacity = Math.round(255 - (255 - ShoeFlowerExpireWarnMinOpacity) * amount);
       const scaleMul = 1 + (ShoeFlowerExpireWarnScale - 1) * amount;
-
-      // 进入警告阶段：停止扫光
-      if (state.sweepActive) {
-        state.sweepActive = false;
-        const sweepNode = state.node.getChildByName('_sweepFx');
-        if (sweepNode) {
-          Tween.stopAllByTarget(sweepNode);
-          const sweepOpacity = sweepNode.getComponent(UIOpacity);
-          if (sweepOpacity) Tween.stopAllByTarget(sweepOpacity);
-          sweepNode.active = false;
-        }
-      }
-
       this._applyShoeFlowerVisual(state, scaleMul, opacity, state.baseAngle);
     });
   }
@@ -799,68 +783,8 @@ export class PingPangPage extends UiBase {
     Tween.stopAllByTarget(node);
     const opacity = node.getComponent(UIOpacity);
     if (opacity) Tween.stopAllByTarget(opacity);
-    const sweepNode = node.getChildByName('_sweepFx');
-    if (sweepNode) {
-      Tween.stopAllByTarget(sweepNode);
-      const sweepOpacity = sweepNode.getComponent(UIOpacity);
-      if (sweepOpacity) Tween.stopAllByTarget(sweepOpacity);
-    }
     node.active = false;
     node.destroy();
-  }
-
-  // ----------------------------------------------------------------
-  // 鞋花扫光
-  // ----------------------------------------------------------------
-
-  private _createSweepNode(parent: Node): void {
-    const sweepNode = new Node('_sweepFx');
-    sweepNode.layer = parent.layer;
-    sweepNode.parent = parent;
-    sweepNode.addComponent(UITransform).setContentSize(30, 130);
-    const g = sweepNode.addComponent(Graphics);
-    const h = 130;
-    // 多段矩形模拟横向渐变（透明 → 白 → 透明）
-    const strips = [
-      { x: -15, w: 5, a: 20 },
-      { x: -10, w: 10, a: 110 },
-      { x:   0, w: 10, a: 110 },
-      { x:  10, w: 5, a: 20 },
-    ];
-    for (const s of strips) {
-      g.fillColor = new Color(255, 255, 255, s.a);
-      g.rect(s.x, -h / 2, s.w, h);
-      g.fill();
-    }
-    const opacity = sweepNode.addComponent(UIOpacity);
-    opacity.opacity = 0;
-    sweepNode.angle = 25;
-    sweepNode.setPosition(-90, 0, 0);
-    this._playSweepAnimation(sweepNode);
-  }
-
-  private _playSweepAnimation(sweepNode: Node): void {
-    if (!sweepNode || !sweepNode.isValid) return;
-    const opacity = sweepNode.getComponent(UIOpacity);
-    if (!opacity) return;
-    const startX = -90;
-    const endX = 90;
-    const sweepDur = 0.45;
-    const delay = 2.0;
-    sweepNode.setPosition(startX, 0, 0);
-    opacity.opacity = 0;
-    tween(sweepNode)
-      .delay(delay)
-      .call(() => { if (sweepNode.isValid) sweepNode.setPosition(startX, 0, 0); })
-      .to(sweepDur, { position: new Vec3(endX, 0, 0) })
-      .call(() => { if (sweepNode.isValid) this._playSweepAnimation(sweepNode); })
-      .start();
-    tween(opacity)
-      .delay(delay)
-      .to(sweepDur * 0.25, { opacity: 200 })
-      .to(sweepDur * 0.5, { opacity: 180 })
-      .to(sweepDur * 0.25, { opacity: 0 })
-      .start();
   }
 
   // ----------------------------------------------------------------
