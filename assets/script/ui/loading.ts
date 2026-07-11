@@ -16,7 +16,7 @@ export class loading extends UiBase {
 
   protected onInit(): void {
     this.rateLabel.string = "0%";
-    BundleManager.getBundle().loadDir('/', (finished: number, total: number, item: any) => {
+    BundleManager.getBundle().loadDir('/image/common', (finished: number, total: number, item: any) => {
       // 更新进度条
       if (total > 0) {
         const progress = finished / total;

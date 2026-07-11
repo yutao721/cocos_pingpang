@@ -134,14 +134,14 @@ export const EnableMockApi = false;
 
 // 鞋花类型
 export enum eShoeFlowerType {
-  normal = 1, // 普通鞋花  +5分
-  limited = 2, // 限量款鞋花 +10分
+  normal = 1, // 普通鞋花  +2分
+  limited = 2, // 限量款鞋花 +3分
 }
 
 // 鞋花得分配置
 export const ShoeFlowerScoreConfig: Record<eShoeFlowerType, number> = {
   [eShoeFlowerType.normal]: 2,
-  [eShoeFlowerType.limited]: 5,
+  [eShoeFlowerType.limited]: 3,
 };
 
 // 连颠 Buff 阶段配置（达到 count 次连颠时额外加 bonus 分）
@@ -153,11 +153,18 @@ export interface IComboBuffConfig {
 }
 
 export const ComboBuffConfig: IComboBuffConfig[] = [
-  { count: 5,   bonus: 1,  title: '5连击！',   desc: '洞门buff拉满！' },
-  { count: 20,  bonus: 5,  title: '20连击！',  desc: '洞门高手，尽显实力！' },
-  { count: 50,  bonus: 10, title: '50连击！',  desc: '节奏拉满，自在发力！' },
-  { count: 100, bonus: 20, title: '100连击！', desc: '满级操作，洞门封神！' },
-  { count: 150, bonus: 30, title: '150连击！', desc: '无敌状态，传说级选手！' },
+  { count: 10,  bonus: 0, title: '10连击！',    desc: '稳住节奏，继续努力！' },
+  { count: 20,  bonus: 5, title: '20连击！',    desc: '洞门高手，尽显实力！' },
+  { count: 30,  bonus: 0, title: '30连击封神！', desc: '无人能挡，持续领跑！' },
+  { count: 40,  bonus: 0, title: '40连击！',    desc: '洞感全开，持续领跑！' },
+  { count: 50,  bonus: 10, title: '50连击！',    desc: '节奏拉满，自在发力！' },
+  { count: 60,  bonus: 0, title: '60连击！',    desc: '稳控全场，洞感狂飙！' },
+  { count: 70,  bonus: 0, title: '70连击！',    desc: '实力爆表，锁定洞门高分！' },
+  { count: 80,  bonus: 0, title: '80连击！',    desc: '巅峰状态，自在拿捏！' },
+  { count: 90,  bonus: 0, title: '90连击！',    desc: '步步进阶，冲刺洞门榜首！' },
+  { count: 100, bonus: 0, title: '100连击！',   desc: '满级操作，洞门封神！' },
+  { count: 150, bonus: 15, title: '150连击！',   desc: '洞门颠球王者！' },
+  { count: 300, bonus: 20, title: '300连击！',   desc: '洞门颠球天花板！' },
 ];
 
 // 连颠步长（超出上表后按此步长递增；设为极大值表示不再额外触发）
@@ -166,7 +173,7 @@ export const ComboBuffStep = 999999;
 export const ComboBuffStepBonus = 0;
 
 // 随机激励提示触发间隔（每颠多少次出现 1 条，<= 0 表示关闭）
-export const RandomHintHitInterval = 10;
+export const RandomHintHitInterval = 20;
 
 // 随机提示文案（每次颠球低概率触发，优先级最低）
 export const RandomHintTexts: string[] = [
@@ -174,13 +181,12 @@ export const RandomHintTexts: string[] = [
   '手感在线，自在拿捏！',
   '洞感全开，稳稳拿捏每一球！',
   '自在节奏，高分正在路上！',
-  '洞感buff加持，分数稳步暴涨！',
 ];
 
 // 击中鞋花提示文案（优先级最高）
 export const ShoeFlowerHitHint: Record<number, string> = {
   [eShoeFlowerType.normal]: '颠得漂亮鞋花接住',
-  [eShoeFlowerType.limited]: '接住限量鞋花分数飙升',
+  [eShoeFlowerType.limited]: '接住限量鞋花，分数飙升',
 };
 
 // 基础颠球得分（每颠一次 +1）
@@ -191,6 +197,9 @@ export const GameDuration = 0;
 
 // 鞋花在屏幕上同时最多存在的数量
 export const MaxShoeFlowerOnStage = 1;
+
+// 颠球达到该次数后才开始生成鞋花（0 表示游戏开始即可生成）
+export const ShoeFlowerStartHitCount: number = 11;
 
 // 鞋花生成间隔范围（秒）[min, max]
 export const ShoeFlowerSpawnInterval: [number, number] = [2.0, 5.0];
@@ -204,9 +213,6 @@ export const ShoeFlowerSpawnRangeY: [number, number] = [-40, 200];
 
 // 鞋花存活时间范围（秒）[min, max]，倒计时到 0 后消失
 export const ShoeFlowerLifetime: [number, number] = [3, 4];
-
-// Phase2 时鞋花存活时间倍率（< 1 使鞋花消失更快）
-export const ShoeFlowerLifetimeMulPhase2: number = 0.6;
 
 // 鞋花临近超时时的原地预警效果配置
 export const ShoeFlowerExpireWarnTime: number = 1.2;
@@ -285,10 +291,10 @@ export enum eDifficultyPhase {
 // ---------- Phase 1：球速提升 ----------
 
 // 触发球速提升所需分数（建议测试期间根据游戏时长调整）
-export const Phase1ScoreThreshold = 100;
+export const Phase1ScoreThreshold = 50;
 
 // 球速提升倍率（当前速度 × 此系数）
-export const Phase1BallSpeedMul = 1.15;
+export const Phase1BallSpeedMul = 1.35;
 
 // Phase 1 触发时的 UI 提示文案
 export const Phase1HintText = '⚡ 球速加快了！';
@@ -299,7 +305,10 @@ export const Phase1HintText = '⚡ 球速加快了！';
 export const Phase2DurationThreshold = 20;
 
 // Phase2 鞋花生成间隔缩短倍率（间隔 × 此系数，值越小生成越频繁）
-export const Phase2SpawnIntervalMul = 0.6;
+export const Phase2SpawnIntervalMul = 1;
+
+// Phase2 时鞋花存活时间倍率（< 1 使鞋花消失更快）
+export const ShoeFlowerLifetimeMulPhase2: number = 0.4;
 
 // Phase 2 触发时的 UI 提示文案
 export const Phase2HintText = '🌪 鞋花消失加快了！';

@@ -30,6 +30,7 @@ import {
   ShoeFlowerSpawnInterval,
   ShoeFlowerSpawnRangeX,
   ShoeFlowerSpawnRangeY,
+  ShoeFlowerStartHitCount,
 } from '../const/GameConst';
 import { IPingPangResult, IShoeFlower, IShoeFlowerHitEffectData } from '../const/Interface';
 import { PingPangModel } from '../model/PingPangModel';
@@ -376,7 +377,7 @@ export class PingPangControl {
 
   private _tickShoeFlowers(dt: number): void {
     this.spawnTimer -= dt;
-    if (this.spawnTimer <= 0 && this.model.shoeFlowers.length < MaxShoeFlowerOnStage) {
+    if (this.spawnTimer <= 0 && this.model.shoeFlowers.length < MaxShoeFlowerOnStage && this.model.hitCount >= ShoeFlowerStartHitCount) {
       this._spawnShoeFlower();
       this.spawnTimer = this._randomSpawnInterval();
     }

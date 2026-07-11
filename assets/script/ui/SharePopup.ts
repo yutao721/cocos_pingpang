@@ -32,7 +32,7 @@ export class SharePopup extends UiBase {
   share_bg: string = 'https://sgssj-hdimg.oss-cn-hangzhou.aliyuncs.com/icons/h5game_jump/share_bg.jpg';
   _canvas: HTMLCanvasElement = null!;
   shareUrl: string = 'https://www.baidu.com';
-  nickname: string = 'yutao';
+  nickname: string = 'Charihᰔᩚ';
   score: number = 88108;
   img: HTMLImageElement;
   headimgurl: string = 'https://usersstatic.solomochina.com/crocs/dm/avatar/202512/24/1766565681651113.png'

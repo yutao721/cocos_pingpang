@@ -9,7 +9,7 @@ export const PingPangProgressMaxScore = 500;
 export const PingPangProgressMilestones: IPingPangProgressMilestone[] = [
   {
     key: 'point100',
-    score: 100,
+    score: 50,
     label: '100',
   },
   {

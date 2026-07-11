@@ -14,7 +14,7 @@ export class GameCanvas extends UiBase {
     document.title = '乒乓控场挑战';
     // 页面管理初始化
     this.pageManager.init(this.node);
-    this.pageManager.showUI(UI_PATH.LOADING);
+    // this.pageManager.showUI(UI_PATH.LOADING);
     // 提示管理初始化
     TipControl.Instance.init();
     // 音频管理初始化
