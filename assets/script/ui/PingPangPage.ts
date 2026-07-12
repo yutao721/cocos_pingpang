@@ -1,5 +1,6 @@
 import { _decorator, Color, Graphics, Label, Node, Prefab, Sprite, SpriteFrame, Tween, UIOpacity, UITransform, Vec3, instantiate, tween } from 'cc';
 import { UiBase } from '../../framework/ui/UiBase';
+import { AnimationPlayer } from '../../framework/ui/AnimationPlayer';
 import { pingPangControl } from '../control/PingPangControl';
 import { PingPangEvent } from '../const/EventDefine';
 import { RewardInfoUpdateEvent } from '../const/RewardConst';
@@ -33,7 +34,7 @@ import { ResultPopup } from './ResultPopup';
 import { ScoreMilestoneBar } from './ScoreMilestoneBar';
 import { VideoPopup } from './VideoPopup';
 import { userControl } from '../control/UserControl';
-import { getShoeFlowerSpritePool } from '../utils/utils';
+import { getShoeFlowerSpritePool, getSpriteFramesByDir } from '../utils/utils';
 import { PingPangProgressMaxScore } from '../const/PingPangProgressConfig';
 const { ccclass, property } = _decorator;
 
@@ -44,6 +45,7 @@ interface IShoeFlowerViewState {
   totalLifetime: number;
   baseScale: Vec3;
   baseAngle: number;
+  animPlayer?: AnimationPlayer;
 }
 
 /**
@@ -148,6 +150,10 @@ export class PingPangPage extends UiBase {
   @property
   limitedShoeFlowerDir: string = 'image/game/limited';
 
+  /** 限量鞋花序列帧 fps */
+  @property
+  limitedShoeFlowerFps: number = 24;
+
   /** 爆炸特效 SpriteFrame（拖入 boom.png/spriteFrame） */
   @property(SpriteFrame)
   boomSF: SpriteFrame = null;
@@ -214,8 +220,8 @@ export class PingPangPage extends UiBase {
   /** 普通鞋花候选图集（运行时从目录加载） */
   private _normalShoeFlowerPool: SpriteFrame[] = [];
 
-  /** 限量鞋花候选图集（运行时从目录加载） */
-  private _limitedShoeFlowerPool: SpriteFrame[] = [];
+  /** 限量鞋花候选帧序列池（每个子目录一组帧，运行时从子目录加载） */
+  private _limitedFramePools: SpriteFrame[][] = [];
 
   private bestScoreLabel: Label | null = null;
   /** 调试：球拍碰撞盒绘制组件（ShowPaddleHitBox=true 时创建） */
@@ -631,11 +637,20 @@ export class PingPangPage extends UiBase {
 
     // 根据类型切换 SpriteFrame（在编辑器拖入资源后生效）
     const sprite = node.getComponent(Sprite);
-    sprite.sizeMode = Sprite.SizeMode.TRIMMED;
-    sprite.trim = true;
     if (sprite) {
-      const sf = this._pickShoeFlowerSpriteFrame(flower.type);
-      sprite.spriteFrame = sf;
+      sprite.sizeMode = Sprite.SizeMode.TRIMMED;
+      sprite.trim = true;
+    }
+
+    let animPlayer: AnimationPlayer | undefined;
+    if (flower.type === eShoeFlowerType.limited && this._limitedFramePools.length > 0 && sprite) {
+      const poolIndex = Math.floor(Math.random() * this._limitedFramePools.length);
+      const frames = this._limitedFramePools[poolIndex];
+      animPlayer = node.addComponent(AnimationPlayer);
+      animPlayer.initFrame(sprite, frames, this.limitedShoeFlowerFps);
+      animPlayer.play(true);
+    } else if (sprite) {
+      sprite.spriteFrame = this._pickShoeFlowerSpriteFrame();
     }
 
     const opacity = node.getComponent(UIOpacity) ?? node.addComponent(UIOpacity);
@@ -648,6 +663,7 @@ export class PingPangPage extends UiBase {
       totalLifetime: flower.lifetime,
       baseScale: new Vec3(node.scale.x, node.scale.y, node.scale.z),
       baseAngle: node.angle,
+      animPlayer,
     });
   }
 
@@ -783,6 +799,8 @@ export class PingPangPage extends UiBase {
     Tween.stopAllByTarget(node);
     const opacity = node.getComponent(UIOpacity);
     if (opacity) Tween.stopAllByTarget(opacity);
+    const animPlayer = node.getComponent(AnimationPlayer);
+    if (animPlayer) animPlayer.stop();
     node.active = false;
     node.destroy();
   }
@@ -811,25 +829,27 @@ export class PingPangPage extends UiBase {
   }
 
   private async _loadShoeFlowerSpritePools(): Promise<void> {
-    const [normalPool, limitedPool] = await Promise.all([
+    const limitedFolderCount = 12;
+    const tasks: Promise<SpriteFrame[]>[] = [
       getShoeFlowerSpritePool('normal', this.normalShoeFlowerDir),
-      getShoeFlowerSpritePool('limited', this.limitedShoeFlowerDir),
-    ]);
+      ...Array.from({ length: limitedFolderCount }, (_, i) =>
+        getSpriteFramesByDir(`${this.limitedShoeFlowerDir}/${i + 1}`)
+      ),
+    ];
+    const [normalPool, ...limitedPools] = await Promise.all(tasks);
 
     this._normalShoeFlowerPool = normalPool;
-    this._limitedShoeFlowerPool = limitedPool;
+    this._limitedFramePools = limitedPools.filter(p => p.length > 0);
 
-    console.log(`[ShoeFlower] sprite pool loaded: normal=${this._normalShoeFlowerPool.length}, limited=${this._limitedShoeFlowerPool.length}`);
+    console.log(`[ShoeFlower] sprite pool loaded: normal=${this._normalShoeFlowerPool.length}, limited folders=${this._limitedFramePools.length}`);
   }
 
-  private _pickShoeFlowerSpriteFrame(type: number): SpriteFrame {
-    const isLimited = type === eShoeFlowerType.limited;
-    const pool = isLimited ? this._limitedShoeFlowerPool : this._normalShoeFlowerPool;
+  private _pickShoeFlowerSpriteFrame(): SpriteFrame {
+    const pool = this._normalShoeFlowerPool;
     if (pool.length > 0) {
-      const index = Math.floor(Math.random() * pool.length);
-      return pool[index];
+      return pool[Math.floor(Math.random() * pool.length)];
     }
-    return isLimited ? this.limitedShoeFlowerSF : this.normalShoeFlowerSF;
+    return this.normalShoeFlowerSF;
   }
 
   private _showShoeFlowerScore(hitData: IShoeFlowerHitEffectData): void {
