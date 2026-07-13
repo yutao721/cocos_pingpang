@@ -199,7 +199,7 @@ export const GameDuration = 0;
 export const MaxShoeFlowerOnStage = 1;
 
 // 颠球达到该次数后才开始生成鞋花（0 表示游戏开始即可生成）
-export const ShoeFlowerStartHitCount: number = 11;
+export const ShoeFlowerStartHitCount: number = 1;
 
 // 鞋花生成间隔范围（秒）[min, max]
 export const ShoeFlowerSpawnInterval: [number, number] = [2.0, 5.0];
