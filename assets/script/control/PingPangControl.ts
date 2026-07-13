@@ -30,6 +30,7 @@ import {
   ShoeFlowerSpawnInterval,
   ShoeFlowerSpawnRangeX,
   ShoeFlowerSpawnRangeY,
+  ShoeFlowerSpawnYSpread,
   ShoeFlowerStartHitCount,
 } from '../const/GameConst';
 import { IPingPangResult, IShoeFlower, IShoeFlowerHitEffectData } from '../const/Interface';
@@ -433,7 +434,8 @@ export class PingPangControl {
     const [xMin, xMax] = ShoeFlowerSpawnRangeX;
     const [yMin, yMax] = ShoeFlowerSpawnRangeY;
     const x = xMin + Math.random() * (xMax - xMin);
-    const y = yMin + Math.random() * (yMax - yMin);
+    const center = Math.max(yMin, Math.min(yMax, this.model.ballY));
+    const y = Math.max(yMin, Math.min(yMax, center + (Math.random() * 2 - 1) * ShoeFlowerSpawnYSpread));
 
     const [ltMin, ltMax] = ShoeFlowerLifetime;
     const lifetimeMul = this.model.difficultyPhase >= eDifficultyPhase.phase2
