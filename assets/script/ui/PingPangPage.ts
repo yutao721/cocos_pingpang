@@ -44,6 +44,10 @@ interface IShoeFlowerViewState {
   totalLifetime: number;
   baseScale: Vec3;
   baseAngle: number;
+  /** 是否播放左右晃动（限量款专用） */
+  swingEnabled: boolean;
+  /** 晃动计时器（秒） */
+  swingElapsed: number;
 }
 
 /**
@@ -648,6 +652,8 @@ export class PingPangPage extends UiBase {
       totalLifetime: flower.lifetime,
       baseScale: new Vec3(node.scale.x, node.scale.y, node.scale.z),
       baseAngle: node.angle,
+      swingEnabled: flower.type === eShoeFlowerType.limited,
+      swingElapsed: 0,
     });
   }
 
@@ -684,13 +690,27 @@ export class PingPangPage extends UiBase {
   }
 
   private _tickShoeFlowerEffects(dt: number): void {
+    /** 限量鞋花晃动幅度（度） */
+    const SWING_ANGLE = 18;
+    /** 晃动周期（秒） */
+    const SWING_PERIOD = 1.0;
+
     this.shoeFlowerNodes.forEach(state => {
       if (!state.node || !state.node.isValid) return;
 
+      if (state.swingEnabled) {
+        state.swingElapsed += dt;
+      }
+
       state.remainingLifetime = Math.max(0, state.remainingLifetime - dt);
       const warnWindow = Math.min(ShoeFlowerExpireWarnTime, state.totalLifetime);
+
+      const swingAngle = state.swingEnabled
+        ? state.baseAngle + Math.sin((state.swingElapsed / SWING_PERIOD) * Math.PI * 2) * SWING_ANGLE
+        : state.baseAngle;
+
       if (warnWindow <= 0 || state.remainingLifetime > warnWindow) {
-        this._resetShoeFlowerVisual(state);
+        this._applyShoeFlowerVisual(state, 1, 255, swingAngle);
         return;
       }
 
@@ -702,7 +722,7 @@ export class PingPangPage extends UiBase {
       const amount = pulse * strength;
       const opacity = Math.round(255 - (255 - ShoeFlowerExpireWarnMinOpacity) * amount);
       const scaleMul = 1 + (ShoeFlowerExpireWarnScale - 1) * amount;
-      this._applyShoeFlowerVisual(state, scaleMul, opacity, state.baseAngle);
+      this._applyShoeFlowerVisual(state, scaleMul, opacity, swingAngle);
     });
   }
 
