@@ -128,21 +128,54 @@ export const ShowShoeFlowerHitBox = false;
  */
 export const EnableMockApi = false;
 
+/**
+ * 调试：强制下一次生成必然是减分鞋花
+ * true  → 无视概率/门槛，每次生成鞋花时直接出减分款，方便快速看效果
+ * false → 正常概率逻辑
+ */
+export const DebugForceSpawnPenalty = false;
+
+/**
+ * 调试：覆盖减分鞋花解锁门槛（颠球次数）
+ * >= 0  → 用此值替换 PenaltyShoeFlowerStartHitCount，设 0 可立即出现
+ * -1    → 不覆盖，使用正式配置值
+ */
+export const DebugPenaltyStartHitCount: number = -1;
+
 // ============================================================
 // 颠球游戏（PingPang）新玩法配置
 // ============================================================
 
 // 鞋花类型
 export enum eShoeFlowerType {
-  normal = 1, // 普通鞋花  +2分
-  limited = 2, // 限量款鞋花 +3分
+  normal  = 1, // 普通鞋花      +2 分
+  limited = 2, // 限量款鞋花    +3 分
+  penalty = 3, // 减分鞋花（扣分道具）-5 分
 }
 
-// 鞋花得分配置
+// 鞋花得分配置（正数=加分，负数=扣分）
 export const ShoeFlowerScoreConfig: Record<eShoeFlowerType, number> = {
-  [eShoeFlowerType.normal]: 2,
+  [eShoeFlowerType.normal]:  2,
   [eShoeFlowerType.limited]: 3,
+  [eShoeFlowerType.penalty]: -5,
 };
+
+// 减分鞋花碰到后的屏幕震动参数（振幅略大于限量款）
+export const PenaltyShoeFlowerShakeAmplitude: number = 9;
+export const PenaltyShoeFlowerShakeDuration:  number = 0.28;
+
+// 减分鞋花首次出现所需颠球次数
+export const PenaltyShoeFlowerStartHitCount: number = 15;
+
+// 减分鞋花生成概率（每次 _spawnShoeFlower 被调用时，此概率替换普通/限量款逻辑）
+// 值越小出现越稀少；比限量款（0.2）更低
+export const PenaltyShoeFlowerSpawnChance: number = 0.12;
+
+// 减分鞋花存活时间范围（秒）[min, max]
+export const PenaltyShoeFlowerLifetime: [number, number] = [3, 5];
+
+// 减分鞋花命中提示文案
+export const PenaltyShoeFlowerHitHint: string = '碰到扣分鞋花，小心！';
 
 // 连颠 Buff 阶段配置（达到 count 次连颠时额外加 bonus 分）
 export interface IComboBuffConfig {

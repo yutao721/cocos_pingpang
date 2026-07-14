@@ -8,6 +8,8 @@ import {
   BallVXRatio,
   BallGravity,
   AutoPaddle,
+  DebugForceSpawnPenalty,
+  DebugPenaltyStartHitCount,
   eDifficultyPhase,
   EnablePaddleCheck,
   eShoeFlowerType,
@@ -17,6 +19,9 @@ import {
   PaddleHeight,
   PaddleMoveSpeed,
   PaddleWidth,
+  PenaltyShoeFlowerLifetime,
+  PenaltyShoeFlowerSpawnChance,
+  PenaltyShoeFlowerStartHitCount,
   Phase1BallSpeedMul,
   Phase1HintText,
   Phase1ScoreThreshold,
@@ -83,6 +88,7 @@ export class PingPangControl {
   // 调试统计
   private _debugNormalCount: number = 0;
   private _debugLimitedCount: number = 0;
+  private _debugPenaltyCount: number = 0;
 
   // 屏幕水平边界（设计分辨率 750，留球半径边距）
   private readonly WALL_LEFT = -375 + BallRadius;
@@ -101,8 +107,9 @@ export class PingPangControl {
     this._isPaused = false;
     this.spawnTimer = this._randomSpawnInterval();
     this.lastSecond = 0;
-    this._debugNormalCount = 0;
+    this._debugNormalCount  = 0;
     this._debugLimitedCount = 0;
+    this._debugPenaltyCount = 0;
     this._ballMissed = false;
     // 初始直线下落，速度放缓让玩家有准备时间；接到第一球后才有横向速度
     this.model.setBall(this.model.ballX, this.model.ballY, 0, -600);
@@ -415,7 +422,7 @@ export class PingPangControl {
 
     for (const hitData of toHit) {
       const delta = this.model.onHitShoeFlower(hitData.uid);
-      if (delta <= 0) continue;
+      if (delta === 0) continue; // uid 已不存在（双帧保护）
       hitData.score = delta;
       this._resetShoeFlowerRespawnTimer();
       UiBase.emitUiEvent(PingPangEvent.scoreUpdate, this.model.score, delta);
@@ -429,16 +436,38 @@ export class PingPangControl {
   }
 
   private _spawnShoeFlower(): void {
-    const type = Math.random() < 0.2 ? eShoeFlowerType.limited : eShoeFlowerType.normal;
+    // ---- 决定类型 ----
+    // 优先判定减分鞋花（需达到颠球次数门槛，且概率比限量款更低）
+    let type: eShoeFlowerType;
+    const penaltyThreshold = DebugPenaltyStartHitCount >= 0
+      ? DebugPenaltyStartHitCount
+      : PenaltyShoeFlowerStartHitCount;
+    if (
+      DebugForceSpawnPenalty ||
+      (this.model.hitCount >= penaltyThreshold && Math.random() < PenaltyShoeFlowerSpawnChance)
+    ) {
+      type = eShoeFlowerType.penalty;
+    } else if (Math.random() < 0.2) {
+      type = eShoeFlowerType.limited;
+    } else {
+      type = eShoeFlowerType.normal;
+    }
 
+    // ---- 位置 ----
     const [xMin, xMax] = ShoeFlowerSpawnRangeX;
     const [yMin, yMax] = ShoeFlowerSpawnRangeY;
     const x = xMin + Math.random() * (xMax - xMin);
     const center = Math.max(yMin, Math.min(yMax, this.model.ballY));
     const y = Math.max(yMin, Math.min(yMax, center + (Math.random() * 2 - 1) * ShoeFlowerSpawnYSpread));
 
-    const [ltMin, ltMax] = ShoeFlowerLifetime;
-    const lifetimeMul = this.model.difficultyPhase >= eDifficultyPhase.phase2
+    // ---- 存活时间 ----
+    let ltMin: number, ltMax: number;
+    if (type === eShoeFlowerType.penalty) {
+      [ltMin, ltMax] = PenaltyShoeFlowerLifetime;
+    } else {
+      [ltMin, ltMax] = ShoeFlowerLifetime;
+    }
+    const lifetimeMul = (type !== eShoeFlowerType.penalty && this.model.difficultyPhase >= eDifficultyPhase.phase2)
       ? ShoeFlowerLifetimeMulPhase2 : 1;
     const lifetime = (ltMin + Math.random() * (ltMax - ltMin)) * lifetimeMul;
 
@@ -446,12 +475,14 @@ export class PingPangControl {
     UiBase.emitUiEvent(PingPangEvent.shoeFlowerSpawn, flower);
 
     // 调试统计
-    if (type === eShoeFlowerType.limited) {
+    if (type === eShoeFlowerType.penalty) {
+      this._debugPenaltyCount++;
+    } else if (type === eShoeFlowerType.limited) {
       this._debugLimitedCount++;
     } else {
       this._debugNormalCount++;
     }
-    console.log(`[ShoeFlower] 生成: ${type === eShoeFlowerType.limited ? '限量款' : '普通款'}  普通=${this._debugNormalCount}  限量=${this._debugLimitedCount}  合计=${this._debugNormalCount + this._debugLimitedCount}`);
+    console.log(`[ShoeFlower] 生成: ${type === eShoeFlowerType.penalty ? '减分款' : type === eShoeFlowerType.limited ? '限量款' : '普通款'}  普通=${this._debugNormalCount}  限量=${this._debugLimitedCount}  减分=${this._debugPenaltyCount}  合计=${this._debugNormalCount + this._debugLimitedCount + this._debugPenaltyCount}`);
   }
 
   // ----------------------------------------------------------------
