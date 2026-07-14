@@ -704,7 +704,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "2ea329ac-527d-4e1b-a4da-a8b6e1f1d881@f9941",
+      "__uuid__": "988c84ac-03f2-4742-8b1e-6f618216b8c3@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -1477,7 +1477,7 @@
       "b": 250,
       "a": 255
     },
-    "_string": "随身润着小金鱼",
+    "_string": "",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 28,
@@ -1487,7 +1487,7 @@
     "_overflow": 1,
     "_enableWrapText": false,
     "_font": {
-      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -1622,7 +1622,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -117.86003112792969,
+      "x": -174.27200317382812,
       "y": 0,
       "z": 0
     },
@@ -1663,7 +1663,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 134.27993774414062,
+      "width": 21.45599365234375,
       "height": 45.36
     },
     "_anchorPoint": {
@@ -1699,7 +1699,7 @@
       "b": 0,
       "a": 255
     },
-    "_string": "1111111111",
+    "_string": "0",
     "_horizontalAlign": 0,
     "_verticalAlign": 2,
     "_actualFontSize": 36,
@@ -1784,7 +1784,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -26.720062255859375,
+      "x": -139.54400634765625,
       "y": 0,
       "z": 0
     },
@@ -1871,7 +1871,7 @@
     "_overflow": 0,
     "_enableWrapText": false,
     "_font": {
-      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -2442,7 +2442,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 750,
+      "width": 750.0000000000001,
       "height": 444
     },
     "_anchorPoint": {
@@ -2814,7 +2814,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "2ea329ac-527d-4e1b-a4da-a8b6e1f1d881@f9941",
+      "__uuid__": "988c84ac-03f2-4742-8b1e-6f618216b8c3@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -3587,7 +3587,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "随身润着小金鱼",
+    "_string": "",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 24,
@@ -3597,7 +3597,7 @@
     "_overflow": 1,
     "_enableWrapText": false,
     "_font": {
-      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -3735,7 +3735,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -144.7160186767578,
+      "x": -174.27200317382812,
       "y": 0,
       "z": 0
     },
@@ -3776,7 +3776,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 80.56796264648438,
+      "width": 21.45599365234375,
       "height": 45.36
     },
     "_anchorPoint": {
@@ -3812,7 +3812,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "111111",
+    "_string": "0",
     "_horizontalAlign": 0,
     "_verticalAlign": 2,
     "_actualFontSize": 36,
@@ -3933,7 +3933,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -80.43203735351562,
+      "x": -139.54400634765625,
       "y": 0,
       "z": 0
     },
@@ -4020,7 +4020,7 @@
     "_overflow": 0,
     "_enableWrapText": false,
     "_font": {
-      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -4902,7 +4902,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "2ea329ac-527d-4e1b-a4da-a8b6e1f1d881@f9941",
+      "__uuid__": "988c84ac-03f2-4742-8b1e-6f618216b8c3@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -5262,7 +5262,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 45.53997802734375,
+      "width": 17.879989624023438,
       "height": 37.8
     },
     "_anchorPoint": {
@@ -5298,7 +5298,7 @@
       "b": 0,
       "a": 255
     },
-    "_string": "186",
+    "_string": "0",
     "_horizontalAlign": 0,
     "_verticalAlign": 2,
     "_actualFontSize": 30,
@@ -5383,7 +5383,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 24.769989013671875,
+      "x": 10.939994812011719,
       "y": 0,
       "z": 0
     },
@@ -5470,7 +5470,7 @@
     "_overflow": 0,
     "_enableWrapText": false,
     "_font": {
-      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -5536,7 +5536,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 141.53997802734375,
+      "width": 113.87998962402344,
       "height": 35
     },
     "_anchorPoint": {
@@ -5749,17 +5749,17 @@
       "b": 250,
       "a": 255
     },
-    "_string": "随身润着小金鱼",
+    "_string": "",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 21,
+    "_actualFontSize": 24,
     "_fontSize": 24,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
     "_overflow": 2,
     "_enableWrapText": false,
     "_font": {
-      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -5962,7 +5962,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -251,
+      "x": -251.00000000000006,
       "y": -353,
       "z": 0
     },
@@ -6201,7 +6201,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "2ea329ac-527d-4e1b-a4da-a8b6e1f1d881@f9941",
+      "__uuid__": "988c84ac-03f2-4742-8b1e-6f618216b8c3@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -6561,7 +6561,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 45.53997802734375,
+      "width": 17.879989624023438,
       "height": 37.8
     },
     "_anchorPoint": {
@@ -6597,7 +6597,7 @@
       "b": 0,
       "a": 255
     },
-    "_string": "186",
+    "_string": "0",
     "_horizontalAlign": 0,
     "_verticalAlign": 2,
     "_actualFontSize": 30,
@@ -6682,7 +6682,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 24.769989013671875,
+      "x": 10.939994812011719,
       "y": 0,
       "z": 0
     },
@@ -6769,7 +6769,7 @@
     "_overflow": 0,
     "_enableWrapText": false,
     "_font": {
-      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -6835,7 +6835,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 141.53997802734375,
+      "width": 113.87998962402344,
       "height": 35
     },
     "_anchorPoint": {
@@ -7048,17 +7048,17 @@
       "b": 250,
       "a": 255
     },
-    "_string": "随身润着小金鱼",
+    "_string": "",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 21,
+    "_actualFontSize": 24,
     "_fontSize": 24,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
     "_overflow": 2,
     "_enableWrapText": false,
     "_font": {
-      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -7261,7 +7261,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 241,
+      "x": 241.00000000000006,
       "y": -447,
       "z": 0
     },
@@ -7500,7 +7500,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "2ea329ac-527d-4e1b-a4da-a8b6e1f1d881@f9941",
+      "__uuid__": "988c84ac-03f2-4742-8b1e-6f618216b8c3@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -7860,7 +7860,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 28.589981079101562,
+      "width": 17.879989624023438,
       "height": 37.8
     },
     "_anchorPoint": {
@@ -7896,7 +7896,7 @@
       "b": 0,
       "a": 255
     },
-    "_string": "18",
+    "_string": "0",
     "_horizontalAlign": 0,
     "_verticalAlign": 2,
     "_actualFontSize": 30,
@@ -7981,7 +7981,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 16.29499053955078,
+      "x": 10.939994812011719,
       "y": 0,
       "z": 0
     },
@@ -8068,7 +8068,7 @@
     "_overflow": 0,
     "_enableWrapText": false,
     "_font": {
-      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -8134,7 +8134,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 124.58998107910156,
+      "width": 113.87998962402344,
       "height": 35
     },
     "_anchorPoint": {
@@ -8347,17 +8347,17 @@
       "b": 250,
       "a": 255
     },
-    "_string": "随身润着小金鱼",
+    "_string": "",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 21,
+    "_actualFontSize": 24,
     "_fontSize": 24,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
     "_overflow": 2,
     "_enableWrapText": false,
     "_font": {
-      "__uuid__": "f9423b8b-aa51-4026-94d0-4c016c11e621",
+      "__uuid__": "f3190701-2d4d-4423-b5c8-09fe23472cda",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -8538,7 +8538,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 750,
+      "width": 750.0000000000001,
       "height": 600
     },
     "_anchorPoint": {
@@ -8941,7 +8941,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 750,
+      "width": 750.0000000000001,
       "height": 1334
     },
     "_anchorPoint": {

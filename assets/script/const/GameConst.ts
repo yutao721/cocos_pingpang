@@ -22,7 +22,7 @@ export const RewardConfig: {
   type: number[],
   source: number
 }[] = [
-    { key: 'point100', desc: '明星视频', count: 1, type: [11], source: 1 },
+    { key: 'point100', desc: '代言人视频', count: 1, type: [11], source: 1 },
     { key: 'point300', desc: '100洞力值', count: 3, type: [12], source: 2 },
     { key: 'point500', desc: '500洞力值', count: 5, type: [13], source: 2 },
   ];
@@ -209,7 +209,10 @@ export const ShoeFlowerRespawnDelayAfterDisappear: number = 2.0;
 
 // 鞋花随机出现的位置范围（设计分辨率 750x1334，Cocos 坐标系）
 export const ShoeFlowerSpawnRangeX: [number, number] = [-180, 40];
-export const ShoeFlowerSpawnRangeY: [number, number] = [-40, 200];
+// Y 范围扩大到 500，覆盖屏幕高区；实际生成位置以球当前 Y 为中心偏移，见 ShoeFlowerSpawnYSpread
+export const ShoeFlowerSpawnRangeY: [number, number] = [-40, 500];
+// 鞋花生成时以当前球 Y 为中心、在此范围内随机偏移（像素）；值越大随机性越强
+export const ShoeFlowerSpawnYSpread: number = 300;
 
 // 鞋花存活时间范围（秒）[min, max]，倒计时到 0 后消失
 export const ShoeFlowerLifetime: [number, number] = [3, 4];
