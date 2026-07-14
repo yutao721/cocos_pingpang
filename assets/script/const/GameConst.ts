@@ -169,7 +169,7 @@ export const PenaltyShoeFlowerStartHitCount: number = 15;
 
 // 减分鞋花生成概率（每次 _spawnShoeFlower 被调用时，此概率替换普通/限量款逻辑）
 // 值越小出现越稀少；比限量款（0.2）更低
-export const PenaltyShoeFlowerSpawnChance: number = 0.12;
+export const PenaltyShoeFlowerSpawnChance: number = 0.2;
 
 // 减分鞋花存活时间范围（秒）[min, max]
 export const PenaltyShoeFlowerLifetime: [number, number] = [3, 5];
