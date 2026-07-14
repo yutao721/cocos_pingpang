@@ -153,11 +153,12 @@ export interface IComboBuffConfig {
 }
 
 export const ComboBuffConfig: IComboBuffConfig[] = [
-  { count: 10,  bonus: 0, title: '10连击！',    desc: '稳住节奏，继续努力！' },
+  { count: 5,  bonus: 0, title: '5连击！',    desc: '手感在线，继续努力！' },
+  { count: 10,  bonus: 0, title: '10连击！',    desc: '保持自信，迎接每一场挑战！' },
   { count: 20,  bonus: 5, title: '20连击！',    desc: '洞门高手，尽显实力！' },
-  { count: 30,  bonus: 0, title: '30连击封神！', desc: '无人能挡，持续领跑！' },
-  { count: 40,  bonus: 0, title: '40连击！',    desc: '洞感全开，持续领跑！' },
-  { count: 50,  bonus: 10, title: '50连击！',    desc: '节奏拉满，自在发力！' },
+  { count: 30,  bonus: 0, title: '30连击！', desc: '你的实力也很难想象吧！' },
+  { count: 40,  bonus: 0, title: '40连击！',    desc: '永远想赢ing！' },
+  { count: 50,  bonus: 10, title: '50连击！',    desc: '没有什么是不可能的！' },
   { count: 60,  bonus: 0, title: '60连击！',    desc: '稳控全场，洞感狂飙！' },
   { count: 70,  bonus: 0, title: '70连击！',    desc: '实力爆表，锁定洞门高分！' },
   { count: 80,  bonus: 0, title: '80连击！',    desc: '巅峰状态，自在拿捏！' },
@@ -179,8 +180,8 @@ export const RandomHintHitInterval = 20;
 export const RandomHintTexts: string[] = [
   '洞门自在，这一拍超稳！',
   '手感在线，自在拿捏！',
-  '洞感全开，稳稳拿捏每一球！',
-  '自在节奏，高分正在路上！',
+  '洞感全开，相信自己不止于此！',
+  '自在节奏，稳稳拿捏每一球！',
 ];
 
 // 击中鞋花提示文案（优先级最高）
