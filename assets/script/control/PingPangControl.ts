@@ -429,7 +429,7 @@ export class PingPangControl {
   }
 
   private _spawnShoeFlower(): void {
-    const type = Math.random() < 1 ? eShoeFlowerType.limited : eShoeFlowerType.normal;
+    const type = Math.random() < 0.2 ? eShoeFlowerType.limited : eShoeFlowerType.normal;
 
     const [xMin, xMax] = ShoeFlowerSpawnRangeX;
     const [yMin, yMax] = ShoeFlowerSpawnRangeY;
