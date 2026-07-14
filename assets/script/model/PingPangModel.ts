@@ -301,15 +301,16 @@ export class PingPangModel {
     }
 
     /**
-     * 球命中鞋花，移除并结算加分
-     * @returns 本次得分增量，鞋花不存在时返回 0
+     * 球命中鞋花，移除并结算分数变化
+     * 减分鞋花（penalty）：扣分但分数下限为 0
+     * @returns 本次分数增量（可为负数），鞋花不存在时返回 0
      */
     public onHitShoeFlower(uid: number): number {
         const index = this._shoeFlowers.findIndex(f => f.uid === uid);
         if (index === -1) return 0;
         const flower = this._shoeFlowers[index];
         const delta  = ShoeFlowerScoreConfig[flower.type] ?? 0;
-        this._score += delta;
+        this._score  = Math.max(0, this._score + delta);
         this._shoeFlowerHitCount++;
         this._shoeFlowers.splice(index, 1);
         return delta;

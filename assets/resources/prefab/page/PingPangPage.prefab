@@ -4083,8 +4083,13 @@
       "__uuid__": "356870c6-022e-4406-9467-ae62473066c2@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
+    "penaltyShoeFlowerSF": {
+      "__uuid__": "7077c16a-e469-49a0-bb33-a699d7ec78b7@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
     "normalShoeFlowerDir": "image/game/normal",
     "limitedShoeFlowerDir": "image/game/limited",
+    "penaltyShoeFlowerDir": "image/game/penalty",
     "limitedShoeFlowerFps": 24,
     "boomSF": {
       "__uuid__": "047428ec-309f-4f3d-8eee-d2c9bec221cc@f9941",

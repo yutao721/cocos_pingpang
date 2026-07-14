@@ -14,6 +14,9 @@ import {
   PaddleMoveMinY,
   PaddleMoveMaxY,
   PaddleWidth,
+  PenaltyShoeFlowerHitHint,
+  PenaltyShoeFlowerShakeAmplitude,
+  PenaltyShoeFlowerShakeDuration,
   RandomHintHitInterval,
   RandomHintTexts,
   ShoeFlowerExpireBlinkInterval,
@@ -46,6 +49,8 @@ interface IShoeFlowerViewState {
   baseScale: Vec3;
   baseAngle: number;
   animPlayer?: AnimationPlayer;
+  swingEnabled?: boolean;
+  swingElapsed?: number;
 }
 
 /**
@@ -142,6 +147,10 @@ export class PingPangPage extends UiBase {
   @property(SpriteFrame)
   limitedShoeFlowerSF: SpriteFrame = null;
 
+  /** 减分鞋花 SpriteFrame，在编辑器中拖入（不填则复用普通鞋花图） */
+  @property(SpriteFrame)
+  penaltyShoeFlowerSF: SpriteFrame = null;
+
   /** 普通鞋花资源目录（resources 内路径） */
   @property
   normalShoeFlowerDir: string = 'image/game/normal';
@@ -149,6 +158,10 @@ export class PingPangPage extends UiBase {
   /** 限量鞋花资源目录（resources 内路径） */
   @property
   limitedShoeFlowerDir: string = 'image/game/limited';
+
+  /** 减分鞋花资源目录（resources 内路径，填了就从此目录随机取帧；不填则用 penaltyShoeFlowerSF） */
+  @property
+  penaltyShoeFlowerDir: string = 'image/game/penalty';
 
   /** 限量鞋花序列帧 fps */
   @property
@@ -222,6 +235,9 @@ export class PingPangPage extends UiBase {
 
   /** 限量鞋花候选帧序列池（每个子目录一组帧，运行时从子目录加载） */
   private _limitedFramePools: SpriteFrame[][] = [];
+
+  /** 减分鞋花候选图集（运行时从目录加载；目录为空时降级用 penaltyShoeFlowerSF） */
+  private _penaltyShoeFlowerPool: SpriteFrame[] = [];
 
   private bestScoreLabel: Label | null = null;
   /** 调试：球拍碰撞盒绘制组件（ShowPaddleHitBox=true 时创建） */
@@ -649,6 +665,12 @@ export class PingPangPage extends UiBase {
       animPlayer = node.addComponent(AnimationPlayer);
       animPlayer.initFrame(sprite, frames, this.limitedShoeFlowerFps);
       animPlayer.play(true);
+    } else if (flower.type === eShoeFlowerType.penalty && sprite) {
+      // 减分鞋花：优先从目录池随机取；池为空时降级用拖入的 penaltyShoeFlowerSF
+      const pool = this._penaltyShoeFlowerPool;
+      sprite.spriteFrame = pool.length > 0
+        ? pool[Math.floor(Math.random() * pool.length)]
+        : (this.penaltyShoeFlowerSF ?? this._pickShoeFlowerSpriteFrame());
     } else if (sprite) {
       sprite.spriteFrame = this._pickShoeFlowerSpriteFrame();
     }
@@ -664,6 +686,8 @@ export class PingPangPage extends UiBase {
       baseScale: new Vec3(node.scale.x, node.scale.y, node.scale.z),
       baseAngle: node.angle,
       animPlayer,
+      swingEnabled: false,
+      swingElapsed: 0,
     });
   }
 
@@ -674,15 +698,27 @@ export class PingPangPage extends UiBase {
 
   private onShoeFlowerHit(hitData: IShoeFlowerHitEffectData): void {
     const type = (hitData.type as eShoeFlowerType) ?? eShoeFlowerType.normal;
-    this._showHint(ShoeFlowerHitHint[type], 3);
-    this._playScreenShake(6, 0.22);
+
+    if (type === eShoeFlowerType.penalty) {
+      // 减分鞋花：专用提示 + 更大震动
+      this._showHint(PenaltyShoeFlowerHitHint, 3);
+      this._playScreenShake(PenaltyShoeFlowerShakeAmplitude, PenaltyShoeFlowerShakeDuration);
+    } else {
+      this._showHint(ShoeFlowerHitHint[type], 3);
+      this._playScreenShake(6, 0.22);
+    }
+
     this._playShoeFlowerHitEffect(hitData.uid);
     this._showShoeFlowerScore(hitData);
+
     if (type === eShoeFlowerType.limited) {
       this._playBoomEffect(hitData.x, hitData.y);
     }
-    // TODO: 播放消除特效/音效
-    if (type === eShoeFlowerType.limited) {
+
+    // 音效
+    if (type === eShoeFlowerType.penalty) {
+      userControl.playSFX('audio/hitPenalty'); // 暂用普通音效，可替换专属音效
+    } else if (type === eShoeFlowerType.limited) {
       userControl.playSFX('audio/hitLimt');
     } else {
       userControl.playSFX('audio/hitFlower');
@@ -850,12 +886,22 @@ export class PingPangPage extends UiBase {
         getSpriteFramesByDir(`${this.limitedShoeFlowerDir}/${i + 1}`)
       ),
     ];
-    const [normalPool, ...limitedPools] = await Promise.all(tasks);
 
-    this._normalShoeFlowerPool = normalPool;
-    this._limitedFramePools = limitedPools.filter(p => p.length > 0);
+    // 如果配置了减分鞋花目录，则同步加载（type 传 'normal' 仅作占位，实际用 customDir）
+    const penaltyTask = this.penaltyShoeFlowerDir
+      ? getShoeFlowerSpritePool('normal', this.penaltyShoeFlowerDir)
+      : Promise.resolve([] as SpriteFrame[]);
 
-    console.log(`[ShoeFlower] sprite pool loaded: normal=${this._normalShoeFlowerPool.length}, limited folders=${this._limitedFramePools.length}`);
+    const [penaltyPool, [normalPool, ...limitedPools]] = await Promise.all([
+      penaltyTask,
+      Promise.all(tasks),
+    ]);
+
+    this._normalShoeFlowerPool  = normalPool;
+    this._limitedFramePools     = limitedPools.filter(p => p.length > 0);
+    this._penaltyShoeFlowerPool = penaltyPool;
+
+    console.log(`[ShoeFlower] sprite pool loaded: normal=${this._normalShoeFlowerPool.length}, limited folders=${this._limitedFramePools.length}, penalty=${this._penaltyShoeFlowerPool.length}`);
   }
 
   private _pickShoeFlowerSpriteFrame(): SpriteFrame {
@@ -888,8 +934,10 @@ export class PingPangPage extends UiBase {
     node.active = true;
     node.setPosition(hitData.x, hitData.y + 12, 0);
     node.setScale(0.92, 0.92, 1);
-    label.string = `+${hitData.score}`;
-    if (!usingCustomPrefab) {
+    // 减分鞋花显示负号（score 本身已是负数），加分鞋花显示 +
+    label.string = hitData.score < 0 ? `${hitData.score}` : `+${hitData.score}`;
+    // 无 Prefab 时按类型设颜色；有 Prefab 时减分款仍强制覆盖为红色
+    if (!usingCustomPrefab || hitData.type === eShoeFlowerType.penalty) {
       label.color = this._getShoeFlowerScoreColor(hitData.type);
     }
     opacity.opacity = 255;
@@ -1032,10 +1080,13 @@ export class PingPangPage extends UiBase {
   }
 
   private _getShoeFlowerScoreColor(type: number): Color {
-    if (type === eShoeFlowerType.limited) {
-      return new Color(255, 214, 88, 255);
+    if (type === eShoeFlowerType.penalty) {
+      return new Color(239, 179, 54, 255);   // 减分鞋花：橘色
     }
-    return new Color(255, 245, 170, 255);
+    if (type === eShoeFlowerType.limited) {
+      return new Color(255, 214, 88, 255);  // 限量款：金色
+    }
+    return new Color(255, 245, 170, 255);   // 普通款：淡黄色
   }
 
   private _formatElapsedTime(totalSeconds: number): string {
