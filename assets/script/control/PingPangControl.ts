@@ -300,7 +300,7 @@ export class PingPangControl {
 
     UiBase.emitUiEvent(PingPangEvent.scoreUpdate, this.model.score, delta);
     UiBase.emitUiEvent(PingPangEvent.comboUpdate, this.model.combo);
-    if (buffBonus > 0) {
+    if (buffTitle) {
       UiBase.emitUiEvent(PingPangEvent.comboBuff, buffBonus, buffTitle, buffDesc);
     }
     UiBase.emitUiEvent(PingPangEvent.ballHitPaddle, this.model.ballX, this.model.ballY);
