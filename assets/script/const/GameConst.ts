@@ -188,17 +188,17 @@ export interface IComboBuffConfig {
 export const ComboBuffConfig: IComboBuffConfig[] = [
   { count: 5,  bonus: 0, title: '5连击！',    desc: '手感在线，继续努力！' },
   { count: 10,  bonus: 0, title: '10连击！',    desc: '保持自信，迎接每一场挑战！' },
-  { count: 20,  bonus: 5, title: '20连击！',    desc: '洞门高手，尽显实力！' },
+  // { count: 20,  bonus: 5, title: '20连击！',    desc: '洞门高手，尽显实力！' },
   { count: 30,  bonus: 0, title: '30连击！', desc: '你的实力也很难想象吧！' },
   { count: 40,  bonus: 0, title: '40连击！',    desc: '永远想赢ing！' },
   { count: 50,  bonus: 10, title: '50连击！',    desc: '没有什么是不可能的！' },
-  { count: 60,  bonus: 0, title: '60连击！',    desc: '稳控全场，洞感狂飙！' },
-  { count: 70,  bonus: 0, title: '70连击！',    desc: '实力爆表，锁定洞门高分！' },
-  { count: 80,  bonus: 0, title: '80连击！',    desc: '巅峰状态，自在拿捏！' },
-  { count: 90,  bonus: 0, title: '90连击！',    desc: '步步进阶，冲刺洞门榜首！' },
-  { count: 100, bonus: 0, title: '100连击！',   desc: '满级操作，洞门封神！' },
-  { count: 150, bonus: 15, title: '150连击！',   desc: '洞门颠球王者！' },
-  { count: 300, bonus: 20, title: '300连击！',   desc: '洞门颠球天花板！' },
+  // { count: 60,  bonus: 0, title: '60连击！',    desc: '稳控全场，洞感狂飙！' },
+  // { count: 70,  bonus: 0, title: '70连击！',    desc: '实力爆表，锁定洞门高分！' },
+  // { count: 80,  bonus: 0, title: '80连击！',    desc: '巅峰状态，自在拿捏！' },
+  // { count: 90,  bonus: 0, title: '90连击！',    desc: '步步进阶，冲刺洞门榜首！' },
+  // { count: 100, bonus: 0, title: '100连击！',   desc: '满级操作，洞门封神！' },
+  // { count: 150, bonus: 15, title: '150连击！',   desc: '洞门颠球王者！' },
+  // { count: 300, bonus: 20, title: '300连击！',   desc: '洞门颠球天花板！' },
 ];
 
 // 连颠步长（超出上表后按此步长递增；设为极大值表示不再额外触发）
