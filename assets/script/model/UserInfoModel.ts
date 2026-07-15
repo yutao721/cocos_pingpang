@@ -196,7 +196,7 @@ export class UserInfoModel {
       point500: this.toSafeInt(data.point500),
       recordmaxscore: this.toSafeInt(data.recordmaxscore),
     };
-    this.recordMaxScore = Math.max(this.recordMaxScore, this.rewardData.recordmaxscore);
+    this.recordMaxScore = this.rewardData.recordmaxscore;
     this.rewardData.recordmaxscore = this.recordMaxScore;
     this.rebuildRewardStateMap();
     this.saveRewardInfoToCache();

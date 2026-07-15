@@ -11,6 +11,12 @@ const { ccclass, property } = _decorator;
 export class GameCanvas extends UiBase {
 
   protected onLoad(): void {
+    setTimeout(() => {
+      const splash = document.getElementById('CustomSplash');
+      if (splash) {
+        splash.style.display = 'none';
+      }
+    }, 100);
     document.title = '乒乓控场挑战';
     // 页面管理初始化
     this.pageManager.init(this.node);

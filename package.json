@@ -2,7 +2,8 @@
   "name": "乒乓接球大挑战",
   "uuid": "ba5f164d-8ef9-44de-842f-6cba30a42097",
   "scripts": {
-    "dev:proxy": "node tools/dev-proxy.js"
+    "dev:proxy": "node tools/dev-proxy.js",
+    "post-build": "node tools/post-build.js"
   },
   "creator": {
     "version": "3.8.6"
