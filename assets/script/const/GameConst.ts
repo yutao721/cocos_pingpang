@@ -175,7 +175,7 @@ export const PenaltyShoeFlowerSpawnChance: number = 0.2;
 export const PenaltyShoeFlowerLifetime: [number, number] = [3, 5];
 
 // 减分鞋花命中提示文案
-export const PenaltyShoeFlowerHitHint: string = '碰到扣分鞋花，小心！';
+export const PenaltyShoeFlowerHitHint: string = '💥小心避让！';
 
 // 连颠 Buff 阶段配置（达到 count 次连颠时额外加 bonus 分）
 export interface IComboBuffConfig {
@@ -219,8 +219,8 @@ export const RandomHintTexts: string[] = [
 
 // 击中鞋花提示文案（优先级最高）
 export const ShoeFlowerHitHint: Record<number, string> = {
-  [eShoeFlowerType.normal]: '颠得漂亮鞋花接住',
-  [eShoeFlowerType.limited]: '接住限量鞋花，分数飙升',
+  [eShoeFlowerType.normal]: '颠得漂亮，鞋花接住',
+  [eShoeFlowerType.limited]: '惊喜鞋花，拿捏!',
 };
 
 // 基础颠球得分（每颠一次 +1）
