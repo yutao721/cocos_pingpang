@@ -48,6 +48,7 @@ interface IShoeFlowerViewState {
   totalLifetime: number;
   baseScale: Vec3;
   baseAngle: number;
+  type: eShoeFlowerType;
   animPlayer?: AnimationPlayer;
   swingEnabled?: boolean;
   swingElapsed?: number;
@@ -685,6 +686,7 @@ export class PingPangPage extends UiBase {
       totalLifetime: flower.lifetime,
       baseScale: new Vec3(node.scale.x, node.scale.y, node.scale.z),
       baseAngle: node.angle,
+      type: flower.type,
       animPlayer,
       swingEnabled: false,
       swingElapsed: 0,
@@ -740,15 +742,26 @@ export class PingPangPage extends UiBase {
     const SWING_ANGLE = 18;
     /** 晃动周期（秒） */
     const SWING_PERIOD = 1.0;
+    /** 减分鞋花频闪间隔（秒） */
+    const PENALTY_BLINK_INTERVAL = 0.12;
 
     this.shoeFlowerNodes.forEach(state => {
       if (!state.node || !state.node.isValid) return;
+
+      state.remainingLifetime = Math.max(0, state.remainingLifetime - dt);
+
+      // 减分鞋花：整体频闪（node.active 快速切换），不走渐变逻辑
+      if (state.type === eShoeFlowerType.penalty) {
+        state.swingElapsed += dt;
+        const blinkPhase = Math.floor(state.swingElapsed / PENALTY_BLINK_INTERVAL) % 2;
+        state.node.active = blinkPhase === 0;
+        return;
+      }
 
       if (state.swingEnabled) {
         state.swingElapsed += dt;
       }
 
-      state.remainingLifetime = Math.max(0, state.remainingLifetime - dt);
       const warnWindow = Math.min(ShoeFlowerExpireWarnTime, state.totalLifetime);
 
       const swingAngle = state.swingEnabled
@@ -779,6 +792,7 @@ export class PingPangPage extends UiBase {
     this.shoeFlowerNodes.delete(uid);
     if (!state.node || !state.node.isValid) return;
 
+    state.node.active = true; // 频闪时可能处于隐藏帧，先恢复可见
     this._resetShoeFlowerVisual(state);
     this.shoeFlowerFxNodes.add(state.node);
 
