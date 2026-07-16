@@ -120,11 +120,26 @@ export class ScoreMilestoneBar extends Component {
   }
 
   private _getProgress(score: number): number {
-    const maxScore = this._getMaxScore();
-    if (maxScore <= 0) {
-      return 0;
+    // 如果里程碑配置了 progress 字段，使用分段线性插值
+    const anchors = this._milestones.filter(m => m.progress !== undefined);
+    if (anchors.length > 0) {
+      // 补充起点 (score=0, progress=0)
+      const points = [{ score: 0, progress: 0 }, ...anchors.map(m => ({ score: m.score, progress: m.progress! }))];
+      // 找到 score 所在的分段
+      if (score <= points[0].score) return points[0].progress;
+      if (score >= points[points.length - 1].score) return points[points.length - 1].progress;
+      for (let i = 1; i < points.length; i++) {
+        if (score <= points[i].score) {
+          const prev = points[i - 1];
+          const next = points[i];
+          const t = (score - prev.score) / (next.score - prev.score);
+          return this._clamp01(prev.progress + t * (next.progress - prev.progress));
+        }
+      }
     }
 
+    const maxScore = this._getMaxScore();
+    if (maxScore <= 0) return 0;
     return this._clamp01(score / maxScore);
   }
 
@@ -167,7 +182,7 @@ export class ScoreMilestoneBar extends Component {
    * 刚跨过：隐藏一次对应 sprite
    * 继续往后得分：sprite 再显示出来
    */
-  private _updateMilestones(previousScore: number, score: number): void {
+  private _updateMilestones(_previousScore: number, score: number): void {
     const count = Math.min(this._milestones.length, this.milestoneNodes.length);
     for (let index = 0; index < count; index++) {
       const sprite = this._findSprite(this.milestoneNodes[index]);
@@ -176,8 +191,7 @@ export class ScoreMilestoneBar extends Component {
       }
 
       const milestoneScore = this._milestones[index].score;
-      const justReached = previousScore < milestoneScore && score >= milestoneScore;
-      sprite.enabled = !justReached;
+      sprite.enabled = true;
       sprite.grayscale = score < milestoneScore;
     }
   }
