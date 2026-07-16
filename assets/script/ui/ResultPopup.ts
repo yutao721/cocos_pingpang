@@ -26,12 +26,16 @@ export class ResultPopup extends UiBase {
   @property(Node)
   shareBtn: Node = null;
 
+  @property(Node)
+  backNode: Node = null;
+
   private resultData: IPingPangResult = null;
 
   protected onLoad(): void {
     this.againBtn.on(Node.EventType.TOUCH_END, this.restart, this);
     this.goRankBtn.on(Node.EventType.TOUCH_END, this.goRank, this);
     this.shareBtn.on(Node.EventType.TOUCH_END, this.share, this);
+    this.backNode.on(Node.EventType.TOUCH_END, this.goHome, this);
   }
 
   public show(result: IPingPangResult): void {
