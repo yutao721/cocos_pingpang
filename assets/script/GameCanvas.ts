@@ -5,6 +5,7 @@ import { UiBase } from '../framework/ui/UiBase';
 import { UserControl } from './control/UserControl';
 import { TipControl } from './control/TipControl';
 import { AudioManager } from '../framework/audio/AudioManager';
+import { pingPangControl } from './control/PingPangControl';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameCanvas')
@@ -25,6 +26,8 @@ export class GameCanvas extends UiBase {
     TipControl.Instance.init();
     // 音频管理初始化
     AudioManager.Instance;
+    // 补报上局卡死时未能上报的分数
+    void pingPangControl.checkAndSubmitPendingScore();
   }
 }
 

@@ -9,6 +9,7 @@ import { tipControl } from '../control/TipControl';
 import { shareGame } from '../utils/utils';
 import { AudioManager } from '../../framework/audio/AudioManager';
 import { Api } from '../api/api';
+import { pingPangControl } from '../control/PingPangControl';
 const { ccclass, property } = _decorator;
 declare const wx: any;
 
@@ -87,6 +88,7 @@ export class HomePage extends UiBase {
     if (userControl.isLoginVal) {
       void userControl.initUserData();
     }
+    void pingPangControl.checkAndSubmitPendingScore();
   }
 
   protected start(): void {

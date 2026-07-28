@@ -481,7 +481,12 @@ export class PingPangPage extends UiBase {
     tween(node)
       .to(0.08, { scale: new Vec3(0.9, 0.9, 1) })
       .to(0.18, { scale: new Vec3(0.8, 0.8, 1) })
-      .call(() => { if (node.isValid) node.destroy(); })
+      .call(() => {
+        if (node.isValid) {
+          Tween.stopAllByTarget(opacity);
+          node.destroy();
+        }
+      })
       .start();
     tween(opacity)
       .delay(0.06)
@@ -995,7 +1000,12 @@ export class PingPangPage extends UiBase {
 
     tween(node)
       .to(0.35, { scale: new Vec3(1.5, 1.5, 1) })
-      .call(() => { if (node.isValid) node.destroy(); })
+      .call(() => {
+        if (node.isValid) {
+          Tween.stopAllByTarget(opacity);
+          node.destroy();
+        }
+      })
       .start();
     tween(opacity)
       .to(0.35, { opacity: 0 })

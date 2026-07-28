@@ -1,5 +1,6 @@
 import { Api } from '../api/api';
 import { UiBase } from '../../framework/ui/UiBase';
+import { StorageManager } from '../../framework/storage/StorageManager';
 import { PingPangEvent } from '../const/EventDefine';
 import {
   BallInitSpeed,
@@ -69,6 +70,8 @@ export class PingPangControl {
   }
   private constructor() { }
 
+  private static readonly PENDING_SCORE_KEY = 'pp_pending_score';
+
   private model: PingPangModel = new PingPangModel();
 
   // ----------------------------------------------------------------
@@ -79,6 +82,8 @@ export class PingPangControl {
   private spawnTimer: number = 0;
   /** 上一次秒级时间更新的整秒值，用于 timeUpdate 事件节流 */
   private lastSecond: number = -1;
+  /** 上一次存本地 pending 分数的整秒值，每 30 秒存一次 */
+  private _lastSavedSecond: number = -1;
   /** AutoPaddle 模式下球拍相对球的固定偏移，每次接球后重新随机 */
   private _autoPaddleOffset: number = 0;
   private _isPaused = false;
@@ -107,6 +112,7 @@ export class PingPangControl {
     this._isPaused = false;
     this.spawnTimer = this._randomSpawnInterval();
     this.lastSecond = 0;
+    this._lastSavedSecond = -1;
     this._debugNormalCount  = 0;
     this._debugLimitedCount = 0;
     this._debugPenaltyCount = 0;
@@ -335,6 +341,11 @@ export class PingPangControl {
     if (curSecond !== this.lastSecond) {
       this.lastSecond = curSecond;
       UiBase.emitUiEvent(PingPangEvent.timeUpdate, curSecond);
+      // 每 2 秒把当前分数存一次本地，防止卡死时分数丢失
+      if (curSecond - this._lastSavedSecond >= 2) {
+        this._lastSavedSecond = curSecond;
+        this._savePendingScore();
+      }
     }
 
     if (timeUp && GameDuration > 0) {
@@ -494,6 +505,7 @@ export class PingPangControl {
     this._isPaused = false;
     this.model.setGameOver();
     const result = this.model.buildResult();
+    this._savePendingScore();
     void this._submitResult(result);
     UiBase.emitUiEvent(PingPangEvent.gameOver, result);
   }
@@ -504,8 +516,44 @@ export class PingPangControl {
         score: result.score,
         second: result.duration,
       });
+      this._clearPendingScore();
     } catch (error) {
       console.warn('[PingPangControl] submit result failed', error);
+    }
+  }
+
+  // ----------------------------------------------------------------
+  // 私有：pending 分数本地存储（防卡死丢分）
+  // ----------------------------------------------------------------
+
+  /** 将当前分数写入本地，标记为待上报 */
+  private _savePendingScore(): void {
+    if (this.model.score <= 0) return;
+    StorageManager.set(PingPangControl.PENDING_SCORE_KEY, {
+      score: this.model.score,
+      second: Math.floor(this.model.elapsedTime),
+    });
+  }
+
+  /** 上报成功后清除 pending 标记 */
+  private _clearPendingScore(): void {
+    StorageManager.remove(PingPangControl.PENDING_SCORE_KEY);
+  }
+
+  /**
+   * 游戏启动时检查上局是否有未上报的分数（卡死残留），有则补报
+   * 补报成功后清除，失败则保留等下次再试
+   */
+  public async checkAndSubmitPendingScore(): Promise<void> {
+    const pending = StorageManager.get(PingPangControl.PENDING_SCORE_KEY, null);
+    if (!pending || pending.score <= 0) return;
+    console.log('[PingPangControl] found pending score, submitting:', pending);
+    try {
+      await Api.gameEnd({ score: pending.score, second: pending.second });
+      this._clearPendingScore();
+      console.log('[PingPangControl] pending score submitted and cleared');
+    } catch (error) {
+      console.warn('[PingPangControl] pending score submit failed, will retry next time', error);
     }
   }
 
